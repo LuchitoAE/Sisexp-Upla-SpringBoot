@@ -91,6 +91,63 @@ function Progress({ value, max, color = '#2563eb', height = 8 }) {
   );
 }
 
+// ─── Data normalizers ───
+function normalizeAnual(raw, anio) {
+  const techo = raw.techo || {};
+  const acts = raw.actividades || [];
+  const montoTotal = techo.montoTotal || 0;
+  const ejercido = techo.montoUtilizado || 0;
+  return {
+    techo: {
+      total: montoTotal,
+      pctEjecucion: montoTotal > 0 ? Math.round((ejercido / montoTotal) * 100) : 0,
+      ejercido,
+      disponible: techo.saldo || 0,
+    },
+    actividades: {
+      total: acts.length,
+      pendientes: acts.filter(a => a.estado === 'Pendiente' || a.estado === 'En_proceso').length,
+      cerradas: acts.filter(a => a.estado === 'Finalizada').length,
+    },
+    expedientes: {
+      total: raw.totalExpedientes || 0,
+      costoTotal: raw.costoTotalEstimado || 0,
+    },
+    pap: {
+      totalItems: 0,
+      pctEjecucionMonto: '0',
+    },
+    _techo: techo,
+    _acts: acts,
+    _anio: anio,
+  };
+}
+
+function normalizeExpedientes(raw) {
+  const listado = Array.isArray(raw) ? raw : (raw.listado || []);
+  return { listado };
+}
+
+function normalizePOI(raw) {
+  const actividades = Array.isArray(raw) ? raw : (raw.actividades || []);
+  const totalPresupuesto = actividades.reduce((s, a) => s + (a.presupuestoAsignado || 0), 0);
+  const totalDisponible = actividades.reduce((s, a) => s + (a.disponible || 0), 0);
+  return {
+    presupuesto: {
+      totalPOI: actividades.length,
+      presupuestoTotal: totalPresupuesto,
+      ejecucionPct: totalPresupuesto > 0 ? Math.round(((totalPresupuesto - totalDisponible) / totalPresupuesto) * 100) : 0,
+      disponible: totalDisponible,
+    },
+    actividades,
+  };
+}
+
+function normalizePAP(raw) {
+  const listado = Array.isArray(raw) ? raw : (raw.listado || []);
+  return { listado };
+}
+
 export default function ReportesPage() {
   useAuth();
   const modals = useModals();
@@ -111,15 +168,14 @@ export default function ReportesPage() {
     setLoading(true);
     setData(null);
     try {
-      let result;
+      let raw;
       switch (secc) {
-        case 'anual': result = await client.get(`/reportes/anual/${a}`); break;
-        case 'expedientes': result = await client.get(`/reportes/expedientes?anio=${a}`); break;
-        case 'poi': result = await client.get(`/reportes/poi?anio=${a}`); break;
-        case 'pap': result = await client.get(`/reportes/pap?anio=${a}`); break;
-        default: result = null;
+        case 'anual': raw = await client.get(`/reportes/anual/${a}`); setData(normalizeAnual(raw, a)); return;
+        case 'expedientes': raw = await client.get(`/reportes/expedientes?anio=${a}`); setData(normalizeExpedientes(raw)); return;
+        case 'poi': raw = await client.get(`/reportes/poi?anio=${a}`); setData(normalizePOI(raw)); return;
+        case 'pap': raw = await client.get(`/reportes/pap?anio=${a}`); setData(normalizePAP(raw)); return;
+        default: setData(null);
       }
-      setData(result);
     } catch (err) { modals.alerta('Error', err.message); }
     finally { setLoading(false); }
   }, []);

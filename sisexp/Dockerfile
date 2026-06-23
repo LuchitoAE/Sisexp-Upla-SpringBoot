@@ -17,6 +17,7 @@ RUN mvn clean package -DskipTests -q
 
 # Stage 3: Run
 FROM eclipse-temurin:17-jre-alpine
+RUN apk add --no-cache postgresql-client
 WORKDIR /app
 COPY --from=backend /app/target/*.jar app.jar
 EXPOSE 8080
