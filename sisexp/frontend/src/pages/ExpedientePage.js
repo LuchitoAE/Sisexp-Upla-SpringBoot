@@ -36,6 +36,7 @@ export default function ExpedientePage() {
     actividadPoiId: '', necesidadPapId: '', urgencia: '', naturaleza: '', descripcion: '', cantidadSolicitada: 1
   });
   const [uploading, setUploading] = useState(false);
+  const [changingEstado, setChangingEstado] = useState(false);
   const [disponibilidad, setDisponibilidad] = useState(null);
   const [checkingDisp, setCheckingDisp] = useState(false);
   const [showNotaMod, setShowNotaMod] = useState(false);
@@ -125,10 +126,13 @@ export default function ExpedientePage() {
     let obs = '';
     if (estado === 'Rechazado') { obs = await modals.promptText('Rechazar expediente', '¿Cuál es el motivo del rechazo?', 'Motivo:'); if (!obs) return; }
     if (estado === 'Observado') { obs = await modals.promptText('Observar expediente', 'Describa el detalle de la observación para que el laboratorio pueda corregir.', 'Detalle:'); if (!obs) return; }
+    setChangingEstado(true);
     try {
       await client.put(`/expedientes/${detalle.id}/estado`, { estado, observacion: obs });
+      client.invalidarCache('/expedientes');
       await loadDetalle(detalle.id); await load();
     } catch (err) { modals.alerta('Error', err.message); }
+    finally { setChangingEstado(false); }
   };
 
   const showNewForm = () => {
@@ -348,32 +352,32 @@ export default function ExpedientePage() {
           </div>
           {puedeAprobar && d.estado === 'Borrador' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-warning btn-sm" onClick={() => cambiarEstado('En_revision')}>🔍 Enviar a revisión</button>
-              <button className="btn btn-danger btn-sm" onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
+              <button className="btn btn-warning btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('En_revision')}>🔍 Enviar a revisión</button>
+              <button className="btn btn-danger btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
             </div>
           )}
           {puedeAprobar && d.estado === 'En_revision' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-success btn-sm" onClick={() => cambiarEstado('Aprobado')}>✓ Aprobar</button>
-              <button className="btn btn-warning btn-sm" onClick={() => cambiarEstado('Observado')}>↩ Observar</button>
-              <button className="btn btn-danger btn-sm" onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
+              <button className="btn btn-success btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Aprobado')}>✓ Aprobar</button>
+              <button className="btn btn-warning btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Observado')}>↩ Observar</button>
+              <button className="btn btn-danger btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
             </div>
           )}
           {puedeAprobar && d.estado === 'Observado' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-warning btn-sm" onClick={() => cambiarEstado('En_revision')}>↻ Reenviar a revisión</button>
-              <button className="btn btn-danger btn-sm" onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
+              <button className="btn btn-warning btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('En_revision')}>↻ Reenviar a revisión</button>
+              <button className="btn btn-danger btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
             </div>
           )}
           {puedeFinalizar && d.estado === 'Aprobado' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-primary btn-sm" onClick={() => cambiarEstado('Finalizado')}>✓ Finalizar</button>
-              {puedeDerivar && <button className="btn btn-info btn-sm" onClick={() => cambiarEstado('Derivado')}>📤 Derivar a DGA</button>}
+              <button className="btn btn-primary btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Finalizado')}>✓ Finalizar</button>
+              {puedeDerivar && <button className="btn btn-info btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Derivado')}>📤 Derivar a DGA</button>}
             </div>
           )}
           {d.estado === 'Derivado' && puedeFinalizar && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-primary btn-sm" onClick={() => cambiarEstado('Finalizado')}>✓ Finalizar</button>
+              <button className="btn btn-primary btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Finalizado')}>✓ Finalizar</button>
               {puedeVerDerivacion && (
                 <a href={`${API_URL}/expedientes/${d.id}/derivacion`} target="_blank" rel="noreferrer">
                   <button className="btn btn-secondary btn-sm">Hoja de Derivación</button>
