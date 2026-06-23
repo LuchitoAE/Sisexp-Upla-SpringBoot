@@ -27,10 +27,10 @@ public class SeguimientoLog {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String observacion;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String metadata;
 
     private LocalDateTime createdAt;

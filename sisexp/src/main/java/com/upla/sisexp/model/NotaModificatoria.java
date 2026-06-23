@@ -38,8 +38,7 @@ public class NotaModificatoria {
     @Column(nullable = false, length = 255)
     private String nuevoNombre;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String justificacion;
 
     @Column(precision = 12, scale = 2)
@@ -67,7 +66,7 @@ public class NotaModificatoria {
     @Enumerated(EnumType.STRING)
     private EstadoNota estado = EstadoNota.pendiente;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String observacionAdmin;
 
     @ManyToOne(fetch = FetchType.LAZY)
