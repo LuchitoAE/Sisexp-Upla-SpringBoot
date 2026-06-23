@@ -3,6 +3,7 @@ package com.upla.sisexp.config;
 import com.upla.sisexp.model.Usuario;
 import com.upla.sisexp.repository.UsuarioRepository;
 import com.upla.sisexp.security.HorarioLaboralFilter;
+import com.upla.sisexp.security.JwtAuthenticationFilter;
 import com.upla.sisexp.service.BusinessValidationsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,13 +33,16 @@ import java.util.Map;
 public class SecurityConfig {
 
     private final HorarioLaboralFilter horarioLaboralFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UsuarioRepository usuarioRepository;
     private final BusinessValidationsService businessValidations;
 
     public SecurityConfig(HorarioLaboralFilter horarioLaboralFilter,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
             UsuarioRepository usuarioRepository,
             BusinessValidationsService businessValidations) {
         this.horarioLaboralFilter = horarioLaboralFilter;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.usuarioRepository = usuarioRepository;
         this.businessValidations = businessValidations;
     }
@@ -131,7 +135,8 @@ public class SecurityConfig {
                     }
                 })
             )
-            .addFilterBefore(horarioLaboralFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(horarioLaboralFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

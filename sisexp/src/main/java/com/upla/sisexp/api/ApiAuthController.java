@@ -3,6 +3,7 @@ package com.upla.sisexp.api;
 import com.upla.sisexp.model.Usuario;
 import com.upla.sisexp.repository.UsuarioRepository;
 import com.upla.sisexp.security.CustomUserDetails;
+import com.upla.sisexp.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,11 +21,14 @@ public class ApiAuthController {
 
     private final AuthenticationManager authenticationManager;
     private final UsuarioRepository usuarioRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public ApiAuthController(AuthenticationManager authenticationManager,
-            UsuarioRepository usuarioRepository) {
+            UsuarioRepository usuarioRepository,
+            JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
         this.usuarioRepository = usuarioRepository;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @PostMapping("/login")
@@ -43,7 +47,10 @@ public class ApiAuthController {
 
             Usuario usuario = usuarioRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            String token = jwtTokenProvider.generateToken(
+                    usuario.getId(), usuario.getEmail(), usuario.getRol().name());
             return ResponseEntity.ok(Map.of(
+                    "token", token,
                     "usuario", Map.of(
                             "id", usuario.getId(),
                             "nombre", usuario.getNombre(),
