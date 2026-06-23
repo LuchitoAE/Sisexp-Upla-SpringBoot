@@ -54,7 +54,7 @@ public class ApiActividadPOIController {
             var act = actividadService.crear(
                     (String) body.get("codigo"),
                     (String) body.get("nombre"),
-                    new BigDecimal(body.get("presupuesto").toString()),
+                    new BigDecimal(body.get("presupuestoAsignado").toString()),
                     body.get("fechaLimite") != null ? LocalDate.parse((String) body.get("fechaLimite")) : null,
                     techoId);
             return ResponseEntity.ok(act);
@@ -72,7 +72,7 @@ public class ApiActividadPOIController {
             var act = actividadService.crear(
                     (String) body.get("codigo"),
                     (String) body.get("nombre"),
-                    new BigDecimal(body.get("presupuesto").toString()),
+                    new BigDecimal(body.get("presupuestoAsignado").toString()),
                     body.get("fechaLimite") != null ? LocalDate.parse((String) body.get("fechaLimite")) : null,
                     techoId);
             return ResponseEntity.ok(act);
@@ -89,7 +89,7 @@ public class ApiActividadPOIController {
             var act = actividadService.editar(id,
                     (String) body.get("codigo"),
                     (String) body.get("nombre"),
-                    new BigDecimal(body.get("presupuesto").toString()),
+                    new BigDecimal(body.get("presupuestoAsignado").toString()),
                     body.get("fechaLimite") != null ? LocalDate.parse((String) body.get("fechaLimite")) : null);
             return ResponseEntity.ok(act);
         } catch (BusinessException e) {

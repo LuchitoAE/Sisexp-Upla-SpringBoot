@@ -109,7 +109,7 @@ export default function ExpedientePage() {
     if (!detalle || !file || !tipo) return;
     setUploading(true);
     try {
-      await client.upload(`/expedientes/${detalle.id}/documentos`, file, 'archivo', { tipo });
+      await client.upload(`/expedientes/${detalle.id}/documentos`, file, null, 'archivo', { tipo });
       client.invalidarCache('/expedientes');
       await loadDetalle(detalle.id);
     } catch (err) { modals.alerta('Error', err.message); }
@@ -386,17 +386,17 @@ export default function ExpedientePage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
           <div className="card" style={{ padding: 16 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 8 }}>VINCULACIÓN POI</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{d.actividad?.codigo} — {d.actividad?.nombre}</div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Presupuesto: {formatMoney(d.actividad?.presupuestoAsignado)}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{d.actividadPOI?.codigo} — {d.actividadPOI?.nombre}</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Presupuesto: {formatMoney(d.actividadPOI?.presupuestoAsignado)}</div>
           </div>
           <div className="card" style={{ padding: 16 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 8 }}>VINCULACIÓN PAP</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{d.necesidad?.nombre}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{d.necesidadPAP?.nombre}</div>
             <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
-              Solicitado: <strong>{d.cantidadSolicitada || 1} {d.necesidad?.unidad || ''}</strong> × {formatMoney(d.necesidad?.precioEstimado)} =
+              Solicitado: <strong>{d.cantidadSolicitada || 1} {d.necesidadPAP?.unidad || ''}</strong> × {formatMoney(d.necesidadPAP?.precioEstimado)} =
               <strong style={{ color: '#0f172a' }}> {formatMoney(d.costoEstimado)}</strong>
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Planificadas: {d.necesidad?.cantidad}</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Planificadas: {d.necesidadPAP?.cantidad}</div>
           </div>
         </div>
 
@@ -414,9 +414,9 @@ export default function ExpedientePage() {
               background: d.naturaleza === 'Bien' ? '#dbeafe' : '#f0fdf4',
               color: d.naturaleza === 'Bien' ? '#1d4ed8' : '#166534'
             }}>{d.naturaleza || '—'}</span>
-            {d.necesidad?.clasificadorGasto && (
+            {d.necesidadPAP?.clasificadorGasto && (
               <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 4 }}>
-                Clasificador: <code style={{ background: '#f1f5f9', padding: '1px 4px', borderRadius: 3 }}>{d.necesidad.clasificadorGasto}</code>
+                Clasificador: <code style={{ background: '#f1f5f9', padding: '1px 4px', borderRadius: 3 }}>{d.necesidadPAP.clasificadorGasto}</code>
               </div>
             )}
           </div>
