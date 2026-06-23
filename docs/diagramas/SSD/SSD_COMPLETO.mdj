@@ -1,0 +1,208 @@
+{
+  "_type": "Project",
+  "name": "SISEXP-UPLA-SSD",
+  "ownedElements": [
+    {
+      "_type": "UMLModel",
+      "name": "SSD Diagrams",
+      "ownedElements": [
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD01: CU01 - Iniciar Sesion",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Usuario: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD02: CU02 - Ver Dashboard",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Usuario: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD03: CU03 - Crear Expediente",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Usuario: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD04: CU04 - Cambiar Estado Expediente",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Usuario: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD05: CU05 - Adjuntar Documento",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Usuario: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD06: CU06 - Gestionar Techo",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Admin: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD07: CU07 - Gestionar Actividad POI",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Admin: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD08: CU08 - Gestionar Necesidad PAP",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Admin: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD09: CU09 - Gestionar Nota Modificatoria",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Usuario: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD10: CU10 - Ver Reportes",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Usuario: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD11: CU11 - Gestionar Usuarios",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Admin: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD12: CU12 - Ver Notificaciones",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Usuario: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD13: CU13 - Rastrear Expediente",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Visitante: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        },
+        {
+          "_type": "UMLSequenceDiagram",
+          "name": "SSD14: CU14 - Cerrar Sesion",
+          "ownedElements": [
+            {
+              "_type": "UMLLifeline",
+              "name": "Usuario: Actor"
+            },
+            {
+              "_type": "UMLLifeline",
+              "name": ":Sistema"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

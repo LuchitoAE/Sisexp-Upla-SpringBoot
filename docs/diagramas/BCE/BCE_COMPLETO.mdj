@@ -1,0 +1,758 @@
+{
+  "_type": "Project",
+  "name": "SISEXP-UPLA-BCE",
+  "ownedElements": [
+    {
+      "_type": "UMLModel",
+      "name": "BCE Diagrams",
+      "ownedElements": [
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE01: Iniciar Sesión",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "LoginForm",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarFormulario()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "AuthController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+login(email, password)"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "AuthService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+autenticar(email, password)"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Usuario",
+              "stereotype": "entity",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "email",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "password",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "activo",
+                  "type": "Boolean"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE02: Ver Dashboard",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "DashboardView",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarKPIs()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "DashboardController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+obtenerKPIs()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "DashboardService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+calcularKPIs()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Expediente",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ActividadPOI",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE03: Crear Expediente",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "ExpedienteForm",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarFormulario()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ExpedienteController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear(datos)"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ExpedienteService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crearExpediente()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "BusinessValidationsService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+validarSaldoDisponible()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "BusinessRulesService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+reservarSaldoPOI()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Expediente",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NecesidadPAP",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ActividadPOI(B)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "SeguimientoLog",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Notificacion",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE04: Cambiar Estado Expediente",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "ExpedienteDetalle",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarEstado()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ExpedienteController(B)",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+cambiarEstado(id, estado, comentario)"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ExpedienteService(B)",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+cambiarEstado()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "BusinessValidationsService(B)",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+validarTransicionEstado()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Expediente(B)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "SeguimientoLog(B)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Notificacion(B)",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE05: Adjuntar Documento",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "DocumentoForm",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarSubida()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ExpedienteController(C)",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+adjuntarDocumento(id, archivo)"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ExpedienteService(C)",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+adjuntarDocumento()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "DocumentoAdjunto",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Expediente(C)",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE06: Gestionar Techo",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "TechoForm",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarFormulario()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "TechoPresupuestalController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "TechoPresupuestalService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "TechoPresupuestal",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE07: Gestionar Actividad POI",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "ActividadForm",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarFormulario()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ActividadPOIController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ActividadPOIService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ActividadPOI(D)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "TechoPresupuestal(D)",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE08: Gestionar Necesidad PAP",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "NecesidadForm",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarFormulario()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NecesidadPAPController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NecesidadPAPService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NecesidadPAP(D)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ActividadPOI(E)",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE09: Gestionar Nota Modificatoria",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "NotaForm",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarFormulario()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NotaModificatoriaController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NotaModificatoriaService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NotaModificatoria",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ActividadPOI(F)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "TechoPresupuestal(E)",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE10: Ver Reportes",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "ReporteView",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarFiltros()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ReporteController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+reporteAnual()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ReporteService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+generarReporteAnual()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Expediente(F)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ActividadPOI(G)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NecesidadPAP(E)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "TechoPresupuestal(F)",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE11: Gestionar Usuarios",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "UsuarioForm",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarFormulario()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "UsuarioController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "UsuarioService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+crear()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Usuario(D)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Rol",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE12: Gestionar Notificaciones",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "NotificacionView",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarLista()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NotificacionController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+listar()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NotificacionService",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+listarPorUsuario()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Notificacion(C)",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE13: Rastrear Expediente",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "RastreoView",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarFormulario()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "RastreoController",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+rastrear(codigo)"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ExpedienteService(D)",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+buscarPorCodigo()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Expediente(G)",
+              "stereotype": "entity"
+            },
+            {
+              "_type": "UMLClass",
+              "name": "SeguimientoLog(C)",
+              "stereotype": "entity"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "name": "BCE14: Cerrar Sesion",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "HeaderView",
+              "stereotype": "boundary",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+mostrarOpcionSalir()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "AuthController(B)",
+              "stereotype": "control",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+logout()"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "HttpSession",
+              "stereotype": "entity",
+              "methods": [
+                {
+                  "_type": "UMLOperation",
+                  "name": "+invalidar()"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

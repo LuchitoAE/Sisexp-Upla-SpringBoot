@@ -17,6 +17,13 @@ sisexp/target/
 sisexp/frontend/node_modules/
 sisexp/frontend/build/
 
+# Node.js root
+node_modules/
+package-lock.json
+
+# Generated images
+docs/diagramas/images/
+
 # OS
 *.log
 .DS_Store

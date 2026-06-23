@@ -1,0 +1,403 @@
+{
+  "_type": "Project",
+  "name": "SISEXP-UPLA-ERS",
+  "ownedElements": [
+    {
+      "_type": "UMLModel",
+      "name": "ERS Domain Model",
+      "ownedElements": [
+        {
+          "_type": "UMLClassDiagram",
+          "name": "ERS - Modelo de Dominio",
+          "ownedElements": [
+            {
+              "_type": "UMLClass",
+              "name": "Usuario",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "id",
+                  "type": "Long"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "nombre",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "email",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "password",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "rol",
+                  "type": "RolUsuario"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "activo",
+                  "type": "Boolean"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "horarioRestringido",
+                  "type": "Boolean"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "intentosFallidos",
+                  "type": "Integer"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "bloqueadoHasta",
+                  "type": "LocalDateTime"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Rol",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "id",
+                  "type": "Long"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "nombre",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "descripcion",
+                  "type": "String"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "TechoPresupuestal",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "id",
+                  "type": "Long"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "año",
+                  "type": "Integer"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "montoTotal",
+                  "type": "BigDecimal"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "montoUtilizado",
+                  "type": "BigDecimal"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "activo",
+                  "type": "Boolean"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "planificado",
+                  "type": "Boolean"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "ActividadPOI",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "id",
+                  "type": "Long"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "codigo",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "nombre",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "presupuestoAsignado",
+                  "type": "BigDecimal"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "saldoComprometido",
+                  "type": "BigDecimal"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "saldoEjecutado",
+                  "type": "BigDecimal"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "fechaLimite",
+                  "type": "Date"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "estado",
+                  "type": "EstadoActividad"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "planificado",
+                  "type": "Boolean"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NecesidadPAP",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "id",
+                  "type": "Long"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "descripcion",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "bienServicio",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "cantidad",
+                  "type": "Integer"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "precioUnitario",
+                  "type": "BigDecimal"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "total",
+                  "type": "BigDecimal"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "cantidadComprometida",
+                  "type": "Integer"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "cantidadEjecutada",
+                  "type": "Integer"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "naturaleza",
+                  "type": "Naturaleza"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Expediente",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "id",
+                  "type": "Long"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "codigo",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "estado",
+                  "type": "EstadoExpediente"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "urgencia",
+                  "type": "Urgencia"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "solicitante",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "montoSolicitado",
+                  "type": "BigDecimal"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "activo",
+                  "type": "Boolean"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "DocumentoAdjunto",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "id",
+                  "type": "Long"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "nombreOriginal",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "tipo",
+                  "type": "TipoDocumento"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "ruta",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "tamaño",
+                  "type": "Long"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "SeguimientoLog",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "id",
+                  "type": "Long"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "estadoAnterior",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "estadoNuevo",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "comentario",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "fecha",
+                  "type": "LocalDateTime"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "NotaModificatoria",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "id",
+                  "type": "Long"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "tipo",
+                  "type": "TipoNota"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "monto",
+                  "type": "BigDecimal"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "descripcion",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "estado",
+                  "type": "EstadoNota"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "origen",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "origenId",
+                  "type": "Long"
+                }
+              ]
+            },
+            {
+              "_type": "UMLClass",
+              "name": "Notificacion",
+              "attributes": [
+                {
+                  "_type": "UMLAttribute",
+                  "name": "id",
+                  "type": "Long"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "mensaje",
+                  "type": "String"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "tipo",
+                  "type": "TipoNotificacion"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "leida",
+                  "type": "Boolean"
+                },
+                {
+                  "_type": "UMLAttribute",
+                  "name": "fechaCreacion",
+                  "type": "LocalDateTime"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
