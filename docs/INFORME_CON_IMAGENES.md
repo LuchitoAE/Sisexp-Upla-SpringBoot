@@ -146,7 +146,7 @@ ICONIX combina casos de uso con un enfoque dirigido por el dominio. Consta de 5 
 | 1. ERS | Especificar requisitos | Flowchart CU, RF/RNF | ISO 29148 |
 | 2. Analisis | Modelar el dominio | Diagrama de Clases | Modelo Conceptual |
 | 3. Robustez | Validar casos de uso | Boundary-Control-Entity (BCE) | 14 diagramas BCE |
-| 4. Secuencias | Detallar interacciones | Diagramas de Secuencia (SSD) | 4 diagramas SSD |
+| 4. Secuencias | Detallar interacciones | Diagramas de Secuencia (SSD) | 14 diagramas SSD |
 | 5. Codigo | Implementar | Clases Java + React | Codigo fuente |
 
 ## Fase 1 - ERS: Requisitos
@@ -184,7 +184,7 @@ ICONIX combina casos de uso con un enfoque dirigido por el dominio. Consta de 5 
 
 ---
 
-## Fase 3 - Robustez: Diagramas BCE
+## Fase 3 - Robustez: Diagramas BCE (14)
 
 Los BCE (Boundary-Control-Entity) validan que cada caso de uso tenga:
 - **Boundary**: Interfaz de usuario (React pages, forms)
@@ -192,64 +192,92 @@ Los BCE (Boundary-Control-Entity) validan que cada caso de uso tenga:
 - **Entity**: Modelo de datos (JPA entities)
 
 ### BCE-01: Iniciar Sesion
-
 ![](img/BCE-CU01.png)
 
 ### BCE-02: Ver Dashboard
-
 ![](img/BCE-CU02.png)
 
 ### BCE-03: Crear Expediente
-
 ![](img/BCE-CU03.png)
 
 ### BCE-04: Cambiar Estado Expediente
-
 ![](img/BCE-CU04.png)
 
 ### BCE-05: Adjuntar Documento
-
 ![](img/BCE-CU05.png)
 
 ### BCE-06: Gestionar Techo Presupuestal
-
 ![](img/BCE-CU06.png)
 
 ### BCE-07: Gestionar Actividad POI
-
 ![](img/BCE-CU07.png)
 
 ### BCE-08: Gestionar Necesidad PAP
-
 ![](img/BCE-CU08.png)
 
 ### BCE-09: Gestionar Nota Modificatoria
-
 ![](img/BCE-CU09.png)
 
 ### BCE-10: Ver Reportes
-
 ![](img/BCE-CU10.png)
 
 ### BCE-11: Gestionar Usuarios
-
 ![](img/BCE-CU11.png)
 
-### BCE-13: Rastrear Expediente
+### BCE-12: Gestionar Notificaciones
+![](img/BCE-CU12.png)
 
+### BCE-13: Rastrear Expediente
 ![](img/BCE-CU13.png)
+
+### BCE-14: Cerrar Sesion
+![](img/BCE-CU14.png)
 
 ---
 
-## Fase 4 - Secuencias: Diagramas SSD
+## Fase 4 - Secuencias: Diagramas SSD (14)
 
 ### SSD-01: Iniciar Sesion
-
 ![](img/SSD-CU01.png)
 
-### SSD-04: Cambiar Estado Expediente
+### SSD-02: Ver Dashboard
+![](img/SSD-CU02.png)
 
+### SSD-03: Crear Expediente
+![](img/SSD-CU03.png)
+
+### SSD-04: Cambiar Estado Expediente
 ![](img/SSD-CU04.png)
+
+### SSD-05: Adjuntar Documento
+![](img/SSD-CU05.png)
+
+### SSD-06: Gestionar Techo Presupuestal
+![](img/SSD-CU06.png)
+
+### SSD-07: Gestionar Actividad POI
+![](img/SSD-CU07.png)
+
+### SSD-08: Gestionar Necesidad PAP
+![](img/SSD-CU08.png)
+
+### SSD-09: Gestionar Nota Modificatoria
+![](img/SSD-CU09.png)
+
+### SSD-10: Ver Reportes
+![](img/SSD-CU10.png)
+
+### SSD-11: Gestionar Usuarios
+![](img/SSD-CU11.png)
+
+### SSD-12: Gestionar Notificaciones
+![](img/SSD-CU12.png)
+
+### SSD-13: Rastrear Expediente
+![](img/SSD-CU13.png)
+
+### SSD-14: Cerrar Sesion
+![](img/SSD-CU14.png)
 
 ---
 
@@ -334,4 +362,4 @@ Transiciones definidas en el backend:
 
 ---
 
-**Fin del informe. 18 diagramas generados como imagenes PNG.**
+**Fin del informe. 32 diagramas generados como imagenes PNG.**
