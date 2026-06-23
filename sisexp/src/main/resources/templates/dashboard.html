@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: head('Dashboard — SISEXP-UPLA')}">
+</head>
+<body th:replace="~{layout :: layout(~{::#main-content})}">
+<div id="main-content" th:fragment="content">
+
+    <!-- HEADER -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                Bienvenido, <span sec:authentication="name">usuario</span>
+            </h4>
+            <small class="text-muted">Resumen general del sistema &mdash;
+                <span th:text="${#temporals.format(#temporals.createNow(), 'EEEE dd/MM/yyyy')}">22/06/2026</span>
+            </small>
+        </div>
+        <span class="role-badge" style="font-size:.8rem; padding:.35rem .75rem"
+              th:text="${#strings.replace(
+                  #authentication?.authorities?.iterator()?.next()?.authority ?: '',
+                  'ROLE_', '')}">
+            Rol
+        </span>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="kpi-icon bg-primary bg-opacity-10">
+                        <i class="bi bi-file-earmark text-primary"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Total</div>
+                        <div class="kpi-value" th:text="${kpis.total}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#e2e8f0">
+                        <i class="bi bi-pencil fs-85" style="color:#475569"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Borrador</div>
+                        <div class="kpi-value" th:text="${kpis.Borrador}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#dbeafe">
+                        <i class="bi bi-hourglass-split" style="color:#1d4ed8"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">En revisi&oacute;n</div>
+                        <div class="kpi-value" th:text="${kpis.En_revision}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#d1fae5">
+                        <i class="bi bi-check-circle" style="color:#059669"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Aprobado</div>
+                        <div class="kpi-value" th:text="${kpis.Aprobado}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#e0e7ff">
+                        <i class="bi bi-flag" style="color:#4338ca"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Finalizado</div>
+                        <div class="kpi-value" th:text="${kpis.Finalizado}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card border-danger">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:#fee2e2">
+                        <i class="bi bi-exclamation-triangle" style="color:#dc2626"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-label">Vencidos</div>
+                        <div class="kpi-value text-danger" th:text="${kpis.vencidos}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EJECUCION PRESUPUESTAL -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="table-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-bar-chart me-2 text-primary"></i>Ejecuci&oacute;n presupuestal</h5>
+                    <small class="text-muted">Actividades con presupuesto &gt; S/ 0</small>
+                </div>
+                <div class="p-3">
+                    <div th:each="s : ${saldos}" th:if="${s.presupuesto > 0}" class="mb-3 budget-item">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-light text-dark border fs-85" th:text="${s.codigo}">POI-2.01</span>
+                                <small class="text-muted" th:text="${s.nombre}">Nombre</small>
+                            </div>
+                            <small class="fw-medium" th:text="'S/ ' + ${#numbers.formatDecimal(s.presupuesto, 0, 'COMMA', 2, 'POINT')}">S/ 7,500</small>
+                        </div>
+                        <div class="progress progress-presupuesto">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 th:style="'width:' + ${s.pctEjecutado} + '%'"
+                                 th:attr="title='Ejecutado: S/ ' + ${#numbers.formatDecimal(s.ejecutado, 0, 'COMMA', 2, 'POINT')}"></div>
+                            <div class="progress-bar bg-warning" role="progressbar"
+                                 th:style="'width:' + ${s.pctComprometido} + '%'"
+                                 th:attr="title='Comprometido: S/ ' + ${#numbers.formatDecimal(s.comprometido, 0, 'COMMA', 2, 'POINT')}"></div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-3 mt-1">
+                            <small class="text-success">
+                                <i class="bi bi-check-circle-fill fs-85"></i>
+                                Ejecutado: S/ <span th:text="${#numbers.formatDecimal(s.ejecutado, 0, 'COMMA', 2, 'POINT')}">0</span>
+                            </small>
+                            <small class="text-warning">
+                                <i class="bi bi-clock-fill fs-85"></i>
+                                Comprometido: S/ <span th:text="${#numbers.formatDecimal(s.comprometido, 0, 'COMMA', 2, 'POINT')}">0</span>
+                            </small>
+                            <small class="text-primary">
+                                <i class="bi bi-check-all fs-85"></i>
+                                Disponible: S/ <span th:text="${#numbers.formatDecimal(s.disponible, 0, 'COMMA', 2, 'POINT')}">0</span>
+                            </small>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(saldos) or #aggregates.sum(saldos.![presupuesto]) == 0}" class="text-center text-muted py-4">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        <span>No hay actividades con presupuesto disponible</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="table-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-bell me-2 text-primary"></i>Alertas</h5>
+                    <span th:if="${#lists.isEmpty(alertas)}" class="badge bg-success fs-85">Sin alertas</span>
+                    <span th:if="${not #lists.isEmpty(alertas)}" class="badge bg-warning text-dark fs-85"
+                          th:text="${#lists.size(alertas)} + ' pendientes'">3</span>
+                </div>
+                <div th:if="${not #lists.isEmpty(alertas)}" class="p-3">
+                    <div th:each="exp : ${alertas}" class="alerta-item d-flex align-items-start gap-3 py-3 border-bottom">
+                        <div class="alerta-icon mt-1"
+                             th:classappend="${exp.fechaLimite != null and exp.fechaLimite < #temporals.createToday()} ? 'alerta-vencida' : 'alerta-proxima'">
+                            <i class="bi"
+                               th:classappend="${exp.fechaLimite != null and exp.fechaLimite < #temporals.createToday()} ? 'bi-exclamation-triangle-fill' : 'bi-clock-fill'"></i>
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                <a th:href="@{/expedientes/{id}(id=${exp.id})}"
+                                   class="fw-medium text-decoration-none text-primary" th:text="${exp.codigo}">EXP-2026-0001</a>
+                                <span class="badge fs-85"
+                                      th:classappend="'badge-' + ${exp.estado.name()}"
+                                      th:text="${exp.estado.name().replace('_',' ')}">Borrador</span>
+                            </div>
+                            <small class="text-muted d-block" th:text="${exp.descripcion}">Descripci&oacute;n</small>
+                            <small class="text-muted d-block mt-1">
+                                <i class="bi bi-person fs-85"></i>
+                                <span th:text="${exp.solicitante.nombre}">Solicitante</span>
+                                <span th:if="${exp.fechaLimite != null}" class="ms-2">
+                                    <i class="bi bi-calendar fs-85"></i>
+                                    <span th:text="${#temporals.format(exp.fechaLimite, 'dd/MM/yyyy')}">01/01/2026</span>
+                                    <span th:if="${exp.fechaLimite < #temporals.createToday()}" class="text-danger fw-medium">(vencido)</span>
+                                    <span th:unless="${exp.fechaLimite < #temporals.createToday()}" class="text-warning fw-medium">(pr&oacute;ximo)</span>
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .kpi-card.border-danger {
+            border-color: #fecaca !important;
+        }
+        .budget-item + .budget-item {
+            padding-top: .75rem;
+            border-top: 1px solid #f1f5f9;
+        }
+        .alerta-item + .alerta-item {
+            border-top: 1px solid var(--color-card-border);
+        }
+        .alerta-item:last-child {
+            border-bottom: none !important;
+        }
+        .alerta-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .alerta-vencida {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .alerta-proxima {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        .role-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: .75rem;
+            font-weight: 500;
+            padding: .25rem .6rem;
+            border-radius: 999px;
+        }
+    </style>
+
+</div>
+</body>
+</html>

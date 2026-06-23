@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: head('Actividades POI — SISEXP-UPLA')}">
+</head>
+<body th:replace="~{layout :: layout(~{::#main-content})}">
+<div id="main-content" th:fragment="content">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-diagram-3 me-2 text-primary"></i>Actividades POI
+            </h4>
+            <small class="text-muted">Plan Operativo Institucional</small>
+        </div>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPOI"
+                sec:authorize="hasAnyRole('Administrador','Coordinacion')"
+                onclick="document.getElementById('formPOI').reset();prepararCrearPOI()">
+            <i class="bi bi-plus-lg"></i> Nueva actividad
+        </button>
+    </div>
+
+    <th:block th:if="${success}">
+        <div class="alert alert-success alert-auto-close" role="alert" th:text="${success}">OK</div>
+    </th:block>
+    <th:block th:if="${error}">
+        <div class="alert alert-danger alert-auto-close" role="alert" th:text="${error}">Error</div>
+    </th:block>
+
+    <div class="table-card">
+        <div class="card-header">
+            <h5><i class="bi bi-list me-2 text-primary"></i>Listado</h5>
+            <form class="d-flex gap-2" th:action="@{/actividades}" method="get">
+                <select class="form-select form-select-sm" style="min-width:160px" name="techoId"
+                        onchange="this.form.submit()">
+                    <option value="">Todos los a&ntilde;os</option>
+                    <option th:each="t : ${techos}" th:value="${t.id}"
+                            th:selected="${techoSeleccionado != null && techoSeleccionado.equals(t.id)}"
+                            th:text="'A&ntilde;o ' + ${t.a&ntilde;o}">A&ntilde;o 2026</option>
+                </select>
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>C&oacute;digo</th>
+                        <th>Nombre</th>
+                        <th>Techo</th>
+                        <th class="text-end">Presupuesto</th>
+                        <th class="text-end">Ejecutado</th>
+                        <th>% Ejec.</th>
+                        <th>Estado</th>
+                        <th>F. L&iacute;mite</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="a : ${actividades}">
+                        <td class="fw-medium">
+                            <span class="badge bg-light text-dark border fs-85" th:text="${a.codigo}">POI</span>
+                        </td>
+                        <td th:text="${a.nombre}">Nombre de actividad</td>
+                        <td class="small" th:text="${a.techoPresupuestal != null ? a.techoPresupuestal.año : ''}">2026</td>
+                        <td class="text-end fw-medium"
+                            th:text="${#numbers.formatDecimal(a.presupuestoAsignado, 0, 'COMMA', 2, 'POINT')}">0</td>
+                        <td class="text-end text-success"
+                            th:text="${#numbers.formatDecimal(a.saldoEjecutado, 0, 'COMMA', 2, 'POINT')}">0</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span th:text="${a.porcentajeEjecucion} + '%'">0%</span>
+                                <div class="progress progress-presupuesto flex-grow-1" style="max-width:60px">
+                                    <div class="progress-bar"
+                                         th:classappend="${a.porcentajeEjecucion > 80} ? 'bg-success' : (${a.porcentajeEjecucion > 0} ? 'bg-warning' : 'bg-secondary')"
+                                         th:style="'width:' + ${a.porcentajeEjecucion} + '%'">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge fs-85"
+                                  th:classappend="${a.estado.name() == 'ACTIVO'} ? 'bg-success' : (${a.estado.name() == 'PENDIENTE'} ? 'bg-warning text-dark' : 'bg-secondary')"
+                                  th:text="${a.estado}">Pendiente</span>
+                        </td>
+                        <td class="small"
+                            th:text="${a.fechaLimite != null ? #temporals.format(a.fechaLimite, 'dd/MM/yyyy') : '—'}">—</td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm" title="Editar"
+                                    sec:authorize="hasAnyRole('Administrador','Coordinacion')"
+                                    data-bs-toggle="modal" data-bs-target="#modalPOI"
+                                    th:attr="data-id=${a.id}, data-codigo=${a.codigo}, data-nombre=${a.nombre},
+                                              data-presupuesto=${a.presupuestoAsignado},
+                                              data-fecha=${a.fechaLimite != null ? #temporals.format(a.fechaLimite, 'yyyy-MM-dd') : ''},
+                                              data-techo=${a.techoPresupuestal != null ? a.techoPresupuestal.id : ''}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(actividades)}">
+                        <td colspan="9" class="text-center text-muted py-5">
+                            <i class="bi bi-diagram-3 fs-1 d-block mb-2"></i>
+                            <p class="mb-2">No hay actividades POI registradas</p>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPOI"
+                                    sec:authorize="hasAnyRole('Administrador','Coordinacion')"
+                                    onclick="prepararCrearPOI()">
+                                <i class="bi bi-plus-lg"></i> Crear primero
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL CREAR/EDITAR -->
+    <div class="modal fade" id="modalPOI" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form th:action="@{/actividades}" method="post" id="formPOI">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="modalPOITitle">
+                            <i class="bi bi-diagram-3 me-2 text-primary"></i>Nueva Actividad
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="poiId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium text-muted">C&oacute;digo <span class="text-danger">*</span></label>
+                            <input class="form-control" name="codigo" id="poiCodigo" required
+                                   placeholder="Ej: POI-2.01">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium text-muted">Nombre <span class="text-danger">*</span></label>
+                            <input class="form-control" name="nombre" id="poiNombre" required
+                                   placeholder="Nombre de la actividad">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-medium text-muted">Presupuesto (S/) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="presupuesto" id="poiPresupuesto"
+                                       required min="0" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-medium text-muted">Fecha l&iacute;mite</label>
+                                <input type="date" class="form-control" name="fechaLimite" id="poiFecha">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium text-muted">Techo presupuestal</label>
+                            <select class="form-select" name="techoId" id="poiTecho" required>
+                                <option value="">Seleccione</option>
+                                <option th:each="t : ${techos}" th:value="${t.id}"
+                                        th:text="'A&ntilde;o ' + ${t.a&ntilde;o}">A&ntilde;o</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save"></i> Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function prepararCrearPOI() {
+            document.getElementById('formPOI').action = '/actividades';
+            document.getElementById('modalPOITitle').innerHTML = '<i class="bi bi-diagram-3 me-2 text-primary"></i> Nueva Actividad';
+        }
+
+        document.getElementById('modalPOI').addEventListener('show.bs.modal', function(e) {
+            var btn = e.relatedTarget;
+            if (!btn) return;
+            var id = btn.getAttribute('data-id');
+            if (!id) return; // creating, not editing
+
+            document.getElementById('formPOI').action = '/actividades/' + id + '/editar';
+            document.getElementById('modalPOITitle').innerHTML = '<i class="bi bi-pencil me-2 text-primary"></i> Editar Actividad';
+            document.getElementById('poiCodigo').value = btn.getAttribute('data-codigo');
+            document.getElementById('poiNombre').value = btn.getAttribute('data-nombre');
+            document.getElementById('poiPresupuesto').value = btn.getAttribute('data-presupuesto');
+            document.getElementById('poiFecha').value = btn.getAttribute('data-fecha');
+            document.getElementById('poiTecho').value = btn.getAttribute('data-techo');
+        });
+
+        document.getElementById('modalPOI').addEventListener('hidden.bs.modal', function() {
+            document.getElementById('formPOI').reset();
+        });
+    </script>
+
+</div>
+</body>
+</html>

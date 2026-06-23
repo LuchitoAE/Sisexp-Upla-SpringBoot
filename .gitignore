@@ -1,0 +1,23 @@
+# Temp files
+cj*.txt
+ck*.txt
+cookie*.txt
+null.txt
+techos.html
+dash.html
+login_page.html
+.env.railway
+
+# IDE
+.idea/
+*.iml
+
+# Build
+sisexp/target/
+sisexp/frontend/node_modules/
+sisexp/frontend/build/
+
+# OS
+*.log
+.DS_Store
+Thumbs.db

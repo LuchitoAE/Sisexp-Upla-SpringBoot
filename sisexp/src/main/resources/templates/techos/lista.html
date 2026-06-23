@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: head('Techo Presupuestal — SISEXP-UPLA')}">
+</head>
+<body th:replace="~{layout :: layout(~{::#main-content})}">
+<div id="main-content" th:fragment="content">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-bank me-2 text-primary"></i>Techo Presupuestal
+            </h4>
+            <small class="text-muted">Presupuestos anuales asignados a la facultad</small>
+        </div>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTecho"
+                sec:authorize="hasAnyRole('Administrador','Coordinacion')" onclick="prepararCrear()">
+            <i class="bi bi-plus-lg"></i> Nuevo techo
+        </button>
+    </div>
+
+    <th:block th:if="${success}">
+        <div class="alert alert-success alert-auto-close" role="alert"><i class="bi bi-check-circle"></i> <span th:text="${success}">OK</span></div>
+    </th:block>
+    <th:block th:if="${error}">
+        <div class="alert alert-danger alert-auto-close" role="alert"><i class="bi bi-exclamation-triangle"></i> <span th:text="${error}">Error</span></div>
+    </th:block>
+
+    <div th:if="${#lists.isEmpty(techos)}" class="text-center text-muted py-5">
+        <i class="bi bi-bank fs-1 d-block mb-2"></i>
+        <p class="mb-2">No hay techos presupuestales registrados</p>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTecho"
+                onclick="prepararCrear()" sec:authorize="hasAnyRole('Administrador','Coordinacion')">
+            <i class="bi bi-plus-lg"></i> Crear primero
+        </button>
+    </div>
+
+    <div class="row g-3">
+        <div th:each="t : ${techos}" class="col-md-6 col-lg-4">
+            <div class="kpi-card d-flex flex-column h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <div class="kpi-value mb-0" th:text="'Año ' + ${t.año}">Año 2026</div>
+                        <div class="d-flex gap-1 mt-1">
+                            <span class="badge fs-85"
+                                  th:classappend="${t.activo} ? 'bg-success' : 'bg-secondary'"
+                                  th:text="${t.activo} ? 'Activo' : 'Inactivo'">Activo</span>
+                            <span class="badge fs-85"
+                                  th:classappend="${t.planificado} ? 'bg-info text-white' : 'bg-light text-dark border'"
+                                  th:text="${t.planificado} ? 'Cerrado' : 'Abierto'">Abierto</span>
+                        </div>
+                    </div>
+                    <div class="dropdown" sec:authorize="hasAnyRole('Administrador','Coordinacion')">
+                        <button class="btn btn-sm btn-outline-secondary border-0" data-bs-toggle="dropdown"
+                                aria-label="Acciones">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalTecho"
+                                   th:onclick="'prepararEditar(' + ${t.id} + ',' + ${t.año} + ',' + ${t.montoTotal} + ')'">
+                                <i class="bi bi-pencil me-2"></i>Editar</a></li>
+                            <li>
+                                <form th:action="@{/techos/{id}/toggle(id=${t.id})}" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-power me-2"></i>
+                                        <span th:text="${t.activo} ? 'Desactivar' : 'Activar'">Activar</span>
+                                    </button>
+                                </form>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form th:action="@{/techos/{id}/planificar(id=${t.id})}" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-lock me-2"></i>
+                                        <span th:text="${t.planificado} ? 'Reabrir' : 'Cerrar planificaci\u00f3n'">Cerrar planificaci\u00f3n</span>
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted">Total asignado</span>
+                        <strong class="fs-5" th:text="'S/ ' + ${#numbers.formatDecimal(t.montoTotal, 0, 'COMMA', 2, 'POINT')}">S/ 0</strong>
+                    </div>
+                    <div class="d-flex justify-content-between small">
+                        <span class="text-muted">Utilizado</span>
+                        <strong th:text="'S/ ' + ${#numbers.formatDecimal(t.montoUtilizado, 0, 'COMMA', 2, 'POINT')}">S/ 0</strong>
+                    </div>
+                </div>
+
+                <div class="progress progress-presupuesto mt-auto">
+                    <div class="progress-bar"
+                         th:classappend="${t.porcentajeUtilizado > 80} ? 'bg-danger' : (${t.porcentajeUtilizado > 50} ? 'bg-warning' : 'bg-success')"
+                         th:style="'width:' + ${t.porcentajeUtilizado} + '%'"
+                         role="progressbar"
+                         th:aria-valuenow="${t.porcentajeUtilizado}" aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                </div>
+                <small class="text-muted mt-1">
+                    <span th:text="${t.porcentajeUtilizado} + '% utilizado'">0% utilizado</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CREAR/EDITAR -->
+    <div class="modal fade" id="modalTecho" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <form th:action="@{/techos}" method="post" id="formTecho">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="modalTitle"><i class="bi bi-bank me-2 text-primary"></i>Nuevo Techo</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="techoId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium text-muted">Año</label>
+                            <input type="number" class="form-control" name="año" id="techoAno"
+                                   required min="2020" max="2030" placeholder="Ej: 2026">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium text-muted">Monto total (S/)</label>
+                            <input type="number" class="form-control" name="montoTotal" id="techoMonto"
+                                   required min="0" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save"></i> Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function prepararCrear() {
+            document.getElementById('formTecho').action = '/techos';
+            document.getElementById('modalTitle').innerHTML = '<i class="bi bi-bank me-2 text-primary"></i> Nuevo Techo';
+            document.getElementById('techoId').value = '';
+            document.getElementById('techoAno').value = new Date().getFullYear() + 1;
+            document.getElementById('techoMonto').value = '';
+            document.getElementById('techoAno').focus();
+        }
+        function prepararEditar(id, año, monto) {
+            document.getElementById('formTecho').action = '/techos/' + id + '/editar';
+            document.getElementById('modalTitle').innerHTML = '<i class="bi bi-pencil me-2 text-primary"></i> Editar Techo';
+            document.getElementById('techoId').value = id;
+            document.getElementById('techoAno').value = año;
+            document.getElementById('techoMonto').value = monto;
+        }
+    </script>
+
+</div>
+</body>
+</html>

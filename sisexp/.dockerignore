@@ -1,0 +1,10 @@
+node_modules/
+frontend/node_modules/
+frontend/build/
+target/
+.idea/
+*.iml
+.git/
+.gitignore
+README.md
+AGENTS.md
