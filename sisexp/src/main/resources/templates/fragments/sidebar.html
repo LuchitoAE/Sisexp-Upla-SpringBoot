@@ -15,45 +15,37 @@
     </a>
 
     <div class="section">Presupuesto</div>
-
     <a th:href="@{/techos}" sec:authorize="hasAnyRole('Administrador','Coordinacion','Secretaria','Director')">
         <i class="bi bi-bank"></i> Techo Presupuestal
     </a>
-
     <a th:href="@{/actividades}" sec:authorize="hasAnyRole('Administrador','Coordinacion','Secretaria','Director','Laboratorio')">
         <i class="bi bi-diagram-3"></i> Actividades POI
     </a>
-
     <a th:href="@{/necesidades}" sec:authorize="hasAnyRole('Administrador','Coordinacion','Secretaria','Director','Laboratorio','Decanato')">
         <i class="bi bi-card-list"></i> Necesidades PAP
     </a>
 
-    <div class="section">Gestión</div>
-
+    <div class="section">Gesti&oacute;n</div>
     <a th:href="@{/notas}" sec:authorize="hasAnyRole('Administrador','Coordinacion','Secretaria','Director','Laboratorio','Decanato')">
         <i class="bi bi-pencil-square"></i> Notas Modificatorias
     </a>
-
     <a th:href="@{/reportes}" sec:authorize="hasAnyRole('Administrador','Coordinacion','Director','Decanato')">
         <i class="bi bi-graph-up"></i> Reportes
     </a>
-
     <a th:href="@{/usuarios}" sec:authorize="hasRole('Administrador')">
         <i class="bi bi-people"></i> Usuarios
     </a>
 
     <div class="section">Centro</div>
-
     <a th:href="@{/notificaciones}">
         <i class="bi bi-bell"></i> Notificaciones
         <span class="badge bg-danger ms-auto" id="notif-count" style="display:none">0</span>
     </a>
 
-
     <div class="mt-auto p-3 border-top border-secondary">
         <form th:action="@{/logout}" method="post" class="w-100">
             <button type="submit" class="btn btn-sm btn-outline-light w-100">
-                <i class="bi bi-box-arrow-right"></i> Cerrar sesion
+                <i class="bi bi-box-arrow-right"></i> Cerrar sesi&oacute;n
             </button>
         </form>
     </div>

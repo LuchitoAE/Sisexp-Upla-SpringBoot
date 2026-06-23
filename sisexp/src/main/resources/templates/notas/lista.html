@@ -19,15 +19,19 @@
     </div>
 
     <th:block th:if="${success}">
-        <div class="alert alert-success alert-auto-close" role="alert"><span th:text="${success}">OK</span></div>
+        <div class="alert alert-success alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill"></i> <span th:text="${success}">OK</span>
+        </div>
     </th:block>
     <th:block th:if="${error}">
-        <div class="alert alert-danger alert-auto-close" role="alert"><span th:text="${error}">Error</span></div>
+        <div class="alert alert-danger alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error</span>
+        </div>
     </th:block>
 
     <div class="table-card">
         <div class="card-header">
-            <h5><i class="bi bi-list me-2 text-primary"></i>Listado</h5>
+            <h5><i class="bi bi-list"></i>Listado</h5>
         </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -48,7 +52,7 @@
                         <td class="fw-medium" th:text="${n.codigo}">NM-123</td>
                         <td class="small" th:text="${n.solicitante.nombre}">Solicitante</td>
                         <td>
-                            <span class="badge fs-85"
+                            <span class="badge"
                                   th:classappend="${n.tipo.name() == 'inclusion_item'} ? 'bg-info text-dark' : 'bg-primary'"
                                   th:text="${n.tipo.name() == 'inclusion_item'} ? 'Incl. Item' : 'Incl. Actividad'">Tipo</span>
                         </td>
@@ -57,7 +61,7 @@
                         <td class="text-end fw-medium"
                             th:text="${n.costoEstimadoReferencial != null ? 'S/ ' + #numbers.formatDecimal(n.costoEstimadoReferencial, 0, 'COMMA', 2, 'POINT') : '—'}">S/ 0</td>
                         <td>
-                            <span class="badge fs-85"
+                            <span class="badge"
                                   th:classappend="${n.estado.name() == 'pendiente'} ? 'bg-warning text-dark' : (${n.estado.name() == 'configurada'} ? 'bg-success' : 'bg-danger')"
                                   th:text="${n.estado}">pendiente</span>
                         </td>
@@ -72,9 +76,9 @@
                                 <form th:action="@{/notas/{id}/rechazar(id=${n.id})}" method="post" class="d-inline"
                                       th:if="${n.estado.name() == 'pendiente'}">
                                     <div class="input-group input-group-sm" style="width:180px">
-                                        <input type="text" class="form-control form-control-sm" name="observacion"
+                                        <input type="text" class="form-control" name="observacion"
                                                placeholder="Motivo..." required>
-                                        <button class="btn btn-outline-danger btn-sm" type="submit" title="Rechazar">
+                                        <button class="btn btn-outline-danger" type="submit" title="Rechazar">
                                             <i class="bi bi-x-lg"></i>
                                         </button>
                                     </div>
@@ -96,7 +100,6 @@
         </div>
     </div>
 
-    <!-- MODAL CREAR -->
     <div class="modal fade" id="modalNota" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -107,37 +110,37 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Tipo</label>
+                            <label class="form-label">Tipo</label>
                             <select class="form-select" name="tipo" required>
                                 <option th:each="t : ${tiposNota}" th:value="${t}"
                                         th:text="${t.name() == 'inclusion_item'} ? 'Inclusi\u00f3n de Item' : 'Inclusi\u00f3n de Actividad'">Tipo</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Actividad existente</label>
+                            <label class="form-label">Actividad existente</label>
                             <select class="form-select" name="actividadExistenteId" required>
                                 <option th:each="a : ${actividades}" th:value="${a.id}"
                                         th:text="${a.codigo + ' — ' + a.nombre}">POI-2.01</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Nombre del nuevo item/actividad</label>
+                            <label class="form-label">Nombre del nuevo item/actividad</label>
                             <input class="form-control" name="nuevoNombre" required
                                    placeholder="Nombre del item o actividad a incluir">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Justificaci&oacute;n</label>
+                            <label class="form-label">Justificaci&oacute;n</label>
                             <textarea class="form-control" name="justificacion" rows="2" required
                                       placeholder="Explique la raz&oacute;n de la modificaci&oacute;n"></textarea>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label class="form-label small fw-medium text-muted">Costo estimado referencial (S/)</label>
+                                <label class="form-label">Costo estimado referencial (S/)</label>
                                 <input type="number" class="form-control" name="costoEstimado" step="0.01"
                                        placeholder="0.00">
                             </div>
                             <div class="col-6">
-                                <label class="form-label small fw-medium text-muted">Archivo sustento (PDF)</label>
+                                <label class="form-label">Archivo sustento (PDF)</label>
                                 <input type="file" class="form-control" name="archivo" accept="application/pdf">
                             </div>
                         </div>
@@ -151,7 +154,6 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIGURAR -->
     <div class="modal fade" id="modalConfigurar" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -163,31 +165,31 @@
                     <div class="modal-body">
                         <input type="hidden" name="id" id="configNotaId">
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Actividad origen (de donde sale el dinero)</label>
+                            <label class="form-label">Actividad origen (de donde sale el dinero)</label>
                             <select class="form-select" name="actividadOrigenId" required>
                                 <option th:each="a : ${actividades}" th:value="${a.id}"
                                         th:text="${a.codigo + ' — ' + a.nombre}">POI-2.01</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Monto a transferir (S/)</label>
+                            <label class="form-label">Monto a transferir (S/)</label>
                             <input type="number" class="form-control" name="montoTransferir" required step="0.01"
                                    placeholder="0.00">
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label class="form-label small fw-medium text-muted">Nuevo clasificador</label>
+                                <label class="form-label">Nuevo clasificador</label>
                                 <input class="form-control" name="clasificadorGasto" placeholder="Ej: 2.3.1.1.1">
                             </div>
                             <div class="col-6">
-                                <label class="form-label small fw-medium text-muted">Nuevo tipo</label>
+                                <label class="form-label">Nuevo tipo</label>
                                 <select class="form-select" name="tipo">
                                     <option th:each="t : ${naturalezas}" th:value="${t}" th:text="${t}">Bien</option>
                                 </select>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Observaci&oacute;n</label>
+                            <label class="form-label">Observaci&oacute;n</label>
                             <input class="form-control" name="observacion" placeholder="Notas adicionales">
                         </div>
                     </div>

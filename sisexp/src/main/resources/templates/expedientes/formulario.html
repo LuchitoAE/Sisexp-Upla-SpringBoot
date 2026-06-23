@@ -18,32 +18,32 @@
     <div class="form-card">
         <form th:action="@{/expedientes}" method="post" th:object="${formDTO}" id="expForm" class="row g-3">
             <div class="col-md-6">
-                <label class="form-label small fw-medium text-muted">
+                <label class="form-label">
                     Actividad POI <span class="text-danger">*</span>
                 </label>
-                <select class="form-select form-select-sm" th:field="*{actividadPoiId}" id="actividadPoiId"
+                <select class="form-select" th:field="*{actividadPoiId}" id="actividadPoiId"
                         onchange="cargarNecesidades()"
                         th:classappend="${#fields.hasErrors('actividadPoiId')} ? 'is-invalid' : ''">
                     <option value="">Seleccione una actividad</option>
                     <option th:each="a : ${actividades}" th:value="${a.id}"
                             th:text="${a.codigo + ' — ' + a.nombre}">POI-2.01 — Nombre</option>
                 </select>
-                <div th:if="${#fields.hasErrors('actividadPoiId')}" class="invalid-feedback small">
+                <div th:if="${#fields.hasErrors('actividadPoiId')}" class="invalid-feedback">
                     <i class="bi bi-exclamation-circle"></i>
                     <span th:errors="*{actividadPoiId}">Error</span>
                 </div>
             </div>
 
             <div class="col-md-6">
-                <label class="form-label small fw-medium text-muted">
+                <label class="form-label">
                     Item PAP <span class="text-danger">*</span>
                 </label>
-                <select class="form-select form-select-sm" th:field="*{necesidadPapId}" id="necesidadPapId"
+                <select class="form-select" th:field="*{necesidadPapId}" id="necesidadPapId"
                         onchange="actualizarInfoPAP()"
                         th:classappend="${#fields.hasErrors('necesidadPapId')} ? 'is-invalid' : ''">
                     <option value="">Primero seleccione una actividad</option>
                 </select>
-                <div th:if="${#fields.hasErrors('necesidadPapId')}" class="invalid-feedback small">
+                <div th:if="${#fields.hasErrors('necesidadPapId')}" class="invalid-feedback">
                     <i class="bi bi-exclamation-circle"></i>
                     <span th:errors="*{necesidadPapId}">Error</span>
                 </div>
@@ -51,54 +51,54 @@
             </div>
 
             <div class="col-md-4">
-                <label class="form-label small fw-medium text-muted">
+                <label class="form-label">
                     Urgencia <span class="text-danger">*</span>
                 </label>
-                <select class="form-select form-select-sm" th:field="*{urgencia}">
+                <select class="form-select" th:field="*{urgencia}">
                     <option value="">Seleccione</option>
                     <option th:each="u : ${urgencias}" th:value="${u}" th:text="${u}">Urgente</option>
                 </select>
             </div>
 
             <div class="col-md-4">
-                <label class="form-label small fw-medium text-muted">Naturaleza</label>
-                <select class="form-select form-select-sm" th:field="*{naturaleza}" id="naturaleza">
+                <label class="form-label">Naturaleza</label>
+                <select class="form-select" th:field="*{naturaleza}" id="naturaleza">
                     <option value="">Seleccione</option>
                     <option th:each="n : ${naturalezas}" th:value="${n}" th:text="${n}">Bien</option>
                 </select>
             </div>
 
             <div class="col-md-4">
-                <label class="form-label small fw-medium text-muted">Fecha l&iacute;mite sugerida</label>
-                <input type="date" class="form-control form-control-sm" th:field="*{fechaLimite}">
+                <label class="form-label">Fecha l&iacute;mite sugerida</label>
+                <input type="date" class="form-control" th:field="*{fechaLimite}">
             </div>
 
             <div class="col-md-3">
-                <label class="form-label small fw-medium text-muted">
+                <label class="form-label">
                     Cantidad <span class="text-danger">*</span>
                 </label>
-                <input type="number" class="form-control form-control-sm" th:field="*{cantidadSolicitada}"
+                <input type="number" class="form-control" th:field="*{cantidadSolicitada}"
                        min="1" max="9999" id="cantidadSolicitada" onchange="calcularCosto()">
             </div>
 
             <div class="col-md-3">
-                <label class="form-label small fw-medium text-muted">Costo estimado</label>
-                <div class="input-group input-group-sm">
+                <label class="form-label">Costo estimado</label>
+                <div class="input-group">
                     <span class="input-group-text">S/</span>
                     <input type="text" class="form-control" th:field="*{costoEstimado}"
                            id="costoEstimado" readonly>
                 </div>
-                <small class="text-muted">Calculado autom&aacute;ticamente</small>
+                <small class="form-text">Calculado autom&aacute;ticamente</small>
             </div>
 
             <div class="col-12">
-                <label class="form-label small fw-medium text-muted">
+                <label class="form-label">
                     Descripci&oacute;n <span class="text-danger">*</span>
                 </label>
-                <textarea class="form-control form-control-sm" th:field="*{descripcion}" rows="3"
+                <textarea class="form-control" th:field="*{descripcion}" rows="3"
                           placeholder="Describa el prop&oacute;sito y justificaci&oacute;n del expediente"
                           th:classappend="${#fields.hasErrors('descripcion')} ? 'is-invalid' : ''"></textarea>
-                <div th:if="${#fields.hasErrors('descripcion')}" class="invalid-feedback small">
+                <div th:if="${#fields.hasErrors('descripcion')}" class="invalid-feedback">
                     <i class="bi bi-exclamation-circle"></i>
                     <span th:errors="*{descripcion}">Error</span>
                 </div>

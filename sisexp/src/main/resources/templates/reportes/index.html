@@ -34,7 +34,6 @@
 
     <div class="tab-content">
 
-        <!-- TAB 1: EXPEDIENTES -->
         <div class="tab-pane fade show active" id="tabExp" role="tabpanel">
             <div class="row g-3 mb-3">
                 <div class="col-4 col-md-2" th:each="entry : ${conteoEstados}">
@@ -71,8 +70,7 @@
                                 <td class="small" th:text="${e.necesidadPAP.nombre}">Item</td>
                                 <td class="small" th:text="${e.solicitante.nombre}">Sol</td>
                                 <td>
-                                    <span class="badge fs-85"
-                                          th:classappend="'badge-' + ${e.estado.name()}"
+                                    <span class="badge" th:classappend="'badge-' + ${e.estado.name()}"
                                           th:text="${e.estado.name().replace('_',' ')}">Estado</span>
                                 </td>
                                 <td class="text-end fw-medium"
@@ -85,7 +83,6 @@
             </div>
         </div>
 
-        <!-- TAB 2: POI -->
         <div class="tab-pane fade" id="tabPOI" role="tabpanel">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                 <h6 class="fw-bold"><i class="bi bi-diagram-3 me-1 text-muted"></i>Actividades POI</h6>
@@ -131,7 +128,6 @@
             </div>
         </div>
 
-        <!-- TAB 3: PAP -->
         <div class="tab-pane fade" id="tabPAP" role="tabpanel">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                 <h6 class="fw-bold"><i class="bi bi-card-list me-1 text-muted"></i>Necesidades PAP</h6>
@@ -161,7 +157,7 @@
                                 <td class="text-end" th:text="${n.cantidad}">0</td>
                                 <td class="text-end" th:text="'S/ ' + ${#numbers.formatDecimal(n.precioEstimado, 0, 'COMMA', 2, 'POINT')}">S/ 0</td>
                                 <td>
-                                    <span class="badge fs-85"
+                                    <span class="badge"
                                           th:classappend="${n.tipo == 'BIEN' or n.tipo == 'Bien'} ? 'bg-primary' : 'bg-info text-dark'"
                                           th:text="${n.tipo}">Bien</span>
                                 </td>
@@ -175,7 +171,6 @@
             </div>
         </div>
 
-        <!-- TAB 4: ANUAL -->
         <div class="tab-pane fade" id="tabAnual" role="tabpanel">
             <h6 class="fw-bold mb-3"><i class="bi bi-calendar3 me-1 text-muted"></i>Comparativa anual</h6>
             <div class="row g-3">

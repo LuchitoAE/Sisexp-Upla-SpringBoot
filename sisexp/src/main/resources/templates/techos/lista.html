@@ -20,10 +20,14 @@
     </div>
 
     <th:block th:if="${success}">
-        <div class="alert alert-success alert-auto-close" role="alert"><i class="bi bi-check-circle"></i> <span th:text="${success}">OK</span></div>
+        <div class="alert alert-success alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill"></i> <span th:text="${success}">OK</span>
+        </div>
     </th:block>
     <th:block th:if="${error}">
-        <div class="alert alert-danger alert-auto-close" role="alert"><i class="bi bi-exclamation-triangle"></i> <span th:text="${error}">Error</span></div>
+        <div class="alert alert-danger alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error</span>
+        </div>
     </th:block>
 
     <div th:if="${#lists.isEmpty(techos)}" class="text-center text-muted py-5">
@@ -42,10 +46,10 @@
                     <div>
                         <div class="kpi-value mb-0" th:text="'Año ' + ${t.año}">Año 2026</div>
                         <div class="d-flex gap-1 mt-1">
-                            <span class="badge fs-85"
+                            <span class="badge"
                                   th:classappend="${t.activo} ? 'bg-success' : 'bg-secondary'"
                                   th:text="${t.activo} ? 'Activo' : 'Inactivo'">Activo</span>
-                            <span class="badge fs-85"
+                            <span class="badge"
                                   th:classappend="${t.planificado} ? 'bg-info text-white' : 'bg-light text-dark border'"
                                   th:text="${t.planificado} ? 'Cerrado' : 'Abierto'">Abierto</span>
                         </div>
@@ -99,14 +103,11 @@
                          th:aria-valuenow="${t.porcentajeUtilizado}" aria-valuemin="0" aria-valuemax="100">
                     </div>
                 </div>
-                <small class="text-muted mt-1">
-                    <span th:text="${t.porcentajeUtilizado} + '% utilizado'">0% utilizado</span>
-                </small>
+                <small class="text-muted mt-1" th:text="${t.porcentajeUtilizado} + '% utilizado'">0% utilizado</small>
             </div>
         </div>
     </div>
 
-    <!-- MODAL CREAR/EDITAR -->
     <div class="modal fade" id="modalTecho" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -118,12 +119,12 @@
                     <div class="modal-body">
                         <input type="hidden" name="id" id="techoId">
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Año</label>
+                            <label class="form-label">A&ntilde;o</label>
                             <input type="number" class="form-control" name="año" id="techoAno"
                                    required min="2020" max="2030" placeholder="Ej: 2026">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Monto total (S/)</label>
+                            <label class="form-label">Monto total (S/)</label>
                             <input type="number" class="form-control" name="montoTotal" id="techoMonto"
                                    required min="0" step="0.01" placeholder="0.00">
                         </div>

@@ -34,10 +34,10 @@
                 <tbody>
                     <tr th:each="n : ${notificaciones}" th:classappend="${!n.leida} ? 'table-active' : ''">
                         <td>
-                            <div th:text="${n.mensaje}" th:classappend="${!n.leida} ? 'fw-medium' : ''">Mensaje de notificaci&oacute;n</div>
+                            <div th:text="${n.mensaje}" th:classappend="${!n.leida} ? 'fw-medium' : ''">Mensaje</div>
                         </td>
                         <td>
-                            <span class="badge fs-85"
+                            <span class="badge"
                                   th:classappend="${n.tipo.name() == 'aprobacion' or n.tipo.name() == 'nota_aprobada'} ? 'bg-success' : (${n.tipo.name() == 'rechazo' or n.tipo.name() == 'nota_rechazada'} ? 'bg-danger' : (${n.tipo.name() == 'observacion'} ? 'bg-warning text-dark' : (${n.tipo.name() == 'alerta_fecha'} ? 'bg-info text-dark' : 'bg-secondary')))"
                                   th:text="${n.tipo.name().replace('_',' ')}">info</span>
                         </td>

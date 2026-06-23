@@ -21,15 +21,19 @@
     </div>
 
     <th:block th:if="${success}">
-        <div class="alert alert-success alert-auto-close" role="alert" th:text="${success}">OK</div>
+        <div class="alert alert-success alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill"></i> <span th:text="${success}">OK</span>
+        </div>
     </th:block>
     <th:block th:if="${error}">
-        <div class="alert alert-danger alert-auto-close" role="alert" th:text="${error}">Error</div>
+        <div class="alert alert-danger alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error</span>
+        </div>
     </th:block>
 
     <div class="table-card">
         <div class="card-header">
-            <h5><i class="bi bi-list me-2 text-primary"></i>Listado</h5>
+            <h5><i class="bi bi-list"></i>Listado</h5>
             <form class="d-flex gap-2" th:action="@{/actividades}" method="get">
                 <select class="form-select form-select-sm" style="min-width:160px" name="techoId"
                         onchange="this.form.submit()">
@@ -58,14 +62,14 @@
                 <tbody>
                     <tr th:each="a : ${actividades}">
                         <td class="fw-medium">
-                            <span class="badge bg-light text-dark border fs-85" th:text="${a.codigo}">POI</span>
+                            <span class="badge bg-light text-dark border" th:text="${a.codigo}">POI</span>
                         </td>
                         <td th:text="${a.nombre}">Nombre de actividad</td>
                         <td class="small" th:text="${a.techoPresupuestal != null ? a.techoPresupuestal.año : ''}">2026</td>
                         <td class="text-end fw-medium"
-                            th:text="${#numbers.formatDecimal(a.presupuestoAsignado, 0, 'COMMA', 2, 'POINT')}">0</td>
+                            th:text="'S/ ' + ${#numbers.formatDecimal(a.presupuestoAsignado, 0, 'COMMA', 2, 'POINT')}">0</td>
                         <td class="text-end text-success"
-                            th:text="${#numbers.formatDecimal(a.saldoEjecutado, 0, 'COMMA', 2, 'POINT')}">0</td>
+                            th:text="'S/ ' + ${#numbers.formatDecimal(a.saldoEjecutado, 0, 'COMMA', 2, 'POINT')}">0</td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <span th:text="${a.porcentajeEjecucion} + '%'">0%</span>
@@ -78,7 +82,7 @@
                             </div>
                         </td>
                         <td>
-                            <span class="badge fs-85"
+                            <span class="badge"
                                   th:classappend="${a.estado.name() == 'ACTIVO'} ? 'bg-success' : (${a.estado.name() == 'PENDIENTE'} ? 'bg-warning text-dark' : 'bg-secondary')"
                                   th:text="${a.estado}">Pendiente</span>
                         </td>
@@ -112,7 +116,6 @@
         </div>
     </div>
 
-    <!-- MODAL CREAR/EDITAR -->
     <div class="modal fade" id="modalPOI" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -126,28 +129,28 @@
                     <div class="modal-body">
                         <input type="hidden" name="id" id="poiId">
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">C&oacute;digo <span class="text-danger">*</span></label>
+                            <label class="form-label">C&oacute;digo <span class="text-danger">*</span></label>
                             <input class="form-control" name="codigo" id="poiCodigo" required
                                    placeholder="Ej: POI-2.01">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Nombre <span class="text-danger">*</span></label>
+                            <label class="form-label">Nombre <span class="text-danger">*</span></label>
                             <input class="form-control" name="nombre" id="poiNombre" required
                                    placeholder="Nombre de la actividad">
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label class="form-label small fw-medium text-muted">Presupuesto (S/) <span class="text-danger">*</span></label>
+                                <label class="form-label">Presupuesto (S/) <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" name="presupuesto" id="poiPresupuesto"
                                        required min="0" step="0.01" placeholder="0.00">
                             </div>
                             <div class="col-6">
-                                <label class="form-label small fw-medium text-muted">Fecha l&iacute;mite</label>
+                                <label class="form-label">Fecha l&iacute;mite</label>
                                 <input type="date" class="form-control" name="fechaLimite" id="poiFecha">
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Techo presupuestal</label>
+                            <label class="form-label">Techo presupuestal</label>
                             <select class="form-select" name="techoId" id="poiTecho" required>
                                 <option value="">Seleccione</option>
                                 <option th:each="t : ${techos}" th:value="${t.id}"
@@ -174,7 +177,7 @@
             var btn = e.relatedTarget;
             if (!btn) return;
             var id = btn.getAttribute('data-id');
-            if (!id) return; // creating, not editing
+            if (!id) return;
 
             document.getElementById('formPOI').action = '/actividades/' + id + '/editar';
             document.getElementById('modalPOITitle').innerHTML = '<i class="bi bi-pencil me-2 text-primary"></i> Editar Actividad';

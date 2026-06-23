@@ -8,7 +8,9 @@
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <div>
-            <h4 class="fw-bold mb-0">Expedientes</h4>
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-file-earmark-text me-2 text-primary"></i>Expedientes
+            </h4>
             <small class="text-muted" th:text="'Total: ' + ${#lists.size(expedientes)} + ' registros'">Total: 0</small>
         </div>
         <a th:href="@{/expedientes/nuevo}"
@@ -19,23 +21,27 @@
     </div>
 
     <th:block th:if="${success}">
-        <div class="alert alert-success alert-auto-close" role="alert" th:text="${success}">OK</div>
+        <div class="alert alert-success alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill"></i> <span th:text="${success}">OK</span>
+        </div>
     </th:block>
     <th:block th:if="${error}">
-        <div class="alert alert-danger alert-auto-close" role="alert" th:text="${error}">Error</div>
+        <div class="alert alert-danger alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error</span>
+        </div>
     </th:block>
 
     <div class="table-card">
         <div class="card-header">
-            <h5><i class="bi bi-list me-2 text-primary"></i>Listado</h5>
+            <h5><i class="bi bi-list"></i>Listado</h5>
             <div class="d-flex gap-2">
                 <select class="form-select form-select-sm" style="min-width:150px" id="filterEstado"
-                        onchange="filtrarEstado()">
+                        onchange="filtrarEstadoDataset('filterEstado','expTable','data-estado')">
                     <option value="">Todos los estados</option>
                     <option th:each="e : ${estados}" th:value="${e.name()}" th:text="${e.name().replace('_',' ')}">Estado</option>
                 </select>
                 <input type="text" class="form-control form-control-sm" style="min-width:200px"
-                       placeholder="Buscar c&oacute;digo..." id="filterSearch" onkeyup="filtrarTabla()">
+                       placeholder="Buscar c&oacute;digo..." id="filterSearch" onkeyup="filtrarTablaCodigo('filterSearch','expTable')">
             </div>
         </div>
         <div class="table-responsive">
@@ -68,13 +74,12 @@
                                   th:text="${exp.urgencia.name().replace('_',' ')}">Normal</span>
                         </td>
                         <td>
-                            <span class="badge fs-85"
-                                  th:classappend="'badge-' + ${exp.estado.name()}"
+                            <span class="badge" th:classappend="'badge-' + ${exp.estado.name()}"
                                   th:text="${exp.estado.name().replace('_',' ')}">Borrador</span>
                         </td>
                         <td class="small" th:text="${exp.fechaLimite != null ? #temporals.format(exp.fechaLimite, 'dd/MM/yyyy') : '—'}">—</td>
                         <td class="text-end fw-medium"
-                            th:text="${#numbers.formatDecimal(exp.costoEstimado, 0, 'COMMA', 2, 'POINT')}">0</td>
+                            th:text="'S/ ' + ${#numbers.formatDecimal(exp.costoEstimado, 0, 'COMMA', 2, 'POINT')}">0</td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(expedientes)}">
                         <td colspan="8" class="text-center text-muted py-5">
@@ -91,23 +96,6 @@
         </div>
     </div>
 
-    <script>
-        function filtrarTabla() {
-            var q = document.getElementById('filterSearch').value.toUpperCase();
-            document.querySelectorAll('#expTable tbody tr').forEach(function(r) {
-                if (r.getAttribute('data-estado') === null) return;
-                var c = r.cells[0]?.textContent || '';
-                r.style.display = c.toUpperCase().includes(q) ? '' : 'none';
-            });
-        }
-        function filtrarEstado() {
-            var e = document.getElementById('filterEstado').value;
-            document.querySelectorAll('#expTable tbody tr').forEach(function(r) {
-                if (r.getAttribute('data-estado') === null) return;
-                r.style.display = !e || r.getAttribute('data-estado') === e ? '' : 'none';
-            });
-        }
-    </script>
 </div>
 </body>
 </html>

@@ -6,17 +6,16 @@
 <body th:replace="~{layout :: layout(~{::#main-content})}">
 <div id="main-content" th:fragment="content">
 
-    <!-- HEADER -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 animate-fade-up">
         <div>
             <h4 class="fw-bold mb-1">
-                Bienvenido, <span sec:authentication="name">usuario</span>
+                <i class="bi bi-speedometer2 me-2 text-primary"></i>Bienvenido, <span sec:authentication="name">usuario</span>
             </h4>
             <small class="text-muted">Resumen general del sistema &mdash;
                 <span th:text="${#temporals.format(#temporals.createNow(), 'EEEE dd/MM/yyyy')}">22/06/2026</span>
             </small>
         </div>
-        <span class="role-badge" style="font-size:.8rem; padding:.35rem .75rem"
+        <span class="role-badge"
               th:text="${#strings.replace(
                   #authentication?.authorities?.iterator()?.next()?.authority ?: '',
                   'ROLE_', '')}">
@@ -24,7 +23,6 @@
         </span>
     </div>
 
-    <!-- KPI CARDS -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-4 col-lg-2">
             <div class="kpi-card">
@@ -43,7 +41,7 @@
             <div class="kpi-card">
                 <div class="d-flex align-items-center gap-3">
                     <div class="kpi-icon" style="background:#e2e8f0">
-                        <i class="bi bi-pencil fs-85" style="color:#475569"></i>
+                        <i class="bi bi-pencil" style="color:#475569"></i>
                     </div>
                     <div>
                         <div class="kpi-label">Borrador</div>
@@ -92,7 +90,7 @@
             </div>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="kpi-card border-danger">
+            <div class="kpi-card" style="border:1px solid #fecaca">
                 <div class="d-flex align-items-center gap-3">
                     <div class="kpi-icon" style="background:#fee2e2">
                         <i class="bi bi-exclamation-triangle" style="color:#dc2626"></i>
@@ -106,16 +104,15 @@
         </div>
     </div>
 
-    <!-- EJECUCION PRESUPUESTAL -->
     <div class="row g-3 mb-4">
         <div class="col-12">
             <div class="table-card">
                 <div class="card-header">
-                    <h5><i class="bi bi-bar-chart me-2 text-primary"></i>Ejecuci&oacute;n presupuestal</h5>
+                    <h5><i class="bi bi-bar-chart"></i>Ejecuci&oacute;n presupuestal</h5>
                     <small class="text-muted">Actividades con presupuesto &gt; S/ 0</small>
                 </div>
                 <div class="p-3">
-                    <div th:each="s : ${saldos}" th:if="${s.presupuesto > 0}" class="mb-3 budget-item">
+                    <div th:each="s : ${saldos}" th:if="${s.presupuesto > 0}" class="mb-3">
                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="badge bg-light text-dark border fs-85" th:text="${s.codigo}">POI-2.01</span>
@@ -155,28 +152,27 @@
         </div>
     </div>
 
-    <!-- ALERTAS -->
     <div class="row g-3">
         <div class="col-12">
             <div class="table-card">
                 <div class="card-header">
-                    <h5><i class="bi bi-bell me-2 text-primary"></i>Alertas</h5>
-                    <span th:if="${#lists.isEmpty(alertas)}" class="badge bg-success fs-85">Sin alertas</span>
-                    <span th:if="${not #lists.isEmpty(alertas)}" class="badge bg-warning text-dark fs-85"
+                    <h5><i class="bi bi-bell"></i>Alertas</h5>
+                    <span th:if="${#lists.isEmpty(alertas)}" class="badge bg-success">Sin alertas</span>
+                    <span th:if="${not #lists.isEmpty(alertas)}" class="badge bg-warning text-dark"
                           th:text="${#lists.size(alertas)} + ' pendientes'">3</span>
                 </div>
                 <div th:if="${not #lists.isEmpty(alertas)}" class="p-3">
-                    <div th:each="exp : ${alertas}" class="alerta-item d-flex align-items-start gap-3 py-3 border-bottom">
-                        <div class="alerta-icon mt-1"
-                             th:classappend="${exp.fechaLimite != null and exp.fechaLimite < #temporals.createToday()} ? 'alerta-vencida' : 'alerta-proxima'">
+                    <div th:each="exp : ${alertas}" class="d-flex align-items-start gap-3 py-3 border-bottom">
+                        <div class="kpi-icon mt-1"
+                             th:classappend="${exp.fechaLimite != null and exp.fechaLimite < #temporals.createToday()} ? 'bg-danger bg-opacity-10' : 'bg-warning bg-opacity-10'">
                             <i class="bi"
-                               th:classappend="${exp.fechaLimite != null and exp.fechaLimite < #temporals.createToday()} ? 'bi-exclamation-triangle-fill' : 'bi-clock-fill'"></i>
+                               th:classappend="${exp.fechaLimite != null and exp.fechaLimite < #temporals.createToday()} ? 'bi-exclamation-triangle-fill text-danger' : 'bi-clock-fill text-warning'"></i>
                         </div>
                         <div class="flex-grow-1 min-w-0">
                             <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                                 <a th:href="@{/expedientes/{id}(id=${exp.id})}"
-                                   class="fw-medium text-decoration-none text-primary" th:text="${exp.codigo}">EXP-2026-0001</a>
-                                <span class="badge fs-85"
+                                   class="fw-medium text-decoration-none" th:text="${exp.codigo}">EXP-2026-0001</a>
+                                <span class="badge"
                                       th:classappend="'badge-' + ${exp.estado.name()}"
                                       th:text="${exp.estado.name().replace('_',' ')}">Borrador</span>
                             </div>
@@ -197,48 +193,6 @@
             </div>
         </div>
     </div>
-
-    <style>
-        .kpi-card.border-danger {
-            border-color: #fecaca !important;
-        }
-        .budget-item + .budget-item {
-            padding-top: .75rem;
-            border-top: 1px solid #f1f5f9;
-        }
-        .alerta-item + .alerta-item {
-            border-top: 1px solid var(--color-card-border);
-        }
-        .alerta-item:last-child {
-            border-bottom: none !important;
-        }
-        .alerta-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-        .alerta-vencida {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-        .alerta-proxima {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        .role-badge {
-            background: #e0f2fe;
-            color: #0369a1;
-            font-size: .75rem;
-            font-weight: 500;
-            padding: .25rem .6rem;
-            border-radius: 999px;
-        }
-    </style>
 
 </div>
 </body>

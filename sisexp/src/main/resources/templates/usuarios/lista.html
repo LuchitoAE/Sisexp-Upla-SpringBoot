@@ -18,10 +18,14 @@
     </div>
 
     <th:block th:if="${success}">
-        <div class="alert alert-success alert-auto-close" role="alert" th:text="${success}">OK</div>
+        <div class="alert alert-success alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill"></i> <span th:text="${success}">OK</span>
+        </div>
     </th:block>
     <th:block th:if="${error}">
-        <div class="alert alert-danger alert-auto-close" role="alert" th:text="${error}">Error</div>
+        <div class="alert alert-danger alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error</span>
+        </div>
     </th:block>
 
     <style>
@@ -49,10 +53,10 @@
                 <tbody>
                     <tr th:each="u : ${usuarios}">
                         <td class="fw-medium" th:text="${u.nombre}">Nombre</td>
-                        <td class="small" th:text="${u.email}">email@upla.edu.pe</td>
-                        <td><span class="badge fs-85" th:class="'rol-' + ${u.rol}" th:text="${u.rol}">Admin</span></td>
+                        <td class="small text-muted" th:text="${u.email}">email@upla.edu.pe</td>
+                        <td><span class="badge" th:class="'rol-' + ${u.rol}" th:text="${u.rol}">Admin</span></td>
                         <td>
-                            <span class="badge fs-85"
+                            <span class="badge"
                                   th:classappend="${u.horarioRestringido} ? 'bg-info text-dark' : 'bg-success'"
                                   th:text="${u.horarioRestringido} ? 'Restringido' : 'Bypass 24/7'">Restringido</span>
                         </td>
@@ -88,7 +92,6 @@
         <p class="mb-2">No hay usuarios registrados</p>
     </div>
 
-    <!-- MODAL USUARIO -->
     <div class="modal fade" id="modalUsuario" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -102,29 +105,29 @@
                     <div class="modal-body">
                         <input type="hidden" name="id" id="userId">
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Nombre <span class="text-danger">*</span></label>
+                            <label class="form-label">Nombre <span class="text-danger">*</span></label>
                             <input class="form-control" name="nombre" id="userNombre" required
                                    placeholder="Nombre completo">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Email <span class="text-danger">*</span></label>
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" class="form-control" name="email" id="userEmail" required
                                    placeholder="usuario@upla.edu.pe">
                         </div>
                         <div class="mb-3" id="divPassword">
-                            <label class="form-label small fw-medium text-muted">Contrase&ntilde;a <span class="text-danger">*</span></label>
+                            <label class="form-label">Contrase&ntilde;a <span class="text-danger">*</span></label>
                             <input type="password" class="form-control" name="password" minlength="4"
                                    placeholder="M&iacute;nimo 4 caracteres">
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label class="form-label small fw-medium text-muted">Rol</label>
+                                <label class="form-label">Rol</label>
                                 <select class="form-select" name="rol" id="userRol">
                                     <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">Admin</option>
                                 </select>
                             </div>
                             <div class="col-6">
-                                <label class="form-label small fw-medium text-muted">Horario laboral</label>
+                                <label class="form-label">Horario laboral</label>
                                 <select class="form-select" name="horarioRestringido" id="userHorario">
                                     <option value="true">Restringido (8am-8pm)</option>
                                     <option value="false">Bypass 24/7</option>
@@ -141,7 +144,6 @@
         </div>
     </div>
 
-    <!-- MODAL PASSWORD -->
     <div class="modal fade" id="modalPassword" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -152,7 +154,7 @@
                     </div>
                     <div class="modal-body">
                         <input type="hidden" id="passUserId" name="userId">
-                        <label class="form-label small fw-medium text-muted">Nueva contrase&ntilde;a</label>
+                        <label class="form-label">Nueva contrase&ntilde;a</label>
                         <input type="password" class="form-control" name="nuevaPassword" required minlength="4"
                                placeholder="M&iacute;nimo 4 caracteres">
                     </div>

@@ -6,42 +6,25 @@
     <title>Rastreo — SISEXP-UPLA</title>
     <link th:href="@{/vendor/bootstrap.min.css}" rel="stylesheet">
     <link th:href="@{/vendor/bootstrap-icons.css}" rel="stylesheet">
+    <link th:href="@{/css/sisexp.css}" rel="stylesheet">
     <style>
-        :root {
-            --color-primary: #0ea5e9;
-            --color-primary-dark: #0284c7;
-            --color-bg-start: #0f172a;
-            --color-bg-end: #1e293b;
-            --color-text: #0f172a;
-            --color-text-muted: #64748b;
-            --color-card-border: #e2e8f0;
-            --shadow-card: 0 20px 60px rgba(0,0,0,.3);
-            --radius-lg: 1rem;
-            --radius-md: 8px;
-        }
-        * { box-sizing: border-box; }
         body {
-            background: linear-gradient(135deg, var(--color-bg-start) 0%, var(--color-bg-end) 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 1rem;
         }
         .rastreo-card {
             background: white;
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-xl);
             padding: 2.5rem;
             width: 100%;
             max-width: 520px;
-            box-shadow: var(--shadow-card);
+            box-shadow: 0 20px 60px rgba(0,0,0,.3);
             animation: fadeUp .5s ease;
-        }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         @media (prefers-reduced-motion: reduce) {
             .rastreo-card { animation: none; }
@@ -69,24 +52,6 @@
         }
         .rastreo-header small {
             color: var(--color-text-muted);
-        }
-        .form-control {
-            border-radius: var(--radius-md);
-            padding: .65rem 1rem;
-            font-size: .9rem;
-            border: 1.5px solid #e2e8f0;
-            transition: border-color .2s, box-shadow .2s;
-        }
-        .form-control:focus {
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(14,165,233,.15);
-        }
-        .form-control:focus-visible {
-            outline: 2px solid var(--color-primary);
-            outline-offset: 1px;
-        }
-        .input-group .form-control {
-            border-radius: var(--radius-md) 0 0 var(--radius-md);
         }
         .input-group .btn {
             border-radius: 0 var(--radius-md) var(--radius-md) 0;
@@ -117,9 +82,7 @@
         }
         .input-group .btn.loading .spinner { display: inline-block; }
         .input-group .btn.loading i { display: none; }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Result card */
         .result-card {
             margin-top: 1.5rem;
             border: 1px solid var(--color-card-border);
@@ -167,39 +130,6 @@
             margin-top: .25rem;
             line-height: 1.4;
         }
-
-        /* Badges */
-        .badge-Borrador   { background: #e2e8f0; color: #475569; }
-        .badge-En_revision { background: #dbeafe; color: #1d4ed8; }
-        .badge-Aprobado   { background: #d1fae5; color: #059669; }
-        .badge-Rechazado  { background: #fee2e2; color: #dc2626; }
-        .badge-Finalizado { background: #e0e7ff; color: #4338ca; }
-        .badge-Observado  { background: #fef3c7; color: #d97706; }
-        .badge-Derivado   { background: #f3e8ff; color: #7c3aed; }
-
-        .badge-Urgente    { background: #fee2e2; color: #dc2626; }
-        .badge-Normal     { background: #dbeafe; color: #1d40af; }
-        .badge-Baja       { background: #e2e8f0; color: #475569; }
-
-        .alert {
-            font-size: .85rem;
-            border-radius: var(--radius-md);
-            padding: .65rem 1rem;
-            border: none;
-            margin-top: 1rem;
-            animation: fadeUp .3s ease;
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .alert, .result-card { animation: none; }
-        }
-        .alert-warning { background: #fffbeb; color: #92400e; }
-
-        .fs-85 { font-size: .85em; }
-        .home-link {
-            display: block;
-            text-align: center;
-            margin-top: 1.5rem;
-        }
         .home-link:hover { color: var(--color-primary-dark) !important; }
     </style>
 </head>
@@ -230,7 +160,7 @@
                     <h6 th:text="${expediente.codigo}">EXP-2026-0001</h6>
                     <small class="text-muted" th:text="${#temporals.format(expediente.createdAt, 'dd/MM/yyyy')}">01/01/2026</small>
                 </div>
-                <span class="badge fs-85"
+                <span class="badge"
                       th:classappend="'badge-' + ${expediente.estado.name()}"
                       th:text="${expediente.estado.name().replace('_',' ')}">Estado</span>
             </div>
@@ -269,32 +199,32 @@
                         <td th:text="'S/ ' + ${#numbers.formatDecimal(expediente.costoEstimado, 1, 2)}">S/ 0.00</td>
                     </tr>
                     <tr th:if="${expediente.fechaLimite != null}">
-                        <td>Fecha limite</td>
+                        <td>Fecha l&iacute;mite</td>
                         <td th:text="${#temporals.format(expediente.fechaLimite, 'dd/MM/yyyy')}">01/01/2026</td>
                     </tr>
                     <tr>
-                        <td>Ultima actualizacion</td>
+                        <td>&Uacute;ltima actualizaci&oacute;n</td>
                         <td th:text="${#temporals.format(expediente.updatedAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
                     </tr>
                 </table>
                 <div th:if="${expediente.descripcion != null}" class="descripcion">
-                    <small class="text-muted">Descripcion:</small>
+                    <small class="text-muted">Descripci&oacute;n:</small>
                     <p class="mb-0" th:text="${expediente.descripcion}"></p>
                 </div>
             </div>
-            <div th:if="${expediente.observacion != null}" class="alert alert-warning py-2 small mb-0 rounded-0 border-0">
-                <i class="bi bi-chat-quote"></i> <strong>Observacion:</strong>
+            <div th:if="${expediente.observacion != null}" class="alert alert-warning py-2 small mb-0 rounded-0 border-0 d-flex align-items-center gap-2">
+                <i class="bi bi-chat-quote"></i> <strong>Observaci&oacute;n:</strong>
                 <span th:text="${expediente.observacion}">Obs</span>
             </div>
         </div>
 
-        <div th:if="${noEncontrado}" class="alert alert-warning" role="alert">
+        <div th:if="${noEncontrado}" class="alert alert-warning d-flex align-items-center gap-2" role="alert">
             <i class="bi bi-exclamation-triangle"></i>
-            No se encontro ningun expediente con el codigo <strong th:text="${codigoBuscado}">XXX</strong>
+            No se encontr&oacute; ning&uacute;n expediente con el c&oacute;digo <strong th:text="${codigoBuscado}">XXX</strong>
         </div>
 
-        <a th:href="@{/login}" class="home-link small text-muted text-decoration-none">
-            <i class="bi bi-box-arrow-in-right"></i> Iniciar sesion — SISEXP-UPLA
+        <a th:href="@{/login}" class="home-link small text-muted text-decoration-none d-block text-center mt-3">
+            <i class="bi bi-box-arrow-in-right"></i> Iniciar sesi&oacute;n — SISEXP-UPLA
         </a>
     </div>
 

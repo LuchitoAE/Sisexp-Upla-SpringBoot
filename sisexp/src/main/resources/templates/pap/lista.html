@@ -20,15 +20,19 @@
     </div>
 
     <th:block th:if="${success}">
-        <div class="alert alert-success alert-auto-close" role="alert" th:text="${success}">OK</div>
+        <div class="alert alert-success alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill"></i> <span th:text="${success}">OK</span>
+        </div>
     </th:block>
     <th:block th:if="${error}">
-        <div class="alert alert-danger alert-auto-close" role="alert" th:text="${error}">Error</div>
+        <div class="alert alert-danger alert-auto-close d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}">Error</span>
+        </div>
     </th:block>
 
     <div class="table-card">
         <div class="card-header">
-            <h5><i class="bi bi-list me-2 text-primary"></i>Listado</h5>
+            <h5><i class="bi bi-list"></i>Listado</h5>
             <form class="d-flex gap-2" th:action="@{/necesidades}" method="get">
                 <select class="form-select form-select-sm" style="min-width:220px" name="actividadId"
                         onchange="this.form.submit()">
@@ -64,7 +68,7 @@
                         <td class="text-end"
                             th:text="'S/ ' + ${#numbers.formatDecimal(n.precioEstimado, 0, 'COMMA', 2, 'POINT')}">0</td>
                         <td>
-                            <span class="badge fs-85"
+                            <span class="badge"
                                   th:classappend="${n.tipo.name() == 'BIEN' or n.tipo.name() == 'Bien'} ? 'bg-primary' : 'bg-info text-dark'"
                                   th:text="${n.tipo}">Bien</span>
                         </td>
@@ -98,7 +102,6 @@
         </div>
     </div>
 
-    <!-- MODAL CREAR/EDITAR -->
     <div class="modal fade" id="modalPAP" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -112,40 +115,40 @@
                     <div class="modal-body">
                         <input type="hidden" name="id" id="papId">
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Nombre <span class="text-danger">*</span></label>
+                            <label class="form-label">Nombre <span class="text-danger">*</span></label>
                             <input class="form-control" name="nombre" id="papNombre" required
                                    placeholder="Nombre del item">
                         </div>
                         <div class="row mb-3">
                             <div class="col-4">
-                                <label class="form-label small fw-medium text-muted">Cantidad <span class="text-danger">*</span></label>
+                                <label class="form-label">Cantidad <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" name="cantidad" id="papCantidad" required min="1">
                             </div>
                             <div class="col-4">
-                                <label class="form-label small fw-medium text-muted">Precio Unit. (S/) <span class="text-danger">*</span></label>
+                                <label class="form-label">Precio Unit. (S/) <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" name="precioEstimado" id="papPrecio"
                                        required min="0" step="0.01" placeholder="0.00">
                             </div>
                             <div class="col-4">
-                                <label class="form-label small fw-medium text-muted">Unidad</label>
+                                <label class="form-label">Unidad</label>
                                 <input class="form-control" name="unidad" id="papUnidad" placeholder="Ej: unidad, kg, lote">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label class="form-label small fw-medium text-muted">Tipo</label>
+                                <label class="form-label">Tipo</label>
                                 <select class="form-select" name="tipo" id="papTipo">
                                     <option th:each="t : ${naturalezas}" th:value="${t}" th:text="${t}">Bien</option>
                                 </select>
                             </div>
                             <div class="col-6">
-                                <label class="form-label small fw-medium text-muted">Clasificador de gasto</label>
+                                <label class="form-label">Clasificador de gasto</label>
                                 <input class="form-control" name="clasificadorGasto" id="papClasificador"
                                        placeholder="Ej: 2.3.1.1.1">
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium text-muted">Actividad POI <span class="text-danger">*</span></label>
+                            <label class="form-label">Actividad POI <span class="text-danger">*</span></label>
                             <select class="form-select" name="actividadPoiId" required>
                                 <option value="">Seleccionar actividad...</option>
                                 <option th:each="a : ${actividades}" th:value="${a.id}"
