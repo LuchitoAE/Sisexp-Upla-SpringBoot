@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor V as Visitante
+    participant S as Sistema
+
+    V->>S: GET /rastreo
+    activate S
+    S-->>V: 200 Vista formulario de busqueda
+    deactivate S
+
+    V->>S: GET /rastreo?codigo=EXP-2026-0001
+    activate S
+    S-->>S: Validar formato EXP-YYYY-NNNN
+    alt Formato invalido
+        S-->>V: 400 Vista con error de formato
+    else Formato valido
+        S-->>S: Buscar expediente por codigo
+        alt Expediente encontrado
+            S-->>S: Ocultar datos sensibles (montos, solicitante)
+            S-->>V: 200 Vista resultado (codigo, estado, actividad, item, urgencia, fecha)
+        else No encontrado
+            S-->>V: 404 Vista "No se encontro expediente"
+        end
+    end
+    deactivate S

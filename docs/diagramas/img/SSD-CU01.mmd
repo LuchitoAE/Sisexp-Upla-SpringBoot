@@ -1,0 +1,30 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: POST /login {email, password}
+    activate S
+    S-->>S: Buscar usuario por email
+    S-->>S: Verificar cuenta activa
+    alt Cuenta inactiva
+        S-->>U: Redirect /login?error
+    else Cuenta activa
+        S-->>S: Verificar bloqueo por intentos
+        alt Cuenta bloqueada
+            S-->>U: Redirect /login?error
+        else No bloqueada
+            S-->>S: Validar password (BCrypt)
+            alt Password invalido
+                S-->>S: Incrementar intentosFallidos
+                opt Intentos >= 5
+                    S-->>S: Bloquear cuenta 30 min
+                end
+                S-->>U: Redirect /login?error
+            else Password valido
+                S-->>S: Resetear intentosFallidos a 0
+                S-->>S: Crear sesion HTTP + RememberMe
+                S-->>U: Redirect /dashboard (302)
+            end
+        end
+    end
+    deactivate S

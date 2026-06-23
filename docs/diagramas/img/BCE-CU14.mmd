@@ -1,0 +1,19 @@
+classDiagram
+    class HeaderView <<Boundary>> {
+        +mostrarOpcionSalir()
+        +mostrarNombreUsuario()
+    }
+    class AuthController <<Control>> {
+        +logout()
+        +onLogoutSuccess()
+    }
+    class HttpSession <<Entity>> {
+        +invalidar()
+    }
+    class Cookie <<Entity>> {
+        +eliminar()
+    }
+
+    HeaderView ..> AuthController : click(logout)
+    AuthController ..> HttpSession : invalidate()
+    AuthController ..> Cookie : delete()

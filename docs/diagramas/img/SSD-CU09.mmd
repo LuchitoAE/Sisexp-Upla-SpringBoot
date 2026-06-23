@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    Note over U,S: --- CREAR NOTA ---
+    U->>S: POST /api/notas-modificatorias {tipo, actividadExistenteId, justificacion, costoEstimado}
+    activate S
+    S-->>S: Validar datos obligatorios
+    S-->>S: Generar codigo NM-YYYY-NNNN
+    S-->>S: Crear NotaModificatoria (estado: pendiente)
+    S-->>U: 201 Created
+    deactivate S
+
+    Note over U,S: --- CONFIGURAR (ADMIN/COORD) ---
+    U->>S: PUT /api/notas-modificatorias/{id}/configurar {actividadOrigenId, montoTransferir}
+    activate S
+    S-->>S: Validar nota en estado pendiente
+    S-->>S: Validar saldo disponible en origen >= montoTransferir
+    alt Saldo suficiente
+        S-->>S: Transferir saldo (origen: -monto, destino: +monto)
+        S-->>S: Cambiar estado a "configurada"
+        S-->>U: 200 OK
+    else Saldo insuficiente
+        S-->>U: 400 {error: "saldo insuficiente"}
+    end
+    deactivate S

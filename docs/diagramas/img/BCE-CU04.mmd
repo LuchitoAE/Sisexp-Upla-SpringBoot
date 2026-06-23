@@ -1,0 +1,43 @@
+classDiagram
+    class ExpedienteDetalle <<Boundary>> {
+        +mostrarEstado()
+        +mostrarOpcionesTransicion()
+        +capturarComentario()
+        +mostrarConfirmacion()
+        +mostrarError()
+    }
+    class ExpedienteController <<Control>> {
+        +mostrarDetalle(id)
+        +cambiarEstado(id, estado, comentario)
+    }
+    class ExpedienteService <<Control>> {
+        +cambiarEstado()
+        +ejecutarTransicion()
+        +crearLogSeguimiento()
+        +notificarCambioEstado()
+    }
+    class BusinessValidationsService <<Control>> {
+        +validarTransicionEstado()
+        +validarInmutabilidad()
+        +validarDocumentoObligatorio()
+    }
+    class BusinessRulesService <<Control>> {
+        +ejecutarSaldo()
+        +liberarSaldo()
+        +reservarSaldo()
+    }
+    class Expediente <<Entity>>
+    class ActividadPOI <<Entity>>
+    class NecesidadPAP <<Entity>>
+    class SeguimientoLog <<Entity>>
+    class Notificacion <<Entity>>
+
+    ExpedienteDetalle ..> ExpedienteController : changeState(id, nuevoEstado, comentario)
+    ExpedienteController ..> ExpedienteService : change()
+    ExpedienteService ..> BusinessValidationsService : validar()
+    ExpedienteService ..> BusinessRulesService : applyBudgetRules()
+    ExpedienteService ..> Expediente : updateEstado()
+    ExpedienteService ..> ActividadPOI : updateSaldos()
+    ExpedienteService ..> NecesidadPAP : updateCantidades()
+    ExpedienteService ..> SeguimientoLog : save()
+    ExpedienteService ..> Notificacion : create()

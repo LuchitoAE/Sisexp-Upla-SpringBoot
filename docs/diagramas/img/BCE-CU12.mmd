@@ -1,0 +1,24 @@
+classDiagram
+    class NotificacionView <<Boundary>> {
+        +mostrarLista()
+        +mostrarContador()
+        +marcarLeida(id)
+    }
+    class NotificacionController <<Control>> {
+        +listar()
+        +contarNoLeidas()
+        +marcarLeida(id)
+        +marcarTodas()
+    }
+    class NotificacionService <<Control>> {
+        +listarPorUsuario()
+        +contarNoLeidas()
+        +marcarLeida()
+        +marcarTodasLeidas()
+    }
+    class Notificacion <<Entity>>
+    class Usuario <<Entity>>
+
+    NotificacionView ..> NotificacionController : request
+    NotificacionController ..> NotificacionService : process
+    NotificacionService ..> Notificacion : update

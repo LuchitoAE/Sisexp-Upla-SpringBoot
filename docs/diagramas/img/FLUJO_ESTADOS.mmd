@@ -1,0 +1,16 @@
+flowchart TD
+    B["Borrador"] -->|"Enviar a revision"| ER["En_revision"]
+    ER -->|"Aprobar"| A["Aprobado"]
+    ER -->|"Rechazar"| R["Rechazado"]
+    ER -->|"Observar"| O["Observado"]
+    O -->|"Reenviar"| ER
+    A -->|"Finalizar"| F["Finalizado"]
+    A -->|"Derivar"| D["Derivado"]
+    D -->|"Finalizar"| F
+    style B fill:#f1f5f9,stroke:#475569,color:#475569
+    style ER fill:#fef3c7,stroke:#92400e,color:#92400e
+    style A fill:#dcfce7,stroke:#166534,color:#166534
+    style R fill:#fee2e2,stroke:#b91c1c,color:#b91c1c
+    style O fill:#fff7ed,stroke:#c2410c,color:#c2410c
+    style F fill:#f3e8ff,stroke:#6b21a8,color:#6b21a8
+    style D fill:#e0f2fe,stroke:#0369a1,color:#0369a1

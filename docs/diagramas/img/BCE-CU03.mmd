@@ -1,0 +1,41 @@
+classDiagram
+    class ExpedienteForm <<Boundary>> {
+        +mostrarFormulario()
+        +capturarDatos()
+        +mostrarConfirmacion()
+        +mostrarErrorValidacion()
+        +mostrarDisponibilidad()
+    }
+    class ExpedienteController <<Control>> {
+        +mostrarFormularioCrear()
+        +crear(ExpedienteFormDTO)
+        +obtenerDisponibilidad()
+    }
+    class ExpedienteService <<Control>> {
+        +crearExpediente()
+        +generarNumeroExpediente()
+        +reservarSaldo()
+        +validarCreacion()
+    }
+    class BusinessValidationsService <<Control>> {
+        +validarSaldoDisponible()
+        +validarActividadActiva()
+        +validarPeriodoFiscal()
+        +validarLimiteMontoPorRol()
+        +validarTopeExpediente()
+    }
+    class BusinessRulesService <<Control>> {
+        +validarFechaLimite()
+        +validarSaldoDisponible()
+    }
+    class Expediente <<Entity>>
+    class NecesidadPAP <<Entity>>
+    class ActividadPOI <<Entity>>
+    class SeguimientoLog <<Entity>>
+
+    ExpedienteForm ..> ExpedienteController : submit(expedienteDTO)
+    ExpedienteController ..> ExpedienteService : create()
+    ExpedienteService ..> BusinessValidationsService : validateAll()
+    ExpedienteService ..> BusinessRulesService : validar()
+    ExpedienteService ..> Expediente : save()
+    ExpedienteService ..> SeguimientoLog : createLog()

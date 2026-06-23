@@ -1,0 +1,22 @@
+classDiagram
+    class RastreoView <<Boundary>> {
+        +mostrarFormulario()
+        +capturarCodigo()
+        +mostrarResultado()
+        +mostrarTimeline()
+        +mostrarError()
+    }
+    class RastreoController <<Control>> {
+        +rastrear(codigo)
+    }
+    class ExpedienteService <<Control>> {
+        +buscarPorCodigo()
+        +obtenerHistorial()
+    }
+    class Expediente <<Entity>>
+    class SeguimientoLog <<Entity>>
+
+    RastreoView ..> RastreoController : search(codigo)
+    RastreoController ..> ExpedienteService : findByCode()
+    ExpedienteService ..> Expediente : query()
+    ExpedienteService ..> SeguimientoLog : history()

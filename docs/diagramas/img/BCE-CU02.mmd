@@ -1,0 +1,29 @@
+classDiagram
+    class DashboardView <<Boundary>> {
+        +mostrarKPIs()
+        +mostrarSaldos()
+        +mostrarAlertas()
+        +mostrarNotificaciones()
+    }
+    class DashboardController <<Control>> {
+        +verDashboard()
+        +obtenerKPIs()
+        +obtenerSaldos()
+        +obtenerAlertas()
+    }
+    class DashboardService <<Control>> {
+        +calcularKPIs()
+        +calcularSaldos()
+        +calcularAlertas()
+    }
+    class Expediente <<Entity>>
+    class ActividadPOI <<Entity>>
+    class TechoPresupuestal <<Entity>>
+    class Notificacion <<Entity>>
+
+    DashboardView ..> DashboardController : request
+    DashboardController ..> DashboardService : query
+    DashboardService ..> Expediente : countByEstado
+    DashboardService ..> ActividadPOI : sumSaldos
+    DashboardService ..> TechoPresupuestal : findActivos
+    DashboardService ..> Notificacion : countNoLeidas

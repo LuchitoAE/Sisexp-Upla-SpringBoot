@@ -1,10 +1,26 @@
-# AGENTS.md — SISEXP-UPLA (Spring Boot)
+# AGENTS.md — SISEXP-UPLA (Spring Boot) — vFinal
 
 ## PROYECTO ACTUAL: SISEXP-UPLA
 
 **Sistema de Seguimiento y Control de Expedientes — Universidad Peruana Los Andes**
 
-Migración de Express/React a Spring Boot + HTML/JS vanilla.
+Migración completa de Express/React a Spring Boot + Thymeleaf + Bootstrap. Proyecto final del curso Arquitectura de Software (VIII Ciclo).
+
+### Curso: 16 semanas completadas
+| Semana | Tema | Estado |
+|--------|------|--------|
+| 1 | Fundamentos de AS | ✅ |
+| 2 | Estándares Internacionales | ✅ |
+| 3 | Principios de Diseño y Patrones | ✅ |
+| 4 | Evaluación Arquitectónica | ✅ |
+| 5 | Creación de AS mediante POO | ✅ |
+| 6 | Ingeniería de Requerimientos | ✅ |
+| 7 | Modelado del Sistema (UML) | ✅ |
+| 8 | Semana integradora | ✅ |
+| 9 | Patrones Arquitectónicos (16 patrones) | ✅ |
+| 10 | Sistemas Distribuidos + Protocolos | ✅ |
+| 11 | Contratos de Integración (OpenAPI, GraphQL, Resilience4j) | ✅ |
+| 12-16 | SISEXP-UPLA Spring Boot: Implementación, Validación, Frameworks, Normas, Evaluación | ✅ |
 
 | Dato | Valor |
 |---|---|
@@ -13,13 +29,12 @@ Migración de Express/React a Spring Boot + HTML/JS vanilla.
 | Roles | 6 (Administrador, Coordinacion, Secretaria, Director, Laboratorio, Decanato) |
 | Estados expediente | 7 (Borrador, En revision, Aprobado, Rechazado, Finalizado, Observado, Derivado) |
 | Frontend | **Thymeleaf** (MVC server-side, templates + fragments) + Bootstrap 5.3 |
-| Auth | Spring Security form login + Remember Me 30 días (equivalente al JWT 30d) |
+| Auth | Spring Security form login + Remember Me 30 días |
 | Horario laboral | 8am-8pm Perú, bypass para Admin |
-| Documentación | `docs/referencia/DOMINIO_SISEXP.md` — dominio completo extraído del código original |
-| Docs originales | `docs/referencia/doc/` — ERS, SDD, trazabilidad, inconsistencias |
-| Plan detallado | `PLAN.md` — fases, tareas y orden de implementación |
-
-**Stack objetivo:** Spring Boot 3.4.1 + Java 17 + Spring Security + Thymeleaf + Spring Data JPA + PostgreSQL + Bootstrap 5.3
+| Documentación | `docs/referencia/DOMINIO_SISEXP.md` |
+| Docs originales | `docs/referencia/doc/` — ERS, SDD, trazabilidad |
+| Plan detallado | `PLAN.md` |
+| **Stack** | Spring Boot 3.4.1 + Java 17 + Spring Security + Thymeleaf + Spring Data JPA + PostgreSQL + Bootstrap 5.3 |
 
 ---
 
@@ -101,6 +116,8 @@ Es la memoria del proyecto. Se actualiza en cada fase completada. Al iniciar una
 - **ERS completo** en `docs/diagramas/ERS/` (14 RF, 8 RNF, 14 CU, ISO 29148)
 - **14 BCE** generados (CU01-CU14) en `docs/diagramas/BCE/`
 - **Documento consolidado**: `docs/SISEXP_DIAGRAMAS_COMPLETO.md` (163KB) + `.docx` (73KB)
+- **32 diagramas Mermaid fuente** (.mmd) en `docs/diagramas/img/`: 14 BCE + 14 SSD + actores + arquitectura + dominio + flujo_estados
+- **Curso Arquitectura de Software completo**: 16 semanas finalizadas, resúmenes e infografías en la carpeta madre `arquitectura de software/semana X/`
 
 ## Critical Context
 

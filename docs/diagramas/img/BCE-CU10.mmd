@@ -1,0 +1,30 @@
+classDiagram
+    class ReporteView <<Boundary>> {
+        +mostrarFiltros()
+        +mostrarTabla()
+        +mostrarGrafico()
+        +exportarExcel()
+    }
+    class ReporteController <<Control>> {
+        +reporteAnual(anio)
+        +reporteExpedientes(estado, fechas)
+        +reportePOI(actividadId)
+        +reportePAP(actividadId)
+    }
+    class ReporteService <<Control>> {
+        +generarReporteAnual()
+        +generarReporteExpedientes()
+        +generarReportePOI()
+        +calcularPorcentajesEjecucion()
+    }
+    class Expediente <<Entity>>
+    class ActividadPOI <<Entity>>
+    class NecesidadPAP <<Entity>>
+    class TechoPresupuestal <<Entity>>
+
+    ReporteView ..> ReporteController : request(filtros)
+    ReporteController ..> ReporteService : generate()
+    ReporteService ..> Expediente : query()
+    ReporteService ..> ActividadPOI : query()
+    ReporteService ..> NecesidadPAP : query()
+    ReporteService ..> TechoPresupuestal : query()

@@ -1,0 +1,17 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: POST /api/necesidades-pap {actividadPoiId, nombre, cantidad, precioEstimado, unidad, tipo}
+    activate S
+    S-->>S: Validar actividad activa y no cerrada
+    S-->>S: Validar cantidad >= 1 y precioEstimado > 0
+    S-->>S: Calcular costoTotal = cantidad x precioEstimado
+    S-->>S: Validar costoTotal <= disponible de actividad
+    alt Validaciones exitosas
+        S-->>S: Crear NecesidadPAP (cantDisp=cantidad)
+        S-->>U: 201 Created
+    else Costo excede disponible
+        S-->>U: 400 {error: "costo excede presupuesto disponible"}
+    end
+    deactivate S

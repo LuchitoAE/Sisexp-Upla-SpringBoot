@@ -1,0 +1,36 @@
+classDiagram
+    class NotaForm <<Boundary>> {
+        +mostrarFormulario()
+        +capturarDatos()
+        +seleccionarActividades()
+        +mostrarError()
+    }
+    class NotaModificatoriaController <<Control>> {
+        +listar()
+        +crear()
+        +configurar(id)
+        +rechazar(id)
+    }
+    class NotaModificatoriaService <<Control>> {
+        +listar()
+        +crear()
+        +configurar()
+        +rechazar()
+    }
+    class BusinessRulesService <<Control>> {
+        +transferirSaldo()
+        +validarFechaLimite()
+    }
+    class BusinessValidationsService <<Control>> {
+        +validarSaldoDisponible()
+        +validarActividadActiva()
+    }
+    class NotaModificatoria <<Entity>>
+    class ActividadPOI <<Entity>>
+
+    NotaForm ..> NotaModificatoriaController : submit
+    NotaModificatoriaController ..> NotaModificatoriaService : process
+    NotaModificatoriaService ..> BusinessRulesService : applyTransfer
+    NotaModificatoriaService ..> BusinessValidationsService : validate
+    NotaModificatoriaService ..> NotaModificatoria : save
+    NotaModificatoriaService ..> ActividadPOI : update

@@ -1,0 +1,30 @@
+classDiagram
+    class NecesidadForm <<Boundary>> {
+        +mostrarFormulario()
+        +capturarDatos()
+        +seleccionarActividad()
+        +mostrarError()
+    }
+    class NecesidadPAPController <<Control>> {
+        +listar()
+        +crear()
+        +editar(id)
+        +eliminar(id)
+    }
+    class NecesidadPAPService <<Control>> {
+        +listar()
+        +crear()
+        +editar()
+        +eliminar()
+    }
+    class BusinessValidationsService <<Control>> {
+        +validarActividadActiva()
+        +validarPeriodoFiscal()
+    }
+    class NecesidadPAP <<Entity>>
+    class ActividadPOI <<Entity>>
+
+    NecesidadForm ..> NecesidadPAPController : submit
+    NecesidadPAPController ..> NecesidadPAPService : process
+    NecesidadPAPService ..> BusinessValidationsService : validate
+    NecesidadPAPService ..> NecesidadPAP : save

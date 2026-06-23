@@ -1,0 +1,23 @@
+sequenceDiagram
+    actor A as Administrador
+    participant S as Sistema
+
+    A->>S: GET /api/usuarios
+    activate S
+    S-->>S: Verificar rol Administrador
+    S-->>S: Consultar todos los usuarios (sin passwords)
+    S-->>A: 200 Vista listado usuarios
+    deactivate S
+
+    A->>S: POST /api/usuarios {nombre, email, password, rol, horarioRestringido}
+    activate S
+    S-->>S: Validar email unico
+    S-->>S: Validar password >= 6 caracteres
+    S-->>S: Hashear password (BCrypt)
+    alt Validaciones exitosas
+        S-->>S: Crear Usuario (activo=true)
+        S-->>A: 201 Created
+    else Email duplicado
+        S-->>A: 400 {error: "email ya existe"}
+    end
+    deactivate S

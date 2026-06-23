@@ -1,0 +1,41 @@
+flowchart TD
+    subgraph Frontend["Frontend - React 19 SPA"]
+        Pages["8 paginas: Dashboard, Expedientes, POI, PAP, Techos, Reportes, Notas, Usuarios"]
+        Client["client.js: HTTP cache 30s, JWT, error handling"]
+        Auth["AuthContext: login/logout/remember-me"]
+    end
+
+    subgraph Backend["Backend - Spring Boot 3.4.1"]
+        subgraph Security["Spring Security"]
+            FormLogin["Form Login + Remember Me 30d"]
+            JWT["JWT para APIs externas"]
+            Filter["HorarioLaboralFilter 8am-8pm"]
+            RBAC["RBAC: 6 roles con @PreAuthorize"]
+        end
+        subgraph API["REST Controllers /api/**"]
+            ExpCtrl["ApiExpedienteController"]
+            POICtrl["ApiActividadPOIController"]
+            PAPCtrl["ApiNecesidadPAPController"]
+            TechoCtrl["ApiTechoPresupuestalController"]
+            ReportCtrl["ApiReporteController"]
+        end
+        subgraph Services["Services @Transactional"]
+            ExpSvc["ExpedienteService"]
+            Rules["BusinessRulesService"]
+            Valid["BusinessValidationsService"]
+        end
+        subgraph Data["Spring Data JPA"]
+            Repos["10 repositorios"]
+            Entities["11 entidades JPA"]
+        end
+    end
+
+    subgraph DB["PostgreSQL - Railway"]
+        Tables["techos, actividades_poi, necesidades_pap, expedientes, documentos, logs, notificaciones"]
+    end
+
+    Frontend -->|"fetch /api/** cookies"| Security
+    Security --> API
+    API --> Services
+    Services --> Data
+    Data --> DB

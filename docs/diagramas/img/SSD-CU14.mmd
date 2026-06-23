@@ -1,0 +1,12 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: POST /logout
+    activate S
+    S-->>S: Invalidar sesion HTTP
+    S-->>S: Limpiar SecurityContextHolder
+    S-->>S: Eliminar cookie JSESSIONID
+    S-->>S: Eliminar cookie remember-me
+    S-->>U: Redirect /login?logout (302)
+    deactivate S

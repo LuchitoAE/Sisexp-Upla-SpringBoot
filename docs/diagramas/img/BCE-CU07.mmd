@@ -1,0 +1,30 @@
+classDiagram
+    class ActividadForm <<Boundary>> {
+        +mostrarFormulario()
+        +capturarDatos()
+        +seleccionarTecho()
+        +mostrarError()
+    }
+    class ActividadPOIController <<Control>> {
+        +listar()
+        +crear()
+        +editar(id)
+        +eliminar(id)
+    }
+    class ActividadPOIService <<Control>> {
+        +listar()
+        +crear()
+        +editar()
+        +eliminar()
+    }
+    class BusinessValidationsService <<Control>> {
+        +validarTechoCerrado()
+        +validarPeriodoFiscal()
+    }
+    class ActividadPOI <<Entity>>
+    class TechoPresupuestal <<Entity>>
+
+    ActividadForm ..> ActividadPOIController : submit
+    ActividadPOIController ..> ActividadPOIService : process
+    ActividadPOIService ..> BusinessValidationsService : validate
+    ActividadPOIService ..> ActividadPOI : save

@@ -1,0 +1,33 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: GET /expedientes/nuevo
+    activate S
+    S-->>S: Consultar actividades POI activas
+    S-->>U: 200 Vista formulario + actividades
+    deactivate S
+
+    U->>S: GET /api/necesidades-pap/actividad/{id}
+    activate S
+    S-->>S: Consultar necesidades PAP vinculadas
+    S-->>U: 200 [{necesidadPAP}]
+    deactivate S
+
+    U->>S: POST /api/expedientes {actividadPoiId, necesidadPapId, cantidad, urgencia, descripcion}
+    activate S
+    S-->>S: Validar actividad activa y fecha limite no vencida
+    S-->>S: Validar techo del año abierto
+    S-->>S: Calcular costoEstimado = cantidad x precioUnitario
+    S-->>S: Validar saldo disponible en POI
+    S-->>S: Validar limite de monto por rol
+    S-->>S: Validar tope 80% del saldo disponible
+    S-->>S: Generar codigo EXP-YYYY-NNNN
+    alt Validaciones exitosas
+        S-->>S: Crear expediente (estado: Borrador)
+        S-->>S: Crear log de seguimiento inicial
+        S-->>U: 201 Created
+    else Error de validacion
+        S-->>U: 400 {error: "mensaje"}
+    end
+    deactivate S

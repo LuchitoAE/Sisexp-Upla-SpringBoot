@@ -1,0 +1,22 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: GET /api/notificaciones
+    activate S
+    S-->>S: Consultar notificaciones del usuario (ORDER BY createdAt DESC)
+    S-->>U: 200 Vista notificaciones
+    deactivate S
+
+    U->>S: PUT /api/notificaciones/{id}/leer
+    activate S
+    S-->>S: Actualizar leida = true
+    S-->>U: 200 OK
+    deactivate S
+
+    Note over U,S: Consulta automatica cada 60s
+    U->>S: GET /api/notificaciones/count
+    activate S
+    S-->>S: Contar notificaciones no leidas
+    S-->>U: 200 {count: N}
+    deactivate S

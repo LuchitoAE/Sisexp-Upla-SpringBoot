@@ -1,0 +1,33 @@
+classDiagram
+    class LoginForm <<Boundary>> {
+        +mostrarFormulario()
+        +capturarCredenciales()
+        +mostrarError()
+    }
+    class AuthController <<Control>> {
+        +mostrarLogin()
+        +login(email, password)
+        +onAuthenticationSuccess()
+        +onAuthenticationFailure()
+    }
+    class AuthService <<Control>> {
+        +autenticar(email, password)
+        +verificarIntentoFallido(usuario)
+        +registrarIntentoFallido(usuario)
+        +resetearIntentos(usuario)
+    }
+    class CustomUserDetailsService <<Control>> {
+        +loadUserByUsername(email)
+    }
+    class Usuario <<Entity>> {
+        +email
+        +password
+        +activo
+        +intentosFallidos
+        +bloqueadoHasta
+    }
+
+    LoginForm ..> AuthController : submit(email, password)
+    AuthController ..> AuthService : autenticar()
+    AuthService ..> CustomUserDetailsService : loadUserByUsername()
+    AuthService ..> Usuario : validate()

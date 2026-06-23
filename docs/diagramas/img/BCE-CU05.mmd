@@ -1,0 +1,25 @@
+classDiagram
+    class DocumentoForm <<Boundary>> {
+        +mostrarSubida()
+        +capturarArchivo()
+        +mostrarProgreso()
+        +mostrarExito()
+        +mostrarError()
+    }
+    class ExpedienteController <<Control>> {
+        +adjuntarDocumento(id, archivo, tipo)
+        +eliminarDocumento(docId)
+        +descargarDocumento(docId)
+    }
+    class ExpedienteService <<Control>> {
+        +adjuntarDocumento()
+        +validarEstadoEditable()
+        +guardarArchivo()
+    }
+    class DocumentoAdjunto <<Entity>>
+    class SeguimientoLog <<Entity>>
+
+    DocumentoForm ..> ExpedienteController : upload(expedienteId, file, tipo)
+    ExpedienteController ..> ExpedienteService : attach()
+    ExpedienteService ..> DocumentoAdjunto : save()
+    ExpedienteService ..> SeguimientoLog : log()

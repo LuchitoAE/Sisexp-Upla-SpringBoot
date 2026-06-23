@@ -1,0 +1,16 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: POST /api/actividades-poi/techo/{techoId} {codigo, nombre, presupuestoAsignado, fechaLimite}
+    activate S
+    S-->>S: Validar techo activo y no planificado
+    S-->>S: Validar codigo unico en el techo
+    S-->>S: Validar presupuesto <= disponible del techo
+    alt Validaciones exitosas
+        S-->>S: Crear ActividadPOI (estado: Pendiente)
+        S-->>U: 200 OK
+    else Presupuesto excede disponible
+        S-->>U: 400 {error: "presupuesto excede disponible del techo"}
+    end
+    deactivate S

@@ -1,0 +1,26 @@
+classDiagram
+    class UsuarioForm <<Boundary>> {
+        +mostrarFormulario()
+        +capturarDatos()
+        +seleccionarRol()
+        +mostrarError()
+    }
+    class UsuarioController <<Control>> {
+        +listar()
+        +crear()
+        +editar(id)
+        +toggleActivo(id)
+    }
+    class UsuarioService <<Control>> {
+        +listar()
+        +crear()
+        +editar()
+        +toggleActivo()
+        +cambiarPassword()
+    }
+    class Usuario <<Entity>>
+    class Rol <<Entity>>
+
+    UsuarioForm ..> UsuarioController : submit
+    UsuarioController ..> UsuarioService : process
+    UsuarioService ..> Usuario : save

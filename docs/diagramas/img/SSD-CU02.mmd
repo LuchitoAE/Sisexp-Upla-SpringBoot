@@ -1,0 +1,13 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: GET /dashboard
+    activate S
+    S-->>S: Verificar autenticacion
+    S-->>S: Consultar expedientes agrupados por estado
+    S-->>S: Consultar saldos POI
+    S-->>S: Consultar alertas (vencidos + proximos 7 dias)
+    S-->>S: Consultar notificaciones no leidas
+    S-->>U: 200 Vista dashboard (KPIs + barras + alertas)
+    deactivate S

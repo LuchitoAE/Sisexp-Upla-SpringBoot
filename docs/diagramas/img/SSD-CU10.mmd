@@ -1,0 +1,21 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: GET /api/reportes?tab=expedientes
+    activate S
+    S-->>S: Verificar permisos (Admin, Coord, Director, Decanato)
+    S-->>S: Consultar expedientes por estado (KPIs)
+    S-->>S: Consultar tabla detallada de expedientes
+    S-->>S: Consultar actividades POI con % ejecucion
+    S-->>S: Consultar necesidades PAP (disponible/ejecutado)
+    S-->>U: 200 Vista reportes (4 tabs)
+    deactivate S
+
+    opt Exportar CSV
+        U->>S: GET /api/reportes/exportar?tab=expedientes
+        activate S
+        S-->>S: Generar archivo CSV
+        S-->>U: 200 CSV download
+        deactivate S
+    end

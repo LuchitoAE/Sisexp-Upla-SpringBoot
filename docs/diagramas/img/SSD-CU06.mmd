@@ -1,0 +1,21 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: GET /techos
+    activate S
+    S-->>S: Consultar todos los techos (ORDER BY año DESC)
+    S-->>U: 200 Vista listado de techos
+    deactivate S
+
+    U->>S: POST /api/techos-presupuestales {año, montoTotal}
+    activate S
+    S-->>S: Validar año unico en BD
+    S-->>S: Validar montoTotal > 0
+    alt Validaciones exitosas
+        S-->>S: Crear TechoPresupuestal (activo=true)
+        S-->>U: 201 Created
+    else Año duplicado
+        S-->>U: 400 {error: "año ya existe"}
+    end
+    deactivate S

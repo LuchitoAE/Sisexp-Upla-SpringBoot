@@ -1,0 +1,29 @@
+classDiagram
+    class TechoForm <<Boundary>> {
+        +mostrarFormulario()
+        +capturarDatos()
+        +mostrarLista()
+        +mostrarError()
+    }
+    class TechoPresupuestalController <<Control>> {
+        +listar()
+        +crear()
+        +editar(id)
+        +toggleActivo(id)
+    }
+    class TechoPresupuestalService <<Control>> {
+        +listar()
+        +crear()
+        +editar()
+        +toggleActivo()
+    }
+    class BusinessValidationsService <<Control>> {
+        +validarTechoCerrado()
+    }
+    class TechoPresupuestal <<Entity>>
+    class Usuario <<Entity>>
+
+    TechoForm ..> TechoPresupuestalController : submit
+    TechoPresupuestalController ..> TechoPresupuestalService : process
+    TechoPresupuestalService ..> BusinessValidationsService : validate
+    TechoPresupuestalService ..> TechoPresupuestal : save

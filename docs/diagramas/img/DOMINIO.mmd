@@ -1,0 +1,94 @@
+classDiagram
+    class Usuario {
+        +Long id
+        +String nombre
+        +String email
+        +String password
+        +RolUsuario rol
+        +Boolean activo
+        +Boolean horarioRestringido
+        +Integer intentosFallidos
+    }
+    class TechoPresupuestal {
+        +Long id
+        +Integer año
+        +BigDecimal montoTotal
+        +BigDecimal montoUtilizado
+        +Boolean activo
+        +Boolean planificado
+    }
+    class ActividadPOI {
+        +Long id
+        +String codigo
+        +String nombre
+        +BigDecimal presupuestoAsignado
+        +BigDecimal saldoComprometido
+        +BigDecimal saldoEjecutado
+        +LocalDate fechaLimite
+        +EstadoActividad estado
+        +Boolean planificado
+    }
+    class NecesidadPAP {
+        +Long id
+        +String nombre
+        +Integer cantidad
+        +BigDecimal precioEstimado
+        +String unidad
+        +String oficinaLaboratorio
+        +Naturaleza tipo
+        +String clasificadorGasto
+        +Integer cantidadDisponible
+        +BigDecimal montoDisponible
+        +Integer cantidadEjecutada
+        +BigDecimal montoEjecutado
+    }
+    class Expediente {
+        +Long id
+        +String codigo
+        +EstadoExpediente estado
+        +Urgencia urgencia
+        +Naturaleza naturaleza
+        +String descripcion
+        +String observacion
+        +Integer cantidadSolicitada
+        +BigDecimal costoEstimado
+    }
+    class DocumentoAdjunto {
+        +Long id
+        +TipoDocumento tipo
+        +String nombreOriginal
+        +String nombreArchivo
+        +Integer tamaño
+    }
+    class SeguimientoLog {
+        +Long id
+        +String estadoAnterior
+        +String estadoNuevo
+        +String observacion
+    }
+    class NotaModificatoria {
+        +Long id
+        +String codigo
+        +TipoNota tipo
+        +BigDecimal montoTransferir
+        +String justificacion
+        +EstadoNota estado
+    }
+    class Notificacion {
+        +Long id
+        +String mensaje
+        +TipoNotificacion tipo
+        +Boolean leida
+    }
+
+    Usuario "1" -- "*" Expediente : solicitante
+    Usuario "1" -- "*" SeguimientoLog : usuario
+    Usuario "1" -- "*" Notificacion : destinatario
+    Usuario "1" -- "*" TechoPresupuestal : creadoPor
+    TechoPresupuestal "1" -- "*" ActividadPOI : contiene
+    ActividadPOI "1" -- "*" NecesidadPAP : contiene
+    ActividadPOI "1" -- "*" Expediente : actividadPOI
+    NecesidadPAP "1" -- "*" Expediente : necesidadPAP
+    Expediente "1" -- "*" DocumentoAdjunto : documentos
+    Expediente "1" -- "*" SeguimientoLog : logs
+    Expediente "1" -- "*" Notificacion : expediente

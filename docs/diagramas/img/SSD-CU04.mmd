@@ -1,0 +1,33 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: PUT /api/expedientes/{id}/estado {nuevoEstado, observacion}
+    activate S
+    S-->>S: Validar transicion permitida
+    alt Transicion valida
+        S-->>S: Ejecutar reglas de negocio segun transicion
+        alt Borrador a En_revision
+            S-->>S: reservarSaldo(POI)
+            S-->>S: reservarSaldoPAP(PAP)
+        else En_revision a Aprobado
+            S-->>S: ejecutarSaldo(POI)
+            S-->>S: ejecutarSaldoPAP(PAP)
+        else En_revision a Rechazado
+            S-->>S: liberarSaldo(POI)
+            S-->>S: liberarSaldoPAP(PAP)
+        else En_revision a Observado
+            S-->>S: liberarSaldo(POI)
+            S-->>S: liberarSaldoPAP(PAP)
+        else Observado a En_revision
+            S-->>S: reservarSaldo(POI)
+            S-->>S: reservarSaldoPAP(PAP)
+        end
+        S-->>S: Actualizar estado del expediente
+        S-->>S: Crear SeguimientoLog
+        S-->>S: Crear Notificacion para solicitante
+        S-->>U: 200 OK
+    else Transicion invalida
+        S-->>U: 400 {error: Transicion invalida}
+    end
+    deactivate S

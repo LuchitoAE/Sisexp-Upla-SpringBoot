@@ -1,0 +1,47 @@
+flowchart TD
+    subgraph Actores
+        A["Administrador"]
+        C["Coordinacion"]
+        S["Secretaria"]
+        D["Director"]
+        L["Laboratorio"]
+        N["Decanato"]
+        V["Visitante"]
+    end
+
+    subgraph Autenticacion
+        CU01["CU01: Iniciar Sesion"]
+        CU14["CU14: Cerrar Sesion"]
+    end
+
+    subgraph Dashboard
+        CU02["CU02: Ver Dashboard"]
+    end
+
+    subgraph Expedientes
+        CU03["CU03: Crear Expediente"]
+        CU04["CU04: Cambiar Estado"]
+        CU05["CU05: Adjuntar Documento"]
+    end
+
+    subgraph Presupuesto
+        CU06["CU06: Gestionar Techo"]
+        CU07["CU07: Gestionar POI"]
+        CU08["CU08: Gestionar PAP"]
+        CU09["CU09: Gestionar Nota Modif."]
+    end
+
+    subgraph Consultas
+        CU10["CU10: Ver Reportes"]
+        CU11["CU11: Gestionar Usuarios"]
+        CU12["CU12: Notificaciones"]
+        CU13["CU13: Rastrear (publico)"]
+    end
+
+    A --> CU01 & CU02 & CU03 & CU04 & CU05 & CU06 & CU07 & CU08 & CU09 & CU10 & CU11 & CU12 & CU14
+    C --> CU01 & CU02 & CU03 & CU04 & CU05 & CU06 & CU07 & CU08 & CU09 & CU10 & CU12 & CU14
+    S --> CU01 & CU02 & CU03 & CU04 & CU05 & CU06 & CU07 & CU08 & CU09 & CU12 & CU14
+    D --> CU01 & CU02 & CU03 & CU05 & CU06 & CU07 & CU08 & CU09 & CU10 & CU12 & CU14
+    L --> CU01 & CU02 & CU03 & CU05 & CU07 & CU08 & CU09 & CU12 & CU14
+    N --> CU01 & CU02 & CU08 & CU09 & CU10 & CU12 & CU14
+    V --> CU13

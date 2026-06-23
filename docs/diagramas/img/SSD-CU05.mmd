@@ -1,0 +1,17 @@
+sequenceDiagram
+    actor U as Usuario
+    participant S as Sistema
+
+    U->>S: POST /api/expedientes/{id}/documentos {tipo, archivo}
+    activate S
+    S-->>S: Validar expediente existe
+    S-->>S: Validar archivo es PDF y <= 20 MB
+    S-->>S: Validar tipo de documento permitido
+    alt Archivo valido
+        S-->>S: Generar UUID para almacenamiento
+        S-->>S: Crear registro DocumentoAdjunto
+        S-->>U: 200 OK
+    else Archivo invalido
+        S-->>U: 400 {error: "mensaje"}
+    end
+    deactivate S
