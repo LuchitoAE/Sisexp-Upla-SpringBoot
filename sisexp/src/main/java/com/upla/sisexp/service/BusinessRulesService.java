@@ -18,13 +18,16 @@ public class BusinessRulesService {
     private final ActividadPOIRepository actividadPOIRepo;
     private final NecesidadPAPRepository necesidadPAPRepo;
     private final ExpedienteRepository expedienteRepo;
+    private final TechoPresupuestalRepository techoRepo;
 
     public BusinessRulesService(ActividadPOIRepository actividadPOIRepo,
             NecesidadPAPRepository necesidadPAPRepo,
-            ExpedienteRepository expedienteRepo) {
+            ExpedienteRepository expedienteRepo,
+            TechoPresupuestalRepository techoRepo) {
         this.actividadPOIRepo = actividadPOIRepo;
         this.necesidadPAPRepo = necesidadPAPRepo;
         this.expedienteRepo = expedienteRepo;
+        this.techoRepo = techoRepo;
     }
 
     public void validarFechaLimite(Long actividadPoiId) {
@@ -78,6 +81,12 @@ public class BusinessRulesService {
         a.setSaldoComprometido(a.getSaldoComprometido().subtract(costo).max(BigDecimal.ZERO));
         a.setSaldoEjecutado(a.getSaldoEjecutado().add(costo));
         actividadPOIRepo.save(a);
+
+        TechoPresupuestal techo = a.getTechoPresupuestal();
+        if (techo != null) {
+            techo.setMontoUtilizado(techo.getMontoUtilizado().add(costo));
+            techoRepo.save(techo);
+        }
 
         if (necesidadPapId != null && cantidadSolicitada > 0) {
             ejecutarSaldoPAP(necesidadPapId, cantidadSolicitada, costo);
