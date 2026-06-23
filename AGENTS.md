@@ -111,6 +111,7 @@ Es la memoria del proyecto. Se actualiza en cada fase completada. Al iniciar una
 | Seed data actual | 6 roles + 6 usuarios + 2 techos (2025 completo, 2026 abierto) + 9 POI. **Sin necesidades, expedientes, logs ni notificaciones** |
 | Auth | Spring Security form login + remember-me 30d (no JWT) |
 | Horario laboral | 8am-8pm `America/Lima`; rutas exentas: `/login`, `/rastreo`, `/api/health`, `/error`, `/css`, `/js`, `/vendor`, `/favicon.ico` |
+| Package manager | **pnpm** (NO npm) — para instalar dependencias frontend y herramientas CLI |
 | Package base | `com.upla.sisexp` |
 | BD | PostgreSQL en Railway (prod), H2 en local (dev) |
 | DB reset | `DataInitializer` limpia datos existentes con `TRUNCATE ... CASCADE` via `JdbcTemplate` y re-siembra en cada deploy (mientras haya datos previos) |
