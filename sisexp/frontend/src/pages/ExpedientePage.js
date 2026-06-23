@@ -348,7 +348,7 @@ export default function ExpedientePage() {
           </div>
           {puedeAprobar && d.estado === 'Borrador' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-warning btn-sm" onClick={() => cambiarEstado('En revision')}>🔍 Enviar a revisión</button>
+              <button className="btn btn-warning btn-sm" onClick={() => cambiarEstado('En_revision')}>🔍 Enviar a revisión</button>
               <button className="btn btn-danger btn-sm" onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
             </div>
           )}
@@ -361,7 +361,7 @@ export default function ExpedientePage() {
           )}
           {puedeAprobar && d.estado === 'Observado' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-warning btn-sm" onClick={() => cambiarEstado('En revision')}>↻ Reenviar a revisión</button>
+              <button className="btn btn-warning btn-sm" onClick={() => cambiarEstado('En_revision')}>↻ Reenviar a revisión</button>
               <button className="btn btn-danger btn-sm" onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
             </div>
           )}

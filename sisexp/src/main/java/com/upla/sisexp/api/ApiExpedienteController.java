@@ -95,10 +95,16 @@ public class ApiExpedienteController {
             CustomUserDetails user) {
         try {
             CambiarEstadoDTO dto = new CambiarEstadoDTO();
-            dto.setNuevoEstado(EstadoExpediente.valueOf(body.get("estado")));
+            String estadoStr = body.get("estado");
+            if (estadoStr == null || estadoStr.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "El campo 'estado' es obligatorio"));
+            }
+            dto.setNuevoEstado(EstadoExpediente.valueOf(estadoStr.replace(' ', '_')));
             dto.setObservacion(body.get("observacion"));
             Expediente exp = expedienteService.actualizarEstado(id, dto, user);
             return ResponseEntity.ok(exp);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Estado invalido: " + body.get("estado")));
         } catch (BusinessException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
