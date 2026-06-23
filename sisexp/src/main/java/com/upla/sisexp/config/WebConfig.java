@@ -27,6 +27,9 @@ public class WebConfig implements WebMvcConfigurer {
                                 && !resourcePath.startsWith("api/")) {
                             return resource;
                         }
+                        if (resourcePath.startsWith("api/")) {
+                            return null;
+                        }
                         Resource fallback = new ClassPathResource("/static/index.html");
                         if (fallback.exists() && fallback.isReadable()) {
                             return fallback;
