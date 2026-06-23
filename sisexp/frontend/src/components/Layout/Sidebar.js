@@ -89,6 +89,72 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
         })}
       </nav>
 
+      {/* Administracion section (Admin only) */}
+      {user?.rol === 'Administrador' && (
+        <div style={{ padding: collapsed ? '4px 8px' : '8px 8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          {!collapsed && (
+            <div style={{ fontSize: 9, fontWeight: 700, color: '#475569', letterSpacing: 0.08, textTransform: 'uppercase', padding: '0 12px 6px' }}>
+              Administración
+            </div>
+          )}
+          <button onClick={async () => {
+            try {
+              const blob = await fetch('/api/admin/backup', { credentials: 'include' }).then(r => {
+                if (!r.ok) throw new Error('Error al descargar');
+                return r.blob();
+              });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url; a.download = 'sisexp_backup.sql'; a.click();
+              URL.revokeObjectURL(url);
+            } catch (e) { alert('Error al descargar backup'); }
+          }}
+          title={collapsed ? 'Descargar backup' : undefined}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+            padding: collapsed ? '12px 0' : '8px 12px', marginBottom: 2,
+            borderRadius: 10, border: 'none', cursor: 'pointer', textAlign: 'left',
+            background: 'transparent', color: '#94a3b8',
+            fontSize: 12, fontWeight: 500, transition: 'all 0.15s', fontFamily: 'Inter, sans-serif'
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e2e8f0'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
+          >
+            <span style={{ fontSize: collapsed ? 16 : 13, width: collapsed ? '100%' : 'auto', textAlign: 'center' }}>💾</span>
+            {!collapsed && 'Descargar backup'}
+          </button>
+          <button onClick={() => {
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = '.sql';
+            input.onchange = async () => {
+              const file = input.files[0];
+              if (!file) return;
+              if (!window.confirm('⚠ Esto REEMPLAZARA toda la base de datos. ¿Continuar?')) return;
+              try {
+                await client.upload('/admin/restore', file, 'archivo');
+                alert('Restauracion completada. La pagina se recargara.');
+                window.location.reload();
+              } catch (e) { alert('Error: ' + e.message); }
+            };
+            input.click();
+          }}
+          title={collapsed ? 'Cargar backup' : undefined}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+            padding: collapsed ? '12px 0' : '8px 12px', marginBottom: 2,
+            borderRadius: 10, border: 'none', cursor: 'pointer', textAlign: 'left',
+            background: 'transparent', color: '#94a3b8',
+            fontSize: 12, fontWeight: 500, transition: 'all 0.15s', fontFamily: 'Inter, sans-serif'
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e2e8f0'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
+          >
+            <span style={{ fontSize: collapsed ? 16 : 13, width: collapsed ? '100%' : 'auto', textAlign: 'center' }}>📥</span>
+            {!collapsed && 'Cargar backup'}
+          </button>
+        </div>
+      )}
+
       {/* Bottom section */}
       <div style={{
         padding: collapsed ? 8 : '14px 16px',
@@ -139,90 +205,6 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
           <span style={{ fontSize: 13 }}>{collapsed ? '✕' : '🚪'}</span>
           {!collapsed && 'Cerrar sesión'}
         </button>
-        {user?.rol === 'Administrador' && !collapsed && (
-          <div style={{ marginTop: 4, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 4 }}>
-            <button onClick={async () => {
-              try {
-                const blob = await fetch('/api/admin/backup', { credentials: 'include' }).then(r => r.blob());
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = 'sisexp_backup.sql'; a.click();
-                URL.revokeObjectURL(url);
-              } catch (e) { alert('Error al descargar backup: ' + e.message); }
-            }} style={{
-              width: '100%', padding: '6px 14px', borderRadius: 8, border: 'none',
-              background: 'rgba(14,165,233,0.10)', color: '#7dd3fc',
-              cursor: 'pointer', fontSize: 11, fontWeight: 600, marginBottom: 3,
-              transition: 'all 0.15s', fontFamily: 'Inter, sans-serif',
-              display: 'flex', alignItems: 'center', gap: 6
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(14,165,233,0.18)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(14,165,233,0.10)'; }}
-            ><span>💾</span> Descargar backup</button>
-            <button onClick={() => {
-              const input = document.createElement('input');
-              input.type = 'file'; input.accept = '.sql';
-              input.onchange = async () => {
-                const file = input.files[0];
-                if (!file) return;
-                if (!window.confirm('Esto REEMPLAZARA toda la base de datos. ¿Continuar?')) return;
-                try {
-                  const fd = new FormData();
-                  fd.append('archivo', file);
-                  const r = await fetch('/api/admin/restore', { method: 'POST', credentials: 'include', body: fd });
-                  const text = await r.text();
-                  if (r.ok) alert('Restauracion completada. La pagina se recargara.');
-                  else alert('Error: ' + text);
-                  window.location.reload();
-                } catch (e) { alert('Error al restaurar: ' + e.message); }
-              };
-              input.click();
-            }} style={{
-              width: '100%', padding: '6px 14px', borderRadius: 8, border: 'none',
-              background: 'rgba(245,158,11,0.10)', color: '#fcd34d',
-              cursor: 'pointer', fontSize: 11, fontWeight: 600,
-              transition: 'all 0.15s', fontFamily: 'Inter, sans-serif',
-              display: 'flex', alignItems: 'center', gap: 6
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.18)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.10)'; }}
-            ><span>📥</span> Cargar backup</button>
-          </div>
-        )}
-        {user?.rol === 'Administrador' && collapsed && (
-          <div style={{ marginTop: 4, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 4, textAlign: 'center' }}>
-            <button onClick={async () => {
-              try {
-                const blob = await fetch('/api/admin/backup', { credentials: 'include' }).then(r => r.blob());
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = 'sisexp_backup.sql'; a.click();
-                URL.revokeObjectURL(url);
-              } catch (e) { alert('Error'); }
-            }} style={{
-              background: 'rgba(14,165,233,0.10)', color: '#7dd3fc', border: 'none',
-              cursor: 'pointer', fontSize: 13, padding: '4px 0', width: '100%',
-              borderRadius: 6, fontFamily: 'Inter, sans-serif', marginBottom: 2
-            }} title="Descargar backup">💾</button>
-            <button onClick={() => {
-              const input = document.createElement('input');
-              input.type = 'file'; input.accept = '.sql';
-              input.onchange = async () => {
-                const file = input.files[0];
-                if (!file || !window.confirm('¿Reemplazar base de datos?')) return;
-                const fd = new FormData(); fd.append('archivo', file);
-                const r = await fetch('/api/admin/restore', { method: 'POST', credentials: 'include', body: fd });
-                if (r.ok) { alert('Restaurado.'); window.location.reload(); }
-                else { alert('Error: ' + await r.text()); }
-              };
-              input.click();
-            }} style={{
-              background: 'rgba(245,158,11,0.10)', color: '#fcd34d', border: 'none',
-              cursor: 'pointer', fontSize: 13, padding: '4px 0', width: '100%',
-              borderRadius: 6, fontFamily: 'Inter, sans-serif'
-            }} title="Cargar backup">📥</button>
-          </div>
-        )}
         {onToggle && (
           <button onClick={onToggle} style={{
             width: '100%', marginTop: 6, padding: '4px 0', borderRadius: 8,

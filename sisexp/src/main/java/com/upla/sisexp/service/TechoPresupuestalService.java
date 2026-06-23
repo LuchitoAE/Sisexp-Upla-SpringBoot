@@ -5,6 +5,7 @@ import com.upla.sisexp.model.TechoPresupuestal;
 import com.upla.sisexp.model.Usuario;
 import com.upla.sisexp.repository.TechoPresupuestalRepository;
 import com.upla.sisexp.repository.UsuarioRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +25,7 @@ public class TechoPresupuestalService {
     }
 
     public List<TechoPresupuestal> listar() {
-        return techoRepo.findAll();
+        return techoRepo.findAll(Sort.by(Sort.Direction.DESC, "año"));
     }
 
     @Transactional

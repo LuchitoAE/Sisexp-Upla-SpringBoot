@@ -31,6 +31,8 @@ public interface ExpedienteRepository extends JpaRepository<Expediente, Long> {
 
     List<Expediente> findByFechaLimiteBetweenAndEstadoNotIn(LocalDate start, LocalDate end, Collection<EstadoExpediente> estados);
 
+    List<Expediente> findByEstadoNotIn(Collection<EstadoExpediente> estados);
+
     List<Expediente> findByActividadPOI_Id(Long actividadId);
 
     List<Expediente> findByNecesidadPAP_Id(Long necesidadId);

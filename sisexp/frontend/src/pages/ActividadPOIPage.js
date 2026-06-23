@@ -33,7 +33,10 @@ export default function ActividadPOIPage() {
     try {
       const data = await client.get('/techos-presupuestales');
       setTechos(data);
-      if (data.length > 0 && !selectedTecho) setSelectedTecho(data[0].id);
+      if (data.length > 0 && !selectedTecho) {
+        const masReciente = data.reduce((max, t) => (t.año > max.año) ? t : max, data[0]);
+        setSelectedTecho(masReciente.id);
+      }
     } catch (err) { modals.alerta('Error', err.message); }
   }, [selectedTecho]);
 
