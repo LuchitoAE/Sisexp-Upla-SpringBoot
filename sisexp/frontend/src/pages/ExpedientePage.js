@@ -236,7 +236,7 @@ export default function ExpedientePage() {
                   border: `2px solid ${form.naturaleza === n ? '#2563eb' : '#e2e8f0'}`,
                   cursor: 'pointer', fontSize: 13, fontWeight: 500,
                   background: form.naturaleza === n ? '#eff6ff' : '#fff',
-                  opacity: disponibilidad?.necesidad?.tipo && disponibilidad.necesidad.tipo !== n ? 0.4 : 1
+                  opacity: disponibilidad?.necesidad?.tipo && disponibilidad.necesidad?.tipo !== n ? 0.4 : 1
                 }}>
                   <input type="radio" name="naturaleza" checked={form.naturaleza === n}
                     onChange={() => setForm({ ...form, naturaleza: n })} style={{ accentColor: '#2563eb' }} />

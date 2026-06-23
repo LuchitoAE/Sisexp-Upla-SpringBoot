@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.*;
 
@@ -216,10 +217,44 @@ public class ExpedienteService {
                 .subtract(actividad.getSaldoEjecutado());
 
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("saldoDisponibleActividad", disponibleAct);
-        result.put("cantidadDisponiblePAP", necesidad.getCantidadDisponible());
-        result.put("montoDisponiblePAP", necesidad.getMontoDisponible());
-        result.put("precioUnitario", necesidad.getPrecioEstimado());
+
+        result.put("necesidad", Map.of(
+                "nombre", necesidad.getNombre() != null ? necesidad.getNombre() : "",
+                "tipo", necesidad.getTipo() != null ? necesidad.getTipo().name() : "",
+                "clasificador", necesidad.getClasificadorGasto() != null
+                        ? necesidad.getClasificadorGasto() : ""
+        ));
+
+        BigDecimal precio = necesidad.getPrecioEstimado() != null
+                ? necesidad.getPrecioEstimado() : BigDecimal.ZERO;
+
+        result.put("pap", Map.of(
+                "precioUnitario", precio,
+                "unidad", necesidad.getUnidad() != null ? necesidad.getUnidad() : "UNIDAD",
+                "cantidadPlanificada", necesidad.getCantidad(),
+                "cantidadDisponible", necesidad.getCantidadDisponible(),
+                "cantidadEjecutada", necesidad.getCantidadEjecutada()
+        ));
+
+        boolean fechaOk = actividad.getFechaLimite() != null
+                && !actividad.getFechaLimite().isBefore(LocalDate.now());
+        result.put("fechaLimite", Map.of(
+                "ok", fechaOk,
+                "error", fechaOk ? "" : "La fecha limite de la actividad ya vencio"
+        ));
+
+        boolean saldoOk = disponibleAct.compareTo(BigDecimal.ZERO) >= 0;
+        result.put("saldo", Map.of(
+                "ok", saldoOk,
+                "disponible", disponibleAct,
+                "asignado", actividad.getPresupuestoAsignado(),
+                "comprometido", actividad.getSaldoComprometido(),
+                "ejecutado", actividad.getSaldoEjecutado(),
+                "error", saldoOk ? "" : "Saldo insuficiente en la actividad POI"
+        ));
+
+        result.put("costo", precio);
+
         return result;
     }
 
