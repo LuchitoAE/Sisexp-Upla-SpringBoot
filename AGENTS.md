@@ -90,8 +90,17 @@ Es la memoria del proyecto. Se actualiza en cada fase completada. Al iniciar una
 - **Verificación endpoints funcionales**: login, /me, expedientes, techos, POI, dashboard, notificaciones, usuarios — todos responden 200/404 correctamente con H2 local
 - **CSRF config**: `/api/**` exento de CSRF via `ignoringRequestMatchers("/api/**")` en SecurityConfig (se añadió en sesión anterior para React SPA)
 
-### Blocked
-- (none)
+### Done (Session 2026-06-23, documentation)
+- **GitHub repo**: `https://github.com/LuchitoAE/Sisexp-Upla-SpringBoot` — código completo migrado
+- **Railway deploy**: exitoso con PostgreSQL, seed data cargada, endpoints funcionales
+- **3 skills de diagramación** creados en `.opencode/skills/`:
+  - `diagramas-ssd` — System Sequence Diagrams (ICONIX Fase 4, ISO/IEC 19505)
+  - `diagramas-ers` — ERS (ISO 29148, ICONIX Fase 1)
+  - `diagramas-bce` — Robustez Boundary-Control-Entity (ICONIX Fase 3)
+- **14 SSD** generados (CU01-CU14) en `docs/diagramas/SSD/`
+- **ERS completo** en `docs/diagramas/ERS/` (14 RF, 8 RNF, 14 CU, ISO 29148)
+- **14 BCE** generados (CU01-CU14) en `docs/diagramas/BCE/`
+- **Documento consolidado**: `docs/SISEXP_DIAGRAMAS_COMPLETO.md` (163KB) + `.docx` (73KB)
 
 ## Critical Context
 

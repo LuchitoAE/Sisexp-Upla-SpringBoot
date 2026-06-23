@@ -706,7 +706,17 @@ FASE 14 → Rastreo público (consulta sin login)
 FASE 15 → Notificaciones (badge + lista + automáticas)
 FASE 16 → Business Rules (integradas progresivamente desde FASE 7)
 FASE 17 → Docker + deploy
+FASE 18 → Documentación ICONIX (ERS, BCE, SSD + DOCX)
 ```
+
+### FASE 18: Documentación ICONIX (Completada ✅)
+- **18.1** Skill: diagramas-ers (ISO 29148 + ICONIX Fase 1)
+- **18.2** Skill: diagramas-bce (Robustez Boundary-Control-Entity Fase 3)
+- **18.3** Skill: diagramas-ssd (System Sequence Diagrams Fase 4)
+- **18.4** ERS_SISEXP_COMPLETO.md + .docx (14 RF, 8 RNF, 14 CU)
+- **18.5** BCE_COMPLETO.md + .docx (14 diagramas Boundary-Control-Entity)
+- **18.6** SSD_COMPLETO.md + .docx (14 diagramas de secuencia)
+- **18.7** SISEXP_DIAGRAMAS_COMPLETO.md + .docx (documento consolidado)
 
 ---
 
