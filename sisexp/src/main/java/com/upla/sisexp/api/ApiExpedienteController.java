@@ -112,8 +112,8 @@ public class ApiExpedienteController {
 
     @PostMapping("/{id}/documentos")
     public ResponseEntity<?> subirDocumento(@PathVariable Long id,
-            @RequestParam TipoDocumento tipo,
-            @RequestParam("archivo") MultipartFile archivo) {
+            @RequestParam(name = "tipo") TipoDocumento tipo,
+            @RequestParam(name = "archivo") MultipartFile archivo) {
         try {
             DocumentoDTO dto = new DocumentoDTO();
             dto.setTipo(tipo);

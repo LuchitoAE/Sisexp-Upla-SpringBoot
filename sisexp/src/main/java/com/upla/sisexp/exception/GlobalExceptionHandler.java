@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -69,5 +70,13 @@ public class GlobalExceptionHandler {
         }
         model.addAttribute("status", 500);
         return "error";
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<?> handleMaxUploadSize(MaxUploadSizeExceededException ex,
+            HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(Map.of("error", "El archivo excede el tamano maximo permitido (20 MB)",
+                        "timestamp", LocalDateTime.now().toString()));
     }
 }
