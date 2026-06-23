@@ -52,7 +52,6 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     @Override
-    @Transactional
     public void run(String... args) {
         if (usuarioRepo.count() > 0) {
             log.info("Limpiando datos existentes para nuevo seed...");
