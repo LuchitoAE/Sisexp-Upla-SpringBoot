@@ -10,7 +10,7 @@ function formatMoney(n) {
 const PAGE_SIZE = 10;
 
 export default function TechoPresupuestalPage() {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
   const modals = useModals();
   const [techos, setTechos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,12 +30,12 @@ export default function TechoPresupuestalPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await client.get('/techos-presupuestales', token);
+      const data = await client.get('/techos-presupuestales');
       setTechos(data);
       setPage(1);
     }     catch (err) { modals.alerta('Error', err.message); }
     finally { setLoading(false); }
-  }, [token]);
+  }, []);
 
   useEffect(() => { load(); }, [load]);
 
@@ -43,9 +43,9 @@ export default function TechoPresupuestalPage() {
     if (!form.año || !form.montoTotal) return;
     try {
       if (editId) {
-        await client.put(`/techos-presupuestales/${editId}`, { montoTotal: form.montoTotal }, token);
+        await client.put(`/techos-presupuestales/${editId}`, { montoTotal: form.montoTotal });
       } else {
-        await client.post('/techos-presupuestales', form, token);
+        await client.post('/techos-presupuestales', form);
       }
       setShowForm(false);
       setEditId(null);
@@ -60,7 +60,7 @@ export default function TechoPresupuestalPage() {
       `${t.activo ? '¿Desactivar' : '¿Activar'} el techo ${t.año}? ${t.activo ? 'No podrá usarse en nuevas operaciones.' : 'Volverá a estar disponible.'}`
     );
     if (!ok) return;
-    try { await client.patch(`/techos-presupuestales/${t.id}/toggle-activo`, {}, token); await load(); }
+    try { await client.patch(`/techos-presupuestales/${t.id}/toggle-activo`, {}); await load(); }
     catch (err) { modals.alerta('Error', err.message); }
   };
 
@@ -71,7 +71,7 @@ export default function TechoPresupuestalPage() {
     );
     if (!ok) return;
     try {
-      await client.post(`/techos-presupuestales/${id}/finalizar-poi`, {}, token);
+      await client.post(`/techos-presupuestales/${id}/finalizar-poi`, {});
       modals.alerta('POI planificado y cerrado', 'Las actividades quedan congeladas.');
       await load();
     } catch (err) { modals.alerta('Error', err.message); }
@@ -84,7 +84,7 @@ export default function TechoPresupuestalPage() {
     );
     if (!ok) return;
     try {
-      await client.post(`/techos-presupuestales/${id}/desbloquear-poi`, {}, token);
+      await client.post(`/techos-presupuestales/${id}/desbloquear-poi`, {});
       modals.alerta('POI desbloqueado', 'Puede volver a editar las actividades.');
       await load();
     } catch (err) { modals.alerta('Error', err.message); }

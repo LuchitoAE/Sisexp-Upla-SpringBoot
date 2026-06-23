@@ -8,7 +8,7 @@ function formatMoney(n) { return 'S/ ' + Number(n).toLocaleString('es-PE', { min
 const ESTADO_COLOR = { pendiente: { bg: '#fef3c7', fg: '#92400e' }, configurada: { bg: '#dcfce7', fg: '#166534' }, rechazada: { bg: '#fee2e2', fg: '#b91c1c' } };
 
 export default function NotaModificatoriaPage({ embedded, onSuccess }) {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
   const modals = useModals();
   const esAdmin = ['Administrador', 'Coordinacion'].includes(user?.rol);
   const [notas, setNotas] = useState([]);
@@ -32,22 +32,22 @@ export default function NotaModificatoriaPage({ embedded, onSuccess }) {
 
   const loadActividades = useCallback(async () => {
     try {
-      const techos = await client.get('/techos-presupuestales', token);
+      const techos = await client.get('/techos-presupuestales');
       let all = [];
       for (const t of techos) {
-        const acts = await client.get(`/actividades-poi/techo/${t.id}`, token);
+        const acts = await client.get(`/actividades-poi/techo/${t.id}`);
         all = [...all, ...acts];
       }
       setActividades(all);
     } catch (err) { /* ignore */ }
-  }, [token]);
+  }, []);
 
   const loadNotas = useCallback(async () => {
     setLoading(true);
-    try { setNotas(await client.get('/notas-modificatorias', token)); }
+    try { setNotas(await client.get('/notas-modificatorias')); }
     catch (err) { modals.alerta('Error', err.message); }
     finally { setLoading(false); }
-  }, [token]);
+  }, []);
 
   useEffect(() => { loadNotas(); loadActividades(); }, []); // eslint-disable-line
 
@@ -86,7 +86,7 @@ export default function NotaModificatoriaPage({ embedded, onSuccess }) {
         montoTransferir: parseFloat(configForm.montoTransferir),
         nuevoClasificadorGasto: configForm.nuevoClasificadorGasto,
         nuevoTipo: configForm.nuevoTipo
-      }, token);
+      });
       modals.alerta('Solicitud configurada y aprobada', 'Los cambios se aplicaron en las tablas POI/PAP.');
       setConfigId(null); setConfigForm({ actividadOrigenId: '', montoTransferir: '', nuevoClasificadorGasto: '', nuevoTipo: 'Servicio' });
       loadNotas(); loadActividades();
@@ -97,7 +97,7 @@ export default function NotaModificatoriaPage({ embedded, onSuccess }) {
   const handleRechazar = async (id) => {
     const obs = await modals.promptText('Rechazar solicitud', 'Describa el motivo del rechazo para que el solicitante pueda corregir su petición.', 'Motivo:');
     if (!obs) return;
-    try { await client.put(`/notas-modificatorias/${id}/rechazar`, { observacion: obs }, token); loadNotas(); }
+    try { await client.put(`/notas-modificatorias/${id}/rechazar`, { observacion: obs }); loadNotas(); }
     catch (err) { modals.alerta('Error', err.message); }
   };
 

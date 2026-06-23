@@ -92,7 +92,7 @@ function Progress({ value, max, color = '#2563eb', height = 8 }) {
 }
 
 export default function ReportesPage() {
-  const { token } = useAuth();
+  useAuth();
   const modals = useModals();
   const [seccion, setSeccion] = useState('anual');
   const [anio, setAnio] = useState('2026');
@@ -101,11 +101,11 @@ export default function ReportesPage() {
   const [techos, setTechos] = useState([]);
 
   useEffect(() => {
-    client.get('/techos-presupuestales', token).then(d => {
+    client.get('/techos-presupuestales').then(d => {
       setTechos(d);
       if (d.length > 0) setAnio(String(d[d.length - 1].año));
     }).catch(() => {});
-  }, [token]);
+  }, []);
 
   const load = useCallback(async (secc, a) => {
     setLoading(true);
@@ -113,16 +113,16 @@ export default function ReportesPage() {
     try {
       let result;
       switch (secc) {
-        case 'anual': result = await client.get(`/reportes/anual/${a}`, token); break;
-        case 'expedientes': result = await client.get(`/reportes/expedientes?anio=${a}`, token); break;
-        case 'poi': result = await client.get(`/reportes/poi?anio=${a}`, token); break;
-        case 'pap': result = await client.get(`/reportes/pap?anio=${a}`, token); break;
+        case 'anual': result = await client.get(`/reportes/anual/${a}`); break;
+        case 'expedientes': result = await client.get(`/reportes/expedientes?anio=${a}`); break;
+        case 'poi': result = await client.get(`/reportes/poi?anio=${a}`); break;
+        case 'pap': result = await client.get(`/reportes/pap?anio=${a}`); break;
         default: result = null;
       }
       setData(result);
     } catch (err) { modals.alerta('Error', err.message); }
     finally { setLoading(false); }
-  }, [token]);
+  }, []);
 
   useEffect(() => { load(seccion, anio); }, [seccion, anio, load]);
 
@@ -199,8 +199,8 @@ export default function ReportesPage() {
 
           {seccion === 'anual' && <InformeAnual data={data} anio={anio} />}
           {seccion === 'expedientes' && <ReporteExpedientes data={data} />}
-          {seccion === 'poi' && data.presupuesto && <ReportePOI data={data} token={token} />}
-          {seccion === 'pap' && data.listado && <ReportePAP data={data} token={token} />}
+          {seccion === 'poi' && data.presupuesto && <ReportePOI data={data} />}
+          {seccion === 'pap' && data.listado && <ReportePAP data={data} />}
         </>
       )}
 
@@ -354,7 +354,7 @@ function ReporteExpedientes({ data }) {
 }
 
 // ─── Reporte POI ───
-function ReportePOI({ data, token }) {
+function ReportePOI({ data }) {
   const modals = useModals();
   const [detalle, setDetalle] = useState(null);
   const [detLoading, setDetLoading] = useState(false);
@@ -362,7 +362,7 @@ function ReportePOI({ data, token }) {
   const verDetalle = async (id) => {
     setDetLoading(true);
     try {
-      const d = await client.get(`/reportes/poi/${id}`, token);
+      const d = await client.get(`/reportes/poi/${id}`);
       setDetalle(d);
     } catch (err) { modals.alerta('Error', err.message); }
     finally { setDetLoading(false); }
@@ -491,7 +491,7 @@ function ReportePOI({ data, token }) {
 }
 
 // ─── Reporte PAP ───
-function ReportePAP({ data, token }) {
+function ReportePAP({ data }) {
   const modals = useModals();
   const [detalle, setDetalle] = useState(null);
   const [detLoading, setDetLoading] = useState(false);
@@ -499,7 +499,7 @@ function ReportePAP({ data, token }) {
   const verDetalle = async (id) => {
     setDetLoading(true);
     try {
-      const d = await client.get(`/reportes/pap/${id}`, token);
+      const d = await client.get(`/reportes/pap/${id}`);
       setDetalle(d);
     } catch (err) { modals.alerta('Error', err.message); }
     finally { setDetLoading(false); }

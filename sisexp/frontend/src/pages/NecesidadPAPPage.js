@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { client } from '../api/client';
 
 function formatMoney(n) { return 'S/ ' + Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2 }); }
@@ -10,7 +9,6 @@ const ESTADO_COLOR = {
 };
 
 export default function NecesidadPAPPage() {
-  const { token } = useAuth();
   const [techos, setTechos] = useState([]);
   const [actividades, setActividades] = useState([]);
   const [necesidades, setNecesidades] = useState([]);
@@ -20,19 +18,19 @@ export default function NecesidadPAPPage() {
   const [expanded, setExpanded] = useState({});
 
   useEffect(() => {
-    client.get('/techos-presupuestales', token).then(d => {
+    client.get('/techos-presupuestales').then(d => {
       setTechos(d);
       if (d.length > 0) setFiltroAnio(String(d[d.length - 1].año));
     }).catch(() => {});
-  }, [token]);
+  }, []);
 
   const load = useCallback(async (anio) => {
     if (!anio) return;
     setLoading(true);
     try {
       const [necs, exps] = await Promise.all([
-        client.get('/necesidades-pap', token),
-        client.get(`/reportes/expedientes?anio=${anio}`, token)
+        client.get('/necesidades-pap'),
+        client.get(`/reportes/expedientes?anio=${anio}`)
       ]);
       setNecesidades(necs);
       setExp((exps.listado || []));
@@ -48,7 +46,7 @@ export default function NecesidadPAPPage() {
       setActividades(Object.values(actMap).sort((a, b) => (a.codigo || '').localeCompare(b.codigo || '')));
     } catch (err) { /* ignore */ }
     finally { setLoading(false); }
-  }, [token]);
+  }, []);
 
   useEffect(() => { load(filtroAnio); }, [filtroAnio, load]);
 
@@ -192,7 +190,7 @@ export default function NecesidadPAPPage() {
 
                             {/* Detalle de ejecución por ítem */}
                             {itemOpen && (
-                              <ItemEjecucionDetalle necesidadId={item.id} token={token} necesidadNombre={item.nombre} />
+                              <ItemEjecucionDetalle necesidadId={item.id} necesidadNombre={item.nombre} />
                             )}
                           </div>
                         );
@@ -214,13 +212,13 @@ export default function NecesidadPAPPage() {
 }
 
 // ─── Subcomponente: detalle de ejecución de un ítem ───
-function ItemEjecucionDetalle({ necesidadId, token, necesidadNombre }) {
+function ItemEjecucionDetalle({ necesidadId, necesidadNombre }) {
   const [expedientes, setExpedientes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    client.get('/expedientes', token)
+    client.get('/expedientes')
       .then(data => {
         // Filtrar expedientes que usan esta necesidad
         const relevantes = (Array.isArray(data) ? data : []).filter(e =>
@@ -230,7 +228,7 @@ function ItemEjecucionDetalle({ necesidadId, token, necesidadNombre }) {
       })
       .catch(() => setExpedientes([]))
       .finally(() => setLoading(false));
-  }, [necesidadId, token]);
+  }, [necesidadId]);
 
   if (loading) return <div style={{ padding: '8px 32px 12px', fontSize: 11, color: '#94a3b8' }}>Cargando ejecuciones...</div>;
 

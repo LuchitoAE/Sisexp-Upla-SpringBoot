@@ -23,7 +23,7 @@ function formatMoney(n) {
 }
 
 export default function ExpedientePage() {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -50,29 +50,29 @@ export default function ExpedientePage() {
   const modals = useModals();
 
   const load = useCallback(async () => {
-    try { const data = await client.get('/expedientes', token); setList(data); }
+    try { const data = await client.get('/expedientes'); setList(data); }
     catch (err) { modals.alerta('Error', err.message); }
     finally { setLoading(false); }
-  }, [token, modals]);
+  }, [modals]);
 
   useEffect(() => { load(); }, [load]);
 
   const loadTechos = useCallback(async () => {
-    try { const data = await client.get('/techos-presupuestales', token); setTechos(data); }
+    try { const data = await client.get('/techos-presupuestales'); setTechos(data); }
     catch (err) { /* ignore */ }
-  }, [token]);
+  }, []);
 
   useEffect(() => { loadTechos(); }, [loadTechos]);
 
   const loadActividades = async (techoId) => {
     if (!techoId) { setActividades([]); return; }
-    try { const data = await client.get(`/actividades-poi/techo/${techoId}`, token); setActividades(data); }
+    try { const data = await client.get(`/actividades-poi/techo/${techoId}`); setActividades(data); }
     catch (err) { modals.alerta('Error', err.message); }
   };
 
   const loadNecesidades = async (actividadId) => {
     if (!actividadId) { setNecesidades([]); return; }
-    try { const data = await client.get(`/necesidades-pap/actividad/${actividadId}`, token); setNecesidades(data); }
+    try { const data = await client.get(`/necesidades-pap/actividad/${actividadId}`); setNecesidades(data); }
     catch (err) { modals.alerta('Error', err.message); }
   };
 
@@ -85,10 +85,10 @@ export default function ExpedientePage() {
     if (form.actividadPoiId && form.necesidadPapId) {
       setCheckingDisp(true);
       const qs = `?cantidadSolicitada=${form.cantidadSolicitada || 1}`;
-      client.get(`/expedientes/disponibilidad/${form.actividadPoiId}/${form.necesidadPapId}${qs}`, token)
+      client.get(`/expedientes/disponibilidad/${form.actividadPoiId}/${form.necesidadPapId}${qs}`)
         .then(setDisponibilidad).catch(() => setDisponibilidad(null)).finally(() => setCheckingDisp(false));
     } else { setDisponibilidad(null); }
-  }, [form.actividadPoiId, form.necesidadPapId, form.cantidadSolicitada, token]);
+  }, [form.actividadPoiId, form.necesidadPapId, form.cantidadSolicitada]);
 
   const handleSubmit = async () => {
     if (!form.actividadPoiId || !form.necesidadPapId || !form.urgencia || !form.naturaleza) return;
@@ -97,7 +97,7 @@ export default function ExpedientePage() {
         ...form,
         naturaleza: form.naturaleza,
         cantidadSolicitada: form.cantidadSolicitada || 1
-      }, token);
+      });
       setShowForm(false);
       setForm({ actividadPoiId: '', necesidadPapId: '', urgencia: '', naturaleza: '', descripcion: '', cantidadSolicitada: 1 });
       setActividades([]); setNecesidades([]); setSelectedTecho('');
@@ -109,7 +109,7 @@ export default function ExpedientePage() {
     if (!detalle || !file || !tipo) return;
     setUploading(true);
     try {
-      await client.upload(`/expedientes/${detalle.id}/documentos`, file, token, 'archivo', { tipo });
+      await client.upload(`/expedientes/${detalle.id}/documentos`, file, 'archivo', { tipo });
       client.invalidarCache('/expedientes');
       await loadDetalle(detalle.id);
     } catch (err) { modals.alerta('Error', err.message); }
@@ -117,7 +117,7 @@ export default function ExpedientePage() {
   };
 
   const loadDetalle = async (id) => {
-    try { const data = await client.get(`/expedientes/${id}`, token); setDetalle(data); }
+    try { const data = await client.get(`/expedientes/${id}`); setDetalle(data); }
     catch (err) { modals.alerta('Error', err.message); }
   };
 
@@ -126,7 +126,7 @@ export default function ExpedientePage() {
     if (estado === 'Rechazado') { obs = await modals.promptText('Rechazar expediente', '¿Cuál es el motivo del rechazo?', 'Motivo:'); if (!obs) return; }
     if (estado === 'Observado') { obs = await modals.promptText('Observar expediente', 'Describa el detalle de la observación para que el laboratorio pueda corregir.', 'Detalle:'); if (!obs) return; }
     try {
-      await client.put(`/expedientes/${detalle.id}/estado`, { estado, observacion: obs }, token);
+      await client.put(`/expedientes/${detalle.id}/estado`, { estado, observacion: obs });
       await loadDetalle(detalle.id); await load();
     } catch (err) { modals.alerta('Error', err.message); }
   };

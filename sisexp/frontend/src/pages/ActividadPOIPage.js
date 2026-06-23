@@ -15,7 +15,7 @@ const ESTADO_COLOR = {
 };
 
 export default function ActividadPOIPage() {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
   const modals = useModals();
   const isAdmin = user?.rol === 'Administrador';
   const puedeCerrarPAP = ['Administrador', 'Coordinacion'].includes(user?.rol);
@@ -31,11 +31,11 @@ export default function ActividadPOIPage() {
 
   const loadTechos = useCallback(async () => {
     try {
-      const data = await client.get('/techos-presupuestales', token);
+      const data = await client.get('/techos-presupuestales');
       setTechos(data);
       if (data.length > 0 && !selectedTecho) setSelectedTecho(data[0].id);
     } catch (err) { modals.alerta('Error', err.message); }
-  }, [token, selectedTecho]);
+  }, [selectedTecho]);
 
   useEffect(() => { loadTechos(); }, []);
 
@@ -43,11 +43,11 @@ export default function ActividadPOIPage() {
     if (!selectedTecho) return;
     setLoading(true);
     try {
-      const data = await client.get(`/actividades-poi/techo/${selectedTecho}`, token);
+      const data = await client.get(`/actividades-poi/techo/${selectedTecho}`);
       setActividades(data);
     } catch (err) { modals.alerta('Error', err.message); }
     finally { setLoading(false); }
-  }, [selectedTecho, token]);
+  }, [selectedTecho]);
 
   useEffect(() => { loadActividades(); }, [loadActividades]);
 
@@ -61,7 +61,7 @@ export default function ActividadPOIPage() {
     );
     if (!ok) return;
     try {
-      await client.post(`/actividades-poi/${id}/finalizar-pap`, {}, token);
+      await client.post(`/actividades-poi/${id}/finalizar-pap`, {});
       modals.alerta('PAP planificado y cerrado', 'Las necesidades quedan congeladas para esta actividad.');
       await loadActividades();
     } catch (err) { modals.alerta('Error', err.message); }
@@ -74,7 +74,7 @@ export default function ActividadPOIPage() {
     );
     if (!ok) return;
     try {
-      await client.post(`/actividades-poi/${id}/desbloquear-pap`, {}, token);
+      await client.post(`/actividades-poi/${id}/desbloquear-pap`, {});
       modals.alerta('PAP desbloqueado', 'Puede volver a editar los ítems de esta actividad.');
       await loadActividades();
     } catch (err) { modals.alerta('Error', err.message); }
@@ -84,9 +84,9 @@ export default function ActividadPOIPage() {
     if (!form.nombre || !form.presupuestoAsignado) return;
     try {
       if (editId) {
-        await client.put(`/actividades-poi/${editId}`, form, token);
+        await client.put(`/actividades-poi/${editId}`, form);
       } else {
-        await client.post(`/actividades-poi/techo/${selectedTecho}`, form, token);
+        await client.post(`/actividades-poi/techo/${selectedTecho}`, form);
       }
       setShowForm(false); setEditId(null);
       setForm({ nombre: '', presupuestoAsignado: '', fechaLimite: '', estado: 'Pendiente' });
@@ -98,7 +98,7 @@ export default function ActividadPOIPage() {
     const ok = await modals.confirm('Eliminar actividad', '¿Está seguro de eliminar esta actividad?');
     if (!ok) return;
     try {
-      await client.del(`/actividades-poi/${id}`, token);
+      await client.del(`/actividades-poi/${id}`);
       await loadActividades(); await loadTechos();
     } catch (err) { modals.alerta('Error', err.message); }
   };
@@ -113,7 +113,7 @@ export default function ActividadPOIPage() {
     if (expandedId === id) { setExpandedId(null); return; }
     setExpandedId(id);
     try {
-      const data = await client.get(`/necesidades-pap/actividad/${id}`, token);
+      const data = await client.get(`/necesidades-pap/actividad/${id}`);
       setNecesidades(data);
     } catch (err) { modals.alerta('Error', err.message); }
   };
@@ -239,7 +239,7 @@ export default function ActividadPOIPage() {
               </div>
               {expandedId === a.id && (
                 <div style={{ borderTop: '1px solid #f1f5f9', padding: 16, background: '#fafbfc' }}>
-                  <NecesidadSubList token={token} actividadId={a.id} actividadNombre={a.nombre} planificado={a.planificado} onLoad={loadActividades} />
+                  <NecesidadSubList actividadId={a.id} actividadNombre={a.nombre} planificado={a.planificado} onLoad={loadActividades} />
                 </div>
               )}
             </div>
@@ -250,7 +250,7 @@ export default function ActividadPOIPage() {
   );
 }
 
-function NecesidadSubList({ token, actividadId, actividadNombre, planificado }) {
+function NecesidadSubList({ actividadId, actividadNombre, planificado }) {
   const { user } = useAuth();
   const modals = useModals();
   const [items, setItems] = useState([]);
@@ -260,9 +260,9 @@ function NecesidadSubList({ token, actividadId, actividadNombre, planificado }) 
   const puede = ['Administrador', 'Coordinacion'].includes(user?.rol) && !planificado;
 
   const load = useCallback(async () => {
-    try { setItems(await client.get(`/necesidades-pap/actividad/${actividadId}`, token)); }
+    try { setItems(await client.get(`/necesidades-pap/actividad/${actividadId}`)); }
     catch (err) { modals.alerta('Error', err.message); }
-  }, [actividadId, token]);
+  }, [actividadId]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -270,9 +270,9 @@ function NecesidadSubList({ token, actividadId, actividadNombre, planificado }) 
     if (!form.nombre || !form.cantidad || !form.precioEstimado) return;
     try {
       if (editId) {
-        await client.put(`/necesidades-pap/${editId}`, form, token);
+        await client.put(`/necesidades-pap/${editId}`, form);
       } else {
-        await client.post(`/necesidades-pap/actividad/${actividadId}`, form, token);
+        await client.post(`/necesidades-pap/actividad/${actividadId}`, form);
       }
       setShowForm(false); setEditId(null);
       setForm({ nombre: '', cantidad: 1, precioEstimado: '', unidad: 'unidad', oficinaLaboratorio: '', tipo: 'Bien', clasificadorGasto: '' });
@@ -283,7 +283,7 @@ function NecesidadSubList({ token, actividadId, actividadNombre, planificado }) 
   const handleDelete = async (id) => {
     const ok = await modals.confirm('Eliminar necesidad', '¿Está seguro de eliminar esta necesidad del PAP?');
     if (!ok) return;
-    try { await client.del(`/necesidades-pap/${id}`, token); await load(); }
+    try { await client.del(`/necesidades-pap/${id}`); await load(); }
     catch (err) { modals.alerta('Error', err.message); }
   };
 

@@ -44,7 +44,7 @@ function ProgressBar({ ejecutado, comprometido, disponible, height = 8, showLabe
 }
 
 export default function Dashboard() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [alertas, setAlertas] = useState(null);
   const [saldos, setSaldos] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -59,8 +59,8 @@ export default function Dashboard() {
     async function load() {
       try {
         const [alertasData, saldosData] = await Promise.all([
-          puedeVerAlertas ? client.get('/dashboard/alertas', token) : null,
-          puedeVerSaldos ? client.get('/dashboard/saldos', token) : null,
+          puedeVerAlertas ? client.get('/dashboard/alertas') : null,
+          puedeVerSaldos ? client.get('/dashboard/saldos') : null,
         ]);
         setAlertas(alertasData);
         setSaldos(saldosData);

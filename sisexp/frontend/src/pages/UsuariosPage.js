@@ -10,7 +10,7 @@ const ROL_COLORS = {
 };
 
 export default function UsuariosPage() {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
   const modals = useModals();
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,10 +21,10 @@ export default function UsuariosPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { setUsuarios(await client.get('/usuarios', token)); }
+    try { setUsuarios(await client.get('/usuarios')); }
     catch (err) { modals.alerta('Error', err.message); }
     finally { setLoading(false); }
-  }, [token]);
+  }, []);
 
   useEffect(() => { load(); }, [load]);
 
@@ -37,9 +37,9 @@ export default function UsuariosPage() {
       if (editId) {
         const payload = { nombre: form.nombre, email: form.email, rol: form.rol, activo: form.activo, horarioRestringido: form.horarioRestringido };
         if (form.password) payload.password = form.password;
-        await client.put(`/usuarios/${editId}`, payload, token);
+        await client.put(`/usuarios/${editId}`, payload);
       } else {
-        await client.post('/usuarios', form, token);
+        await client.post('/usuarios', form);
       }
       setShowForm(false); setEditId(null); resetForm(); load();
     } catch (err) { modals.alerta('Error', err.message); }
@@ -52,7 +52,7 @@ export default function UsuariosPage() {
       `${u.activo ? '¿Desactivar' : '¿Activar'} a ${u.nombre}? ${u.activo ? 'No podrá iniciar sesión.' : 'Podrá volver a acceder al sistema.'}`
     );
     if (!ok) return;
-    try { await client.patch(`/usuarios/${u.id}/toggle-activo`, {}, token); load(); }
+    try { await client.patch(`/usuarios/${u.id}/toggle-activo`, {}); load(); }
     catch (err) { modals.alerta('Error', err.message); }
   };
 
@@ -63,7 +63,7 @@ export default function UsuariosPage() {
     );
     if (!ok) return;
     try {
-      await client.put(`/usuarios/${u.id}`, { horarioRestringido: !u.horarioRestringido }, token);
+      await client.put(`/usuarios/${u.id}`, { horarioRestringido: !u.horarioRestringido });
       load();
     } catch (err) { modals.alerta('Error', err.message); }
   };

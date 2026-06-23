@@ -1,10 +1,7 @@
 import React, { useEffect, useState, memo } from 'react';
 import { ROL_LABEL, ROL_PROFILE, ROL_COLOR } from '../../utils/config';
 import { client } from '../../api/client';
-import { useAuth } from '../../contexts/AuthContext';
-
 export default memo(function Header({ user }) {
-  const { token } = useAuth();
   const profile = ROL_PROFILE[user?.rol] || {};
   const color = profile.color || ROL_COLOR[user?.rol] || '#2563eb';
   const [notifCount, setNotifCount] = useState(0);
@@ -13,31 +10,31 @@ export default memo(function Header({ user }) {
 
   useEffect(() => {
     const load = () => {
-      client.get('/notificaciones/count', token).then(r => setNotifCount(r.count || 0)).catch(() => {});
+      client.get('/notificaciones/count').then(r => setNotifCount(r.count || 0)).catch(() => {});
     };
     load();
     const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
-  }, [token]);
+  }, []);
 
   const openNotifs = async () => {
     setShowNotifs(!showNotifs);
     if (!showNotifs) {
       try {
-        const data = await client.get('/notificaciones', token);
+        const data = await client.get('/notificaciones');
         setNotifs(data);
       } catch (err) { /* ignore */ }
     }
   };
 
   const markAll = async () => {
-    try { await client.put('/notificaciones/read-all', {}, token); setNotifCount(0); setNotifs(n => n.map(x => ({ ...x, leida: true }))); }
+    try { await client.put('/notificaciones/read-all', {}); setNotifCount(0); setNotifs(n => n.map(x => ({ ...x, leida: true }))); }
     catch (err) { /* ignore */ }
   };
 
   const markOne = async (id) => {
     try {
-      await client.put(`/notificaciones/${id}/read`, {}, token);
+      await client.put(`/notificaciones/${id}/read`, {});
       setNotifCount(c => Math.max(0, c - 1));
       setNotifs(n => n.map(x => x.id === id ? { ...x, leida: true } : x));
     } catch (err) { /* ignore */ }
