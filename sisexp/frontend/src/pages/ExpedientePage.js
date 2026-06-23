@@ -352,7 +352,7 @@ export default function ExpedientePage() {
               <button className="btn btn-danger btn-sm" onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
             </div>
           )}
-          {puedeAprobar && d.estado === 'En revision' && (
+          {puedeAprobar && d.estado === 'En_revision' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <button className="btn btn-success btn-sm" onClick={() => cambiarEstado('Aprobado')}>✓ Aprobar</button>
               <button className="btn btn-warning btn-sm" onClick={() => cambiarEstado('Observado')}>↩ Observar</button>

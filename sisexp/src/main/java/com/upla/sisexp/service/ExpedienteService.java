@@ -109,9 +109,12 @@ public class ExpedienteService {
         return saved;
     }
 
+    @Transactional(readOnly = true)
     public Expediente obtenerConLogs(Long id) {
         Expediente exp = expedienteRepo.findById(id)
                 .orElseThrow(() -> new BusinessException("Expediente no encontrado"));
+        exp.getDocumentos().size();
+        exp.getLogs().size();
         return exp;
     }
 

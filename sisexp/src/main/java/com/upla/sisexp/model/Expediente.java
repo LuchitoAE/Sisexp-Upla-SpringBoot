@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "expedientes")
@@ -61,6 +63,14 @@ public class Expediente {
     @JoinColumn(name = "aprobado_por")
     private Usuario aprobadoPor;
 
+    @OneToMany(mappedBy = "expediente", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"expediente"})
+    private List<DocumentoAdjunto> documentos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "expediente", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"expediente"})
+    private List<SeguimientoLog> logs = new ArrayList<>();
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -113,6 +123,12 @@ public class Expediente {
 
     public Usuario getAprobadoPor() { return aprobadoPor; }
     public void setAprobadoPor(Usuario aprobadoPor) { this.aprobadoPor = aprobadoPor; }
+
+    public List<DocumentoAdjunto> getDocumentos() { return documentos; }
+    public void setDocumentos(List<DocumentoAdjunto> documentos) { this.documentos = documentos; }
+
+    public List<SeguimientoLog> getLogs() { return logs; }
+    public void setLogs(List<SeguimientoLog> logs) { this.logs = logs; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
