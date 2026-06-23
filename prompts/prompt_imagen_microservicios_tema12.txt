@@ -1,0 +1,92 @@
+Crea una infografía técnica en español titulada "Mecanismos de Comunicación en Microservicios — SISEXP-UPLA". La imagen debe tener fondo blanco, estilo estricto y profesional, sin letras ilegibles. Usa colores azul corporativo (#1a365d), blanco y grises.
+
+Incluye 3 columnas principales:
+
+═══════════════════════════════════════════
+COLUMNA 1 — COMUNICACIÓN SÍNCRONA (REST/HTTP)
+═══════════════════════════════════════════
+
+Título: "Síncrona — REST + FeignClient"
+
+Elementos:
+- API Gateway (Spring Cloud Gateway) como punto único de entrada. Cada request externo pasa primero por el Gateway.
+- FeignClient para llamadas entre servicios:
+  * expediente-service → presupuesto-service: GET /api/disponibilidad/{id}
+  * expediente-service → auth-service: GET /api/validate (validar JWT)
+- Verificación de integridad: HTTP status codes (200 OK, 400 Bad Request, 503 Service Unavailable)
+- Retry con Resilience4j: 3 reintentos con backoff exponencial si el servicio destino falla
+
+Diagrama de secuencia simplificado:
+  Cliente → Gateway → auth-service (validar JWT)
+                    → expediente-service (crear expediente)
+                         → presupuesto-service (GET /disponibilidad → 200 {saldo:5000})
+                         ← confirmación
+                    ← 201 Created
+
+Prueba de integración:
+- Postman Collection con flujo completo: login → crear techo → crear POI → crear PAP → crear expediente
+- Assert: cada paso retorna 2xx, los datos se persisten en su DB respectiva
+
+═══════════════════════════════════════════
+COLUMNA 2 — COMUNICACIÓN ASÍNCRONA (EVENTOS)
+═══════════════════════════════════════════
+
+Título: "Asíncrona — RabbitMQ + Eventos"
+
+Elementos:
+- RabbitMQ como message broker central
+- Eventos definidos:
+  * "expediente.cambiado" → {id, estadoAnterior, estadoNuevo, usuario, timestamp}
+  * "expediente.creado" → {id, solicitanteId, codigo, timestamp}
+- notificacion-service como CONSUMIDOR:
+  * Escucha la cola "expediente.eventos"
+  * Al recibir "expediente.cambiado" → crea notificación en DB
+  * Al recibir "expediente.creado" → notifica a coordinación
+- Patrón Saga (coreografía):
+  * Crear expediente: presupuesto-service reserva saldo → confirma → 
+    expediente-service guarda → publica evento
+  * Si falla: evento de compensación libera el saldo reservado
+
+Prueba de eventos:
+- Publicar 100 eventos "expediente.aprobado" en RabbitMQ
+- Verificar que notificacion-service procesa todos sin pérdida
+- Verificar orden de procesamiento por timestamp
+
+═══════════════════════════════════════════
+COLUMNA 3 — DESCUBRIMIENTO Y CONFIGURACIÓN
+═══════════════════════════════════════════
+
+Título: "Discovery & Config"
+
+Elementos:
+- Eureka Server (puerto 8761):
+  * Cada microservicio se registra al iniciar con:
+    spring.application.name=auth-service
+    eureka.client.serviceUrl.defaultZone=http://eureka:8761/eureka
+  * Dashboard muestra servicios UP/DOWN en tiempo real
+- Spring Cloud Config Server:
+  * Repositorio Git con archivos de configuración centralizados
+  * Cada servicio obtiene su config al iniciar: auth-service.yml, 
+    presupuesto-service.yml, etc.
+- Health Checks:
+  * Cada servicio expone /actuator/health
+  * Eureka verifica salud cada 30s
+  * Gateway no enruta a instancias DOWN
+- Prueba: levantar todos los servicios → verificar Eureka dashboard muestra 
+  4 servicios UP
+
+═══════════════════════════════════════════
+TABLA INFERIOR — VERIFICACIÓN
+═══════════════════════════════════════════
+
+Incluye una tabla resumen al pie:
+
+| Mecanismo | Prueba | Herramienta | Resultado Esperado |
+|---|---|---|---|
+| REST/Feign | POST /expedientes → valida saldo en presupuesto | Postman + JUnit | 201 si hay saldo, 400 si no |
+| Retry | Desconectar presupuesto-service 5s | Resilience4j | 3 reintentos, luego CircuitBreaker OPEN |
+| RabbitMQ | Publicar 100 eventos | RabbitMQ Management | 100 mensajes consumidos sin pérdida |
+| Eureka | Levantar 4 servicios | Eureka Dashboard | 4 instancias UP |
+| Actuator | GET /actuator/health | curl | {"status":"UP"} |
+
+Usa iconos simples para cada columna (engranaje para síncrona, rayo para asíncrona, nube para discovery).
