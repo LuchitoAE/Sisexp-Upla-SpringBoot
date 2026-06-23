@@ -22,7 +22,7 @@ public class HorarioLaboralFilter extends OncePerRequestFilter {
     private static final int HORA_FIN = 20;
 
     private static final Set<String> RUTAS_EXENTAS = Set.of(
-            "/login", "/rastreo", "/api", "/api/health",
+            "/login", "/rastreo", "/api", "/api/health", "/health",
             "/error", "/static", "/favicon.ico", "/index.html"
     );
 
