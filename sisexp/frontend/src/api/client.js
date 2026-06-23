@@ -38,7 +38,9 @@ function errorDeRed(err) {
 async function handleResponse(res) {
   if (res.status === 204) return null;
   if (res.status === 401) {
-    window.location.href = '/login';
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
     throw new Error('Sesion expirada');
   }
   if (res.status === 403) {
