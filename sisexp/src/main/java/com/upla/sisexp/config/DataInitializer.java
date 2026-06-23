@@ -10,7 +10,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,6 +30,7 @@ public class DataInitializer implements CommandLineRunner {
     private final ExpedienteRepository expedienteRepo;
     private final SeguimientoLogRepository seguimientoRepo;
     private final NotificacionRepository notificacionRepo;
+    private final DocumentoAdjuntoRepository documentoRepo;
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbc;
 
@@ -38,6 +38,7 @@ public class DataInitializer implements CommandLineRunner {
             TechoPresupuestalRepository techoRepo, ActividadPOIRepository actividadRepo,
             NecesidadPAPRepository necesidadRepo, ExpedienteRepository expedienteRepo,
             SeguimientoLogRepository seguimientoRepo, NotificacionRepository notificacionRepo,
+            DocumentoAdjuntoRepository documentoRepo,
             PasswordEncoder passwordEncoder, JdbcTemplate jdbc) {
         this.rolRepo = rolRepo;
         this.usuarioRepo = usuarioRepo;
@@ -47,6 +48,7 @@ public class DataInitializer implements CommandLineRunner {
         this.expedienteRepo = expedienteRepo;
         this.seguimientoRepo = seguimientoRepo;
         this.notificacionRepo = notificacionRepo;
+        this.documentoRepo = documentoRepo;
         this.passwordEncoder = passwordEncoder;
         this.jdbc = jdbc;
     }
@@ -77,8 +79,9 @@ public class DataInitializer implements CommandLineRunner {
         seedSeguimientoLogs(expedientes, usuarios);
         seedNotificaciones(usuarios, expedientes);
 
-        log.info("=== Seed completado: {} roles, {} usuarios, {} techos, {} POI ===",
-                roles.size(), usuarios.size(), techos.size(), actividades.size());
+        log.info("=== Seed completado: {} roles, {} usuarios, {} techos, {} POI, {} PAP, {} expedientes ===",
+                roles.size(), usuarios.size(), techos.size(), actividades.size(),
+                necesidades.size(), expedientes.size());
     }
 
     private List<Rol> seedRoles() {
@@ -175,11 +178,11 @@ public class DataInitializer implements CommandLineRunner {
         List<ActividadPOI> vigentes2026 = actividadRepo.saveAll(List.of(
                 crearPOI("POI-2.01", "Mantenimiento de infraestructura electrica", bd(7500), bd(0), bd(0),
                         LocalDate.of(2026, 5, 31), EstadoActividad.Pendiente, false, t2026),
-                crearPOI("POI-2.02", "Equipamiento de laboratorios de computo", bd(15000), bd(3600), bd(0),
+                crearPOI("POI-2.02", "Equipamiento de laboratorios de computo", bd(15000), bd(2000), bd(7500),
                         LocalDate.of(2026, 8, 31), EstadoActividad.En_Ejecucion, false, t2026),
                 crearPOI("POI-2.03", "Renovacion de software academico", bd(10000), bd(0), bd(0),
                         LocalDate.of(2026, 7, 31), EstadoActividad.Pendiente, false, t2026),
-                crearPOI("POI-2.04", "Organizacion de congreso institucional", bd(8000), bd(0), bd(3750),
+                crearPOI("POI-2.04", "Organizacion de congreso institucional", bd(8000), bd(0), bd(0),
                         LocalDate.of(2026, 9, 30), EstadoActividad.En_Ejecucion, false, t2026),
                 crearPOI("POI-2.05", "Mejoramiento de aulas y pabellones", bd(9000), bd(0), bd(0),
                         LocalDate.of(2026, 11, 30), EstadoActividad.Pendiente, false, t2026)
@@ -208,7 +211,20 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private List<NecesidadPAP> seedNecesidades(List<ActividadPOI> actividades) {
-        return List.of();
+        log.info("Insertando necesidades PAP...");
+        ActividadPOI poiComp = actividadPorCodigo(actividades, "POI-2.02");
+        ActividadPOI poiCong = actividadPorCodigo(actividades, "POI-2.04");
+
+        return necesidadRepo.saveAll(List.of(
+                crearPAP("Computadoras Core i7", 10, bd(3500), "UNIDAD", "Lab. Computo 02",
+                        Naturaleza.Bien, "2.3.1.2.1.1", 7, bd(24500), 3, bd(10500), poiComp),
+                crearPAP("Proyectores HD 4K", 5, bd(2000), "UNIDAD", "Lab. Computo 02",
+                        Naturaleza.Bien, "2.3.1.2.1.1", 3, bd(6000), 2, bd(4000), poiComp),
+                crearPAP("Servicio de catering", 1, bd(3750), "SERVICIO", "Oficina de Eventos",
+                        Naturaleza.Servicio, "2.3.2.5.1.1", 1, bd(3750), 0, bd(0), poiCong),
+                crearPAP("Material de oficina", 100, bd(25), "UNIDAD", "Almacen Central",
+                        Naturaleza.Bien, "2.3.1.2.1.1", 100, bd(2500), 0, bd(0), poiCong)
+        ));
     }
 
     private NecesidadPAP crearPAP(String nombre, int cantidad, BigDecimal precioEstimado,
@@ -233,7 +249,43 @@ public class DataInitializer implements CommandLineRunner {
 
     private List<Expediente> seedExpedientes(List<ActividadPOI> actividades,
             List<NecesidadPAP> necesidades, List<Usuario> usuarios) {
-        return List.of();
+        log.info("Insertando expedientes de prueba...");
+        ActividadPOI poiComp = actividadPorCodigo(actividades, "POI-2.02");
+        NecesidadPAP papComp = necesidadPorNombre(necesidades, "Computadoras Core i7");
+        NecesidadPAP papProy = necesidadPorNombre(necesidades, "Proyectores HD 4K");
+
+        Usuario jefe = usuarioPorEmail(usuarios, "jefe@upla.edu.pe");
+        Usuario coord = usuarioPorEmail(usuarios, "coord@upla.edu.pe");
+        Usuario secretaria = usuarioPorEmail(usuarios, "secretaria@upla.edu.pe");
+        Usuario director = usuarioPorEmail(usuarios, "director@upla.edu.pe");
+        Usuario lab = usuarioPorEmail(usuarios, "lab@upla.edu.pe");
+
+        return expedienteRepo.saveAll(List.of(
+                crearExpediente("EXP-2026-0001", poiComp, papComp, lab,
+                        Urgencia.Urgente, Naturaleza.Bien,
+                        "Renovacion de 3 computadoras del Lab. Computo 02 por fallas de hardware",
+                        EstadoExpediente.Finalizado, null, 3, bd(10500)),
+                crearExpediente("EXP-2026-0002", poiComp, papProy, director,
+                        Urgencia.No_tan_urgente, Naturaleza.Bien,
+                        "Adquisicion de 1 proyector 4K para sala de conferencias",
+                        EstadoExpediente.En_revision, null, 1, bd(2000)),
+                crearExpediente("EXP-2026-0003", poiComp, papComp, lab,
+                        Urgencia.Urgente, Naturaleza.Bien,
+                        "Compra de 1 computadora adicional para nuevo docente investigador",
+                        EstadoExpediente.Aprobado, null, 1, bd(3500)),
+                crearExpediente("EXP-2026-0004", poiComp, papProy, secretaria,
+                        Urgencia.Puede_esperar, Naturaleza.Bien,
+                        "Solicitud de 2 proyectores para pabellon B — requiere cotizacion actualizada",
+                        EstadoExpediente.Observado, "Falta adjuntar cotizacion actualizada del proveedor", 2, bd(4000)),
+                crearExpediente("EXP-2026-0005", poiComp, papComp, director,
+                        Urgencia.Urgente, Naturaleza.Bien,
+                        "Adquisicion de microscopio binocular para practicas de biologia celular",
+                        EstadoExpediente.Borrador, null, 1, bd(2500)),
+                crearExpediente("EXP-2026-0006", poiComp, papProy, lab,
+                        Urgencia.Urgente, Naturaleza.Bien,
+                        "Proyector para Laboratorio de Fisica — reemplazo por equipo danado",
+                        EstadoExpediente.Rechazado, "Presupuesto insuficiente para este periodo fiscal", 1, bd(2000))
+        ));
     }
 
     private Expediente crearExpediente(String codigo, ActividadPOI poi, NecesidadPAP pap,
@@ -256,6 +308,34 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedSeguimientoLogs(List<Expediente> expedientes, List<Usuario> usuarios) {
+        log.info("Insertando historial de seguimiento...");
+        Usuario lab = usuarioPorEmail(usuarios, "lab@upla.edu.pe");
+        Usuario coord = usuarioPorEmail(usuarios, "coord@upla.edu.pe");
+        Usuario secretaria = usuarioPorEmail(usuarios, "secretaria@upla.edu.pe");
+
+        Expediente e1 = expedientePorCodigo(expedientes, "EXP-2026-0001");
+        Expediente e2 = expedientePorCodigo(expedientes, "EXP-2026-0002");
+        Expediente e3 = expedientePorCodigo(expedientes, "EXP-2026-0003");
+        Expediente e4 = expedientePorCodigo(expedientes, "EXP-2026-0004");
+
+        seguimientoRepo.saveAll(List.of(
+                crearLog(e1, null, "Borrador", lab, "Expediente creado", dt(2026, 3, 10)),
+                crearLog(e1, "Borrador", "En_revision", coord, "Enviado a revision", dt(2026, 3, 11)),
+                crearLog(e1, "En_revision", "Aprobado", coord, "Cumple con los requisitos", dt(2026, 3, 12)),
+                crearLog(e1, "Aprobado", "Finalizado", secretaria, "Ejecutado satisfactoriamente", dt(2026, 3, 15)),
+
+                crearLog(e2, null, "Borrador", usuarios.get(3), "Expediente creado", dt(2026, 4, 1)),
+                crearLog(e2, "Borrador", "En_revision", coord, "Enviado a revision por Direccion", dt(2026, 4, 2)),
+
+                crearLog(e3, null, "Borrador", lab, "Expediente creado", dt(2026, 4, 20)),
+                crearLog(e3, "Borrador", "En_revision", coord, "Enviado a revision", dt(2026, 4, 21)),
+                crearLog(e3, "En_revision", "Aprobado", coord, "Presupuesto verificado y aprobado", dt(2026, 4, 22)),
+
+                crearLog(e4, null, "Borrador", secretaria, "Expediente creado", dt(2026, 5, 5)),
+                crearLog(e4, "Borrador", "En_revision", coord, "Enviado a revision", dt(2026, 5, 6)),
+                crearLog(e4, "En_revision", "Observado", coord,
+                        "Falta adjuntar cotizacion actualizada del proveedor", dt(2026, 5, 7))
+        ));
     }
 
     private SeguimientoLog crearLog(Expediente e, String estadoAnterior, String estadoNuevo,
@@ -271,6 +351,31 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedNotificaciones(List<Usuario> usuarios, List<Expediente> expedientes) {
+        log.info("Insertando notificaciones...");
+        Usuario lab = usuarioPorEmail(usuarios, "lab@upla.edu.pe");
+        Usuario coord = usuarioPorEmail(usuarios, "coord@upla.edu.pe");
+        Usuario director = usuarioPorEmail(usuarios, "director@upla.edu.pe");
+        Usuario secretaria = usuarioPorEmail(usuarios, "secretaria@upla.edu.pe");
+
+        Expediente e1 = expedientePorCodigo(expedientes, "EXP-2026-0001");
+        Expediente e2 = expedientePorCodigo(expedientes, "EXP-2026-0002");
+        Expediente e3 = expedientePorCodigo(expedientes, "EXP-2026-0003");
+        Expediente e4 = expedientePorCodigo(expedientes, "EXP-2026-0004");
+
+        notificacionRepo.saveAll(List.of(
+                crearNotif(lab, "Su expediente EXP-2026-0001 ha sido aprobado",
+                        TipoNotificacion.aprobacion, e1),
+                crearNotif(lab, "Su expediente EXP-2026-0003 ha sido aprobado",
+                        TipoNotificacion.aprobacion, e3),
+                crearNotif(coord, "EXP-2026-0002 requiere revision",
+                        TipoNotificacion.info, e2),
+                crearNotif(director, "EXP-2026-0002 ha sido enviado a revision",
+                        TipoNotificacion.info, e2),
+                crearNotif(secretaria, "EXP-2026-0004 tiene observaciones",
+                        TipoNotificacion.observacion, e4),
+                crearNotif(lab, "Alerta: actividad POI-2.02 proxima a vencer (31/08/2026)",
+                        TipoNotificacion.alerta_fecha, null)
+        ));
     }
 
     private Notificacion crearNotif(Usuario usuario, String mensaje,
