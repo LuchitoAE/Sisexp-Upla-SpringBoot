@@ -121,9 +121,14 @@ const serviceDefs = [
   { id:'rabbitmq', title:'RabbitMQ', port:':5672', x:810, y:510, icon:'&#128012;', cls:'broker', tech:['RabbitMQ 3','AMQP'] }
 ];
 
-const apiServices = ['AUTH-SERVICE','PRESUPUESTO-SERVICE','EXPEDIENTE-SERVICE','NOTIFICACION-SERVICE'];
-const infraIds = ['api-gateway','eureka-server','auth-db','presupuesto-db','expediente-db','notificacion-db','rabbitmq','nginx'];
-
+const apiKeyToId = {
+  'AUTH-SERVICE':'auth-service','PRESUPUESTO-SERVICE':'presupuesto-service',
+  'EXPEDIENTE-SERVICE':'expediente-service','NOTIFICACION-SERVICE':'notificacion-service',
+  'API-GATEWAY':'api-gateway','EUREKA-SERVER':'eureka-server','NGINX':'nginx'
+};
+const allServiceIds = Object.values(apiKeyToId);
+const dbNodes = { 'auth-db':'AUTH-SERVICE','presupuesto-db':'PRESUPUESTO-SERVICE',
+  'expediente-db':'EXPEDIENTE-SERVICE','notificacion-db':'NOTIFICACION-SERVICE' };
 const statuses = {};
 let paused = false;
 let selected = null;
@@ -159,12 +164,7 @@ function findDef(id) { return serviceDefs.find(d => d.id === id); }
 function getEl(id) { return document.getElementById('node-'+id); }
 
 function nodeStatus(id) {
-  if (apiServices.includes(id)) return (statuses[id] && statuses[id].status) || 'UNKNOWN';
-  if (infraIds.includes(id)) {
-    if (id === 'api-gateway') return 'UP';
-    if (id === 'eureka-server') return (statuses[id] || 'UNKNOWN');
-    return 'UNKNOWN';
-  }
+  if (statuses[id]) return statuses[id].status || 'UNKNOWN';
   return 'UNKNOWN';
 }
 
@@ -311,17 +311,32 @@ async function pollNow() {
     document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
 
     let up = 0, down = 0;
-    apiServices.forEach(svc => {
-      if (data[svc]) {
-        statuses[svc] = data[svc];
-        updateDot(svc, data[svc].status);
-        if (data[svc].status === 'UP') up++; else down++;
+    for (const [apiKey, nodeId] of Object.entries(apiKeyToId)) {
+      const svc = data[apiKey];
+      if (svc) {
+        statuses[nodeId] = { status: svc.status, host: svc.host, port: svc.port, instances: svc.instances, components: svc.components, detail: svc.detail };
+        updateDot(nodeId, svc.status);
+        if (svc.status === 'UP') up++; else down++;
       } else {
-        statuses[svc] = { status: 'DOWN', detail: 'No response' };
-        updateDot(svc, 'DOWN');
+        statuses[nodeId] = { status: 'UNKNOWN', detail: 'Sin datos' };
+        updateDot(nodeId, 'UNKNOWN');
         down++;
       }
-    });
+    }
+
+    // DB nodes from service components
+    for (const [dbId, svcKey] of Object.entries(dbNodes)) {
+      const svcData = data[svcKey];
+      const dbStatus = svcData?.components?.db === 'UP' ? 'UP' : (svcData ? 'DOWN' : 'UNKNOWN');
+      statuses[dbId] = { status: dbStatus };
+      updateDot(dbId, dbStatus);
+    }
+
+    // RabbitMQ from expediente components
+    const rHealth = data['EXPEDIENTE-SERVICE']?.components?.rabbit || data['NOTIFICACION-SERVICE']?.components?.rabbit;
+    const rStatus = rHealth === 'UP' ? 'UP' : (rHealth ? 'DOWN' : 'UNKNOWN');
+    statuses['rabbitmq'] = { status: rStatus };
+    updateDot('rabbitmq', rStatus);
 
     if (data.summary) {
       document.getElementById('summary-badge').textContent = data.summary.healthy ? 'Todo Healthy' : 'Problemas Detectados';
@@ -331,29 +346,14 @@ async function pollNow() {
     document.getElementById('stat-up').textContent = 'UP: ' + up;
     document.getElementById('stat-down').textContent = 'DOWN: ' + down;
 
-    // Update infra nodes
-    updateDot('eureka-server', 'UP');
-    updateDot('api-gateway', 'UP');
-    updateDot('rabbitmq', up >= 2 ? 'UP' : 'UNKNOWN');
-
-    const dbUp = data['AUTH-SERVICE']?.components?.db === 'UP';
-    updateDot('auth-db', dbUp ? 'UP' : 'UNKNOWN');
-    const pdbUp = data['PRESUPUESTO-SERVICE']?.components?.db === 'UP';
-    updateDot('presupuesto-db', pdbUp ? 'UP' : 'UNKNOWN');
-    const edbUp = data['EXPEDIENTE-SERVICE']?.components?.db === 'UP';
-    updateDot('expediente-db', edbUp ? 'UP' : 'UNKNOWN');
-    const ndbUp = data['NOTIFICACION-SERVICE']?.components?.db === 'UP';
-    updateDot('notificacion-db', ndbUp ? 'UP' : 'UNKNOWN');
-
     if (selected) showDetail(selected);
   } catch(e) {
     document.getElementById('stat-latency').textContent = 'Lat: ERR';
     document.getElementById('timestamp').textContent = 'Error: ' + e.message;
-    apiServices.forEach(svc => updateDot(svc, 'DOWN'));
+    allServiceIds.forEach(id => { statuses[id] = { status: 'DOWN' }; updateDot(id, 'DOWN'); });
     document.getElementById('summary-badge').textContent = 'API Gateway OFFLINE';
     document.getElementById('summary-badge').style.background = '#3a1a1a';
     document.getElementById('summary-badge').style.color = '#ef4444';
-    updateDot('api-gateway', 'DOWN');
   }
 }
 

@@ -20,7 +20,7 @@ import java.util.List;
 public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     private final SecretKey key;
-    private static final List<String> RUTAS_EXENTAS = List.of("/api/auth/login", "/api/health", "/api/rastreo", "/api/status");
+    private static final List<String> RUTAS_EXENTAS = List.of("/api/auth/login", "/api/health", "/api/expedientes/rastreo", "/api/status");
 
     public JwtAuthFilter(@Value("${jwt.secret}") String secret) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
