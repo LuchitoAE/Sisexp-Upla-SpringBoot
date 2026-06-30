@@ -1,131 +1,126 @@
-# SISEXP-UPLA
+# SISEXP-UPLA — Microservicios
 
 Sistema de Seguimiento y Control de Expedientes — Universidad Peruana Los Andes
 
-Spring Boot 3.4.1 + React 19 SPA + PostgreSQL
+Arquitectura de microservicios con 12 contenedores Docker Compose. Proyecto final del curso Arquitectura de Software (VIII Ciclo).
+
+---
 
 ## Stack
 
-| Capa | Tecnología |
-|---|---|
-| Backend | Spring Boot 3.4.1, Java 17, Spring Security, JPA |
-| Frontend | React 19, React Router 6, CSS nativo |
-| BD | PostgreSQL (prod Railway), H2 (dev local) |
-| Deploy | Railway + Docker multi-stage |
+| Capa | Tecnologia |
+|:-----|:-----------|
+| Backend | Spring Boot 3.4.1, Java 17, Spring Cloud, JWT |
+| Frontend | React 19 SPA + NGINX |
+| BD | PostgreSQL 16-alpine (4 instancias: 5433-5436) |
+| Mensajeria | RabbitMQ 3-management-alpine |
+| Service Discovery | Netflix Eureka |
+| API Gateway | Spring Cloud Gateway |
+| Contenedores | Docker + Docker Compose (12) |
 
-## Estructura
+---
+
+## Arquitectura
 
 ```
-sisexp/
-├── src/main/java/com/upla/sisexp/
-│   ├── api/           # REST controllers (/api/**)
-│   ├── config/        # Security, CORS, DataInitializer
-│   ├── security/      # JWT, CustomUserDetails, HorarioLaboralFilter
-│   ├── model/         # 11 entidades JPA
-│   ├── enums/         # Estados, roles, tipos
-│   ├── repository/    # Spring Data JPA
-│   ├── dto/           # DTOs
-│   └── service/       # Lógica de negocio
-├── frontend/          # React SPA (embebido en JAR)
-└── Dockerfile         # 3-stage: Node → Maven → JRE alpine
+nginx (:80) → api-gateway (:8080) → eureka (:8761)
+                                   ├── auth-service        (:8081) + PostgreSQL (:5433)
+                                   ├── presupuesto-service (:8082) + PostgreSQL (:5434)
+                                   ├── expediente-service  (:8083) + PostgreSQL (:5435) + RabbitMQ
+                                   └── notificacion-service(:8084) + PostgreSQL (:5436) + RabbitMQ
 ```
 
-## URLs
+---
 
-| Entorno | URL |
-|---|---|
-| Producción | https://sisexp-web-production.up.railway.app |
-| Login | https://sisexp-web-production.up.railway.app/login |
-
-## Credenciales seed
-
-| Usuario | Contraseña | Rol |
-|---|---|---|
-| jefe@upla.edu.pe | jefe123 | Administrador |
-| coord@upla.edu.pe | coord123 | Coordinacion |
-| secretaria@upla.edu.pe | secretaria123 | Secretaria |
-| director@upla.edu.pe | director123 | Director |
-| lab@upla.edu.pe | lab123 | Laboratorio |
-| decanato@upla.edu.pe | decanato123 | Decanato |
-
-## Guía para colaboradores
-
-### Requisitos
-
-- Git instalado ([git-scm.com](https://git-scm.com))
-- Cuenta en GitHub
-- Java 17, Node 18+ y pnpm (solo si se trabaja local)
-
-### 1. Clonar el repositorio
+## Inicio rapido
 
 ```bash
-git clone https://github.com/LuchitoAE/Sisexp-Upla-SpringBoot.git
-cd Sisexp-Upla-SpringBoot
+# Construir y levantar
+docker compose build
+docker compose up -d
+
+# Ver estado
+docker compose ps
+
+# Logs de un servicio
+docker compose logs -f auth-service
+
+# Detener
+docker compose down
+
+# Reconstruir frontend
+cd frontend && pnpm install && pnpm run build && cd ..
+docker compose build nginx && docker compose up -d nginx
 ```
 
-### 2. Hacer cambios
+---
 
-Editar los archivos necesarios. El código está en `sisexp/`:
-- Backend: `sisexp/src/main/java/com/upla/sisexp/`
-- Frontend: `sisexp/frontend/src/`
+## Acceso
 
-### 3. Enviar cambios a GitHub
+| URL | Que es |
+|:----|:-------|
+| `http://localhost` | SISEXP-UPLA React SPA (login, dashboard, CRUD) |
+| `http://localhost/monitor` | Dashboard de monitoreo (12 nodos en tiempo real) |
+| `http://localhost/api/status` | API: estado de los 4 servicios |
+| `http://localhost:8761` | Eureka Dashboard |
+| `http://localhost:15672` | RabbitMQ Management (sisexp/sisexp) |
 
-```bash
-# Ver qué archivos se modificaron
-git status
+### Credenciales
 
-# Agregar archivos al stage
-git add sisexp/src/.../Archivo.java
+| Rol | Email | Password |
+|:----|:------|:---------|
+| Admin | jefe@upla.edu.pe | jefe123 |
+| Coord | coord@upla.edu.pe | coord123 |
+| Secretaria | secretaria@upla.edu.pe | secretaria123 |
+| Director | director@upla.edu.pe | director123 |
+| Lab | lab@upla.edu.pe | lab123 |
+| Decanato | decanato@upla.edu.pe | decanato123 |
 
-# Guardar en historial local con mensaje descriptivo
-git commit -m "fix: descripcion corta de lo que se arreglo"
+---
 
-# Subir a GitHub
-git push origin master
+## Estructura del proyecto
+
+```
+├── microservicios/
+│   ├── api-gateway/           # Spring Cloud Gateway + JWT filter
+│   ├── auth-service/          # Login JWT, usuarios, roles
+│   ├── eureka-server/         # Netflix Eureka
+│   ├── expediente-service/    # CRUD expedientes + RabbitMQ publisher
+│   ├── notificacion-service/  # Notificaciones + RabbitMQ consumer
+│   ├── presupuesto-service/   # Techos, POI, PAP, saldos
+│   └── sisexp-common/         # DTOs, enums, excepciones compartidas
+├── frontend/                  # React 19 SPA + NGINX + dashboard monitor
+├── docs/                      # Documentacion y diagramas
+├── .opencode/skills/          # 18 skills para AI agents
+├── docker-compose.yml         # 12 contenedores
+└── pom.xml                    # Parent POM multi-modulo
 ```
 
-Al hacer `push`, Railway detecta el cambio y redeploya automáticamente.
+---
 
-### ¿Y si hay conflictos?
+## API Endpoints
 
-Si otra persona subió cambios mientras trabajabas:
+| Metodo | Ruta | Servicio | Auth |
+|:-------|:-----|:---------|:----:|
+| POST | /api/auth/login | auth-service | No |
+| GET | /api/auth/me | auth-service | JWT |
+| GET | /api/usuarios | auth-service | Admin |
+| GET | /api/techos-presupuestales | presupuesto-service | JWT |
+| GET | /api/actividades-poi | presupuesto-service | JWT |
+| GET | /api/necesidades-pap | presupuesto-service | JWT |
+| GET | /api/expedientes | expediente-service | JWT |
+| POST | /api/expedientes | expediente-service | JWT |
+| PUT | /api/expedientes/{id}/estado | expediente-service | JWT |
+| GET | /api/notificaciones | notificacion-service | JWT |
+| GET | /api/status | auth-service | No |
 
-```bash
-# Bajar cambios remotos
-git pull origin master
+---
 
-# Si hay conflicto, Git lo marca en el archivo con <<<<<<< ======= >>>>>>>
-# Editar el archivo para resolverlo, luego:
-git add archivo-con-conflicto.java
-git commit -m "fix: resolver conflicto"
-git push origin master
-```
+## Documentacion
 
-### Convención de mensajes
-
-| Prefijo | Uso |
-|---|---|
-| `fix:` | Corrección de bug |
-| `feat:` | Nueva funcionalidad |
-| `docs:` | Documentación |
-
-### Pull Request
-
-Si prefieres que alguien revise antes de hacer merge:
-
-1. Crear rama: `git checkout -b mi-cambio`
-2. Push: `git push origin mi-cambio`
-3. Ir a https://github.com/LuchitoAE/Sisexp-Upla-SpringBoot/pulls
-4. **New pull request** → `mi-cambio` → `master`
-5. Escribir descripción de los cambios
-6. El dueño revisa, aprueba y hace merge
-
-## Variables de entorno
-
-| Variable | Descripción |
-|---|---|
-| `SPRING_DATASOURCE_URL` | JDBC URL PostgreSQL |
-| `SPRING_DATASOURCE_USERNAME` | Usuario BD |
-| `SPRING_DATASOURCE_PASSWORD` | Password BD |
-| `JWT_SECRET` | Llave secreta JWT |
+| Archivo | Descripcion |
+|:--------|:------------|
+| `docs/INFORME_MICROSERVICIOS_SISEXP.md` | Documentacion completa de arquitectura |
+| `docs/INFORME_MICROSERVICIOS_SISEXP.docx` | Version Word |
+| `docs/diagramas/microservicios-arquitectura.html` | Diagrama interactivo offline |
+| `AGENTS.md` | Guia para AI agents + skills disponibles |
