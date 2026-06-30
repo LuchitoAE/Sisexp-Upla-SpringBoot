@@ -17,13 +17,13 @@
     <name>SISEXP Microservicios</name>
 
     <modules>
-        <module>sisexp-common</module>
-        <module>eureka-server</module>
-        <module>auth-service</module>
-        <module>presupuesto-service</module>
-        <module>expediente-service</module>
-        <module>notificacion-service</module>
-        <module>api-gateway</module>
+        <module>microservicios/sisexp-common</module>
+        <module>microservicios/eureka-server</module>
+        <module>microservicios/auth-service</module>
+        <module>microservicios/presupuesto-service</module>
+        <module>microservicios/expediente-service</module>
+        <module>microservicios/notificacion-service</module>
+        <module>microservicios/api-gateway</module>
     </modules>
 
     <properties>

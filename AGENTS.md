@@ -95,35 +95,38 @@ docker compose build nginx && docker compose up -d nginx
 ## Estructura de Paquetes (por servicio)
 
 ```
-auth-service/src/main/java/com/upla/sisexp/auth/
-├── config/           # SecurityConfig, DataInitializer
-├── security/         # JwtTokenProvider, JwtAuthFilter
-├── model/            # Usuario (JPA entity)
-├── enums/            # RolUsuario
-├── repository/       # UsuarioRepository
-├── service/          # AuthService
-└── controller/       # ApiAuthController, ApiUsuarioController, StatusController
-
-presupuesto-service/src/main/java/com/upla/sisexp/presupuesto/
-├── config/
-├── model/            # TechoPresupuestal, ActividadPOI, NecesidadPAP
-├── repository/
-├── service/
-└── controller/       # ApiTecho, ApiActividadPOI, ApiNecesidadPAP, ApiSaldoInterno
-
-expediente-service/src/main/java/com/upla/sisexp/expediente/
-├── config/           # RabbitMQConfig
-├── model/            # Expediente, SeguimientoLog, DocumentoAdjunto
-├── repository/
-├── service/          # Publica eventos a RabbitMQ
-└── controller/       # ApiExpedienteController
-
-notificacion-service/src/main/java/com/upla/sisexp/notificacion/
-├── config/           # RabbitMQ consumer config
-├── model/            # Notificacion
-├── repository/
-├── service/          # Consumer de eventos RabbitMQ
-└── controller/       # ApiNotificacionController
+microservicios/
+├── sisexp-common/         # DTOs, enums, excepciones compartidas
+├── eureka-server/         # Netflix Eureka (Service Discovery)
+├── api-gateway/           # Spring Cloud Gateway + JWT filter
+├── auth-service/
+│   └── src/main/java/com/upla/sisexp/auth/
+│       ├── config/         # SecurityConfig, DataInitializer
+│       ├── security/       # JwtTokenProvider, JwtAuthFilter
+│       ├── model/          # Usuario (JPA entity)
+│       ├── repository/     # UsuarioRepository
+│       ├── service/        # AuthService
+│       └── controller/     # ApiAuthController, ApiUsuarioController, StatusController
+├── presupuesto-service/
+│   └── src/main/java/com/upla/sisexp/presupuesto/
+│       ├── model/          # TechoPresupuestal, ActividadPOI, NecesidadPAP
+│       ├── repository/
+│       ├── service/
+│       └── controller/     # ApiTecho, ApiActividadPOI, ApiNecesidadPAP, ApiSaldoInterno
+├── expediente-service/
+│   └── src/main/java/com/upla/sisexp/expediente/
+│       ├── config/         # RabbitMQConfig
+│       ├── model/          # Expediente, SeguimientoLog, DocumentoAdjunto
+│       ├── repository/
+│       ├── service/        # Publica eventos a RabbitMQ
+│       └── controller/     # ApiExpedienteController
+└── notificacion-service/
+    └── src/main/java/com/upla/sisexp/notificacion/
+        ├── config/         # RabbitMQ consumer config
+        ├── model/          # Notificacion
+        ├── repository/
+        ├── service/        # Consumer de eventos RabbitMQ
+        └── controller/     # ApiNotificacionController
 ```
 
 ---

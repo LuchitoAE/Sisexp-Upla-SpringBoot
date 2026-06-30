@@ -18,7 +18,7 @@ services:
   eureka-server:
     build:
       context: .
-      dockerfile: ./eureka-server/Dockerfile
+      dockerfile: ./microservicios/eureka-server/Dockerfile
     container_name: sisexp-eureka
     ports: ["8761:8761"]
     networks: [sisexp-net]
@@ -107,7 +107,7 @@ services:
   auth-service:
     build:
       context: .
-      dockerfile: ./auth-service/Dockerfile
+      dockerfile: ./microservicios/auth-service/Dockerfile
     container_name: sisexp-auth-service
     ports: ["8081:8081"]
     depends_on:
@@ -131,7 +131,7 @@ services:
   presupuesto-service:
     build:
       context: .
-      dockerfile: ./presupuesto-service/Dockerfile
+      dockerfile: ./microservicios/presupuesto-service/Dockerfile
     container_name: sisexp-presupuesto-service
     ports: ["8082:8082"]
     depends_on:
@@ -154,7 +154,7 @@ services:
   expediente-service:
     build:
       context: .
-      dockerfile: ./expediente-service/Dockerfile
+      dockerfile: ./microservicios/expediente-service/Dockerfile
     container_name: sisexp-expediente-service
     ports: ["8083:8083"]
     depends_on:
@@ -181,7 +181,7 @@ services:
   notificacion-service:
     build:
       context: .
-      dockerfile: ./notificacion-service/Dockerfile
+      dockerfile: ./microservicios/notificacion-service/Dockerfile
     container_name: sisexp-notificacion-service
     ports: ["8084:8084"]
     depends_on:
@@ -208,7 +208,7 @@ services:
   api-gateway:
     build:
       context: .
-      dockerfile: ./api-gateway/Dockerfile
+      dockerfile: ./microservicios/api-gateway/Dockerfile
     container_name: sisexp-api-gateway
     ports: ["8080:8080"]
     depends_on:
