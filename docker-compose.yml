@@ -1,37 +1,231 @@
-version: "3.8"
-
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: sisexp-db
-    environment:
-      POSTGRES_DB: sisexp_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+  nginx:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sisexp-nginx
+    ports: ["80:80"]
+    depends_on:
+      api-gateway: {condition: service_healthy}
+    networks: [sisexp-net]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: ./eureka-server/Dockerfile
+    container_name: sisexp-eureka
+    ports: ["8761:8761"]
+    networks: [sisexp-net]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: sisexp-rabbitmq
+    ports: ["5672:5672", "15672:15672"]
+    networks: [sisexp-net]
+    environment:
+      RABBITMQ_DEFAULT_USER: sisexp
+      RABBITMQ_DEFAULT_PASS: sisexp
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 15s
       timeout: 5s
       retries: 5
+      start_period: 20s
 
-  sisexp-app:
-    build:
-      context: ./sisexp
-      dockerfile: Dockerfile
-    container_name: sisexp-app
-    ports:
-      - "8080:8080"
+  auth-db:
+    image: postgres:16-alpine
+    container_name: sisexp-auth-db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sisexp_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-    depends_on:
-      postgres:
-        condition: service_healthy
+      POSTGRES_DB: auth_db
+      POSTGRES_PASSWORD: sisexp
+    ports: ["5433:5432"]
+    networks: [sisexp-net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
-volumes:
-  pgdata:
+  presupuesto-db:
+    image: postgres:16-alpine
+    container_name: sisexp-presupuesto-db
+    environment:
+      POSTGRES_DB: presupuesto_db
+      POSTGRES_PASSWORD: sisexp
+    ports: ["5434:5432"]
+    networks: [sisexp-net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d presupuesto_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  expediente-db:
+    image: postgres:16-alpine
+    container_name: sisexp-expediente-db
+    environment:
+      POSTGRES_DB: expediente_db
+      POSTGRES_PASSWORD: sisexp
+    ports: ["5435:5432"]
+    networks: [sisexp-net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d expediente_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  notificacion-db:
+    image: postgres:16-alpine
+    container_name: sisexp-notificacion-db
+    environment:
+      POSTGRES_DB: notific_db
+      POSTGRES_PASSWORD: sisexp
+    ports: ["5436:5432"]
+    networks: [sisexp-net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notific_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: ./auth-service/Dockerfile
+    container_name: sisexp-auth-service
+    ports: ["8081:8081"]
+    depends_on:
+      eureka-server: {condition: service_healthy}
+      auth-db: {condition: service_healthy}
+    networks: [sisexp-net]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: sisexp
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      JWT_SECRET: SisexpJwtSecret2026MicroservicesKey!
+      JWT_EXPIRATION: 86400000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  presupuesto-service:
+    build:
+      context: .
+      dockerfile: ./presupuesto-service/Dockerfile
+    container_name: sisexp-presupuesto-service
+    ports: ["8082:8082"]
+    depends_on:
+      eureka-server: {condition: service_healthy}
+      presupuesto-db: {condition: service_healthy}
+    networks: [sisexp-net]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://presupuesto-db:5432/presupuesto_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: sisexp
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      JWT_SECRET: SisexpJwtSecret2026MicroservicesKey!
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  expediente-service:
+    build:
+      context: .
+      dockerfile: ./expediente-service/Dockerfile
+    container_name: sisexp-expediente-service
+    ports: ["8083:8083"]
+    depends_on:
+      eureka-server: {condition: service_healthy}
+      expediente-db: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+    networks: [sisexp-net]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://expediente-db:5432/expediente_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: sisexp
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      JWT_SECRET: SisexpJwtSecret2026MicroservicesKey!
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: sisexp
+      SPRING_RABBITMQ_PASSWORD: sisexp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  notificacion-service:
+    build:
+      context: .
+      dockerfile: ./notificacion-service/Dockerfile
+    container_name: sisexp-notificacion-service
+    ports: ["8084:8084"]
+    depends_on:
+      eureka-server: {condition: service_healthy}
+      notificacion-db: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+    networks: [sisexp-net]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notificacion-db:5432/notific_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: sisexp
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      JWT_SECRET: SisexpJwtSecret2026MicroservicesKey!
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: sisexp
+      SPRING_RABBITMQ_PASSWORD: sisexp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./api-gateway/Dockerfile
+    container_name: sisexp-api-gateway
+    ports: ["8080:8080"]
+    depends_on:
+      eureka-server: {condition: service_healthy}
+      auth-service: {condition: service_healthy}
+    networks: [sisexp-net]
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      JWT_SECRET: SisexpJwtSecret2026MicroservicesKey!
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  sisexp-net:
+    driver: bridge
+    name: sisexp-net

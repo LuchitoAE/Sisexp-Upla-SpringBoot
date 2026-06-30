@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SISEXP Monitor — Microservicios en Vivo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0f14;color:#e2e8f0;overflow:hidden;height:100vh}
+#canvas{z-index:1}
+#nodes{position:absolute;top:0;left:0;z-index:2;width:100%;height:100%;pointer-events:none}
+#nodes>*{pointer-events:auto}
+
+.header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,15,20,.9);backdrop-filter:blur(8px);border-bottom:1px solid #1e3350;padding:10px 20px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.header h1 span{color:#22c55e;font-size:12px;background:#1a2a1a;padding:2px 10px;border-radius:10px}
+.header-row{display:flex;gap:10px;align-items:center;font-size:11px}
+.header-row .stat{background:#1a2733;border:1px solid #2d4356;padding:5px 12px;border-radius:8px}
+.header-row .stat.up{color:#4ade80}
+.header-row .stat.down{color:#ef4444}
+.header-row .stat.info{color:#38bdf8}
+
+.node-card{position:absolute;background:linear-gradient(135deg,#162535,#1e3350);border:2px solid #334b64;border-radius:12px;padding:12px 15px;min-width:175px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5);transition:all .3s;font-size:12px}
+.node-card.db{background:linear-gradient(135deg,#1a2a1a,#1e3a1e);border-color:#335533}
+.node-card.broker{background:linear-gradient(135deg,#2a1a3a,#3b1e5f);border-color:#664488}
+.node-card.discovery{background:linear-gradient(135deg,#352015,#5f3520);border-color:#885533}
+.node-card.gateway{background:linear-gradient(135deg,#152535,#1e3360);border-color:#3360aa}
+.node-card:hover{box-shadow:0 6px 28px rgba(0,0,0,.7);z-index:10}
+.node-card.selected{border-color:#38bdf8;box-shadow:0 0 0 4px rgba(56,189,248,.25),0 4px 16px rgba(0,0,0,.5)}
+
+.status-dot{position:absolute;top:10px;right:10px;width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.3);transition:all .5s}
+.status-UP{background:#22c55e;box-shadow:0 0 12px #22c55e}
+.status-DOWN{background:#ef4444;box-shadow:0 0 8px #ef4444}
+.status-UNKNOWN{background:#64748b;box-shadow:0 0 6px #64748b}
+.status-STARTING{background:#eab308;box-shadow:0 0 10px #eab308;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.node-icon{font-size:26px;margin-bottom:4px}
+.node-title{font-weight:700;font-size:13px;color:#e2e8f0}
+.node-port{font-size:10px;color:#7ea8c9;margin:2px 0}
+.node-tech{display:inline-block;font-size:9px;padding:1px 6px;border-radius:6px;margin:2px}
+.node-tech.spring{background:#1e3a5f;color:#60a5fa}
+.node-tech.pg{background:#1a3a1a;color:#4ade80}
+.node-tech.rabbit{background:#3b1e5f;color:#c084fc}
+
+#toolbar{position:fixed;bottom:16px;right:16px;z-index:100;display:flex;gap:6px}
+#toolbar button{background:rgba(22,37,53,.9);border:1px solid #334b64;color:#e2e8f0;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:11px;transition:all .2s}
+#toolbar button:hover{background:#1e3350}
+#toolbar button.paused{background:#3b1e5f;border-color:#c084fc}
+
+#detail{position:fixed;top:70px;right:16px;z-index:100;background:rgba(10,15,20,.92);backdrop-filter:blur(12px);border:1px solid #334b64;border-radius:12px;padding:14px;width:260px;display:none;font-size:11px;line-height:1.6;max-height:70vh;overflow-y:auto}
+#detail.show{display:block}
+#detail h3{color:#38bdf8;margin-bottom:8px}
+#detail .close{position:absolute;top:6px;right:10px;cursor:pointer;color:#94a3b8;font-size:16px}
+#detail .row{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(51,75,100,.15)}
+#detail .row .l{color:#94a3b8}
+#detail .comp{margin-top:6px;font-size:10px}
+#detail .comp .c{display:flex;justify-content:space-between;padding:1px 6px;background:#0a0f14;border-radius:4px;margin:1px 0}
+#detail .comp .c.UP{color:#4ade80}
+#detail .comp .c.DOWN{color:#ef4444}
+
+.legend-bottom{position:fixed;bottom:16px;left:16px;z-index:100;display:flex;gap:14px;font-size:10px;color:#64748b}
+.legend-bottom .lg{display:flex;align-items:center;gap:4px}
+.legend-bottom .dot{width:8px;height:8px;border-radius:50%}
+.legend-bottom .dot.g{background:#22c55e;box-shadow:0 0 4px #22c55e}
+.legend-bottom .dot.r{background:#ef4444;box-shadow:0 0 4px #ef4444}
+.legend-bottom .dot.y{background:#eab308}
+
+.timestamp{position:fixed;top:46px;right:20px;z-index:100;font-size:9px;color:#64748b}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<div id="nodes"></div>
+
+<div class="header">
+  <h1>SISEXP Monitor <span id="summary-badge">Sonando...</span></h1>
+  <div class="header-row">
+    <div class="stat up" id="stat-up">UP: 0</div>
+    <div class="stat down" id="stat-down">DOWN: 0</div>
+    <div class="stat info" id="stat-latency">Lat: --ms</div>
+  </div>
+</div>
+
+<div class="timestamp" id="timestamp"></div>
+
+<div id="detail">
+  <span class="close" onclick="closeDetail()">&times;</span>
+  <h3 id="detail-title"></h3>
+  <div id="detail-body"></div>
+</div>
+
+<div class="legend-bottom">
+  <div class="lg"><span class="dot g"></span> UP</div>
+  <div class="lg"><span class="dot y"></span> Starting</div>
+  <div class="lg"><span class="dot r"></span> DOWN</div>
+</div>
+
+<div id="toolbar">
+  <button onclick="togglePause()" id="btn-pause">Pausar</button>
+  <button onclick="pollNow()">Sondear Ahora</button>
+</div>
+
+<script>
+const API = '/api/status';
+const POLL_MS = 5000;
+
+const serviceDefs = [
+  { id:'nginx', title:'NGINX Frontend', port:':80', x:40, y:180, icon:'&#127760;', cls:'gateway', tech:['nginx'] },
+  { id:'api-gateway', title:'API Gateway', port:':8080', x:280, y:100, icon:'&#9881;', cls:'gateway', tech:['Spring Cloud Gateway','JWT'] },
+  { id:'eureka-server', title:'Eureka Server', port:':8761', x:560, y:40, icon:'&#128269;', cls:'discovery', tech:['Netflix Eureka'] },
+  { id:'auth-service', title:'AUTH-SERVICE', port:':8081', x:540, y:220, icon:'&#128274;', cls:'', tech:['Spring Boot','JPA','Security'] },
+  { id:'presupuesto-service', title:'PRESUPUESTO-SERVICE', port:':8082', x:240, y:330, icon:'&#128200;', cls:'', tech:['Spring Boot','JPA','Feign'] },
+  { id:'expediente-service', title:'EXPEDIENTE-SERVICE', port:':8083', x:500, y:410, icon:'&#128196;', cls:'', tech:['Spring Boot','JPA','RabbitMQ'] },
+  { id:'notificacion-service', title:'NOTIFICACION-SERVICE', port:':8084', x:770, y:300, icon:'&#128276;', cls:'', tech:['Spring Boot','JPA','RabbitMQ'] },
+  { id:'auth-db', title:'PostgreSQL Auth', port:':5433', x:730, y:140, icon:'&#128451;', cls:'db', tech:['PostgreSQL 16'] },
+  { id:'presupuesto-db', title:'PostgreSQL Presup.', port:':5434', x:110, y:440, icon:'&#128451;', cls:'db', tech:['PostgreSQL 16'] },
+  { id:'expediente-db', title:'PostgreSQL Exped.', port:':5435', x:600, y:540, icon:'&#128451;', cls:'db', tech:['PostgreSQL 16'] },
+  { id:'notificacion-db', title:'PostgreSQL Notif.', port:':5436', x:910, y:420, icon:'&#128451;', cls:'db', tech:['PostgreSQL 16'] },
+  { id:'rabbitmq', title:'RabbitMQ', port:':5672', x:810, y:510, icon:'&#128012;', cls:'broker', tech:['RabbitMQ 3','AMQP'] }
+];
+
+const apiServices = ['AUTH-SERVICE','PRESUPUESTO-SERVICE','EXPEDIENTE-SERVICE','NOTIFICACION-SERVICE'];
+const infraIds = ['api-gateway','eureka-server','auth-db','presupuesto-db','expediente-db','notificacion-db','rabbitmq','nginx'];
+
+const statuses = {};
+let paused = false;
+let selected = null;
+
+// Edges
+const edges = [
+  ['nginx','api-gateway','#38bdf8','solid'],
+  ['api-gateway','auth-service','#38bdf8','solid'],
+  ['api-gateway','presupuesto-service','#38bdf8','solid'],
+  ['api-gateway','expediente-service','#38bdf8','solid'],
+  ['api-gateway','notificacion-service','#38bdf8','solid'],
+  ['auth-service','auth-db','#4ade80','dashed'],
+  ['presupuesto-service','presupuesto-db','#4ade80','dashed'],
+  ['expediente-service','expediente-db','#4ade80','dashed'],
+  ['notificacion-service','notificacion-db','#4ade80','dashed'],
+  ['auth-service','eureka-server','#fb923c','dotted'],
+  ['presupuesto-service','eureka-server','#fb923c','dotted'],
+  ['expediente-service','eureka-server','#fb923c','dotted'],
+  ['notificacion-service','eureka-server','#fb923c','dotted'],
+  ['api-gateway','eureka-server','#fb923c','dotted'],
+  ['expediente-service','rabbitmq','#c084fc','dotted'],
+  ['rabbitmq','notificacion-service','#c084fc','dotted']
+];
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize);
+resize();
+
+function findDef(id) { return serviceDefs.find(d => d.id === id); }
+function getEl(id) { return document.getElementById('node-'+id); }
+
+function nodeStatus(id) {
+  if (apiServices.includes(id)) return (statuses[id] && statuses[id].status) || 'UNKNOWN';
+  if (infraIds.includes(id)) {
+    if (id === 'api-gateway') return 'UP';
+    if (id === 'eureka-server') return (statuses[id] || 'UNKNOWN');
+    return 'UNKNOWN';
+  }
+  return 'UNKNOWN';
+}
+
+// Render nodes
+serviceDefs.forEach(def => {
+  const el = document.createElement('div');
+  el.className = 'node-card' + (def.cls ? ' ' + def.cls : '');
+  el.style.left = def.x + 'px'; el.style.top = def.y + 'px';
+  el.id = 'node-' + def.id;
+
+  const dot = document.createElement('span');
+  dot.className = 'status-dot status-UNKNOWN';
+  dot.id = 'dot-' + def.id;
+  el.appendChild(dot);
+
+  const icon = document.createElement('div');
+  icon.className = 'node-icon';
+  icon.innerHTML = def.icon;
+  el.appendChild(icon);
+
+  const title = document.createElement('div');
+  title.className = 'node-title';
+  title.textContent = def.title;
+  el.appendChild(title);
+
+  const port = document.createElement('div');
+  port.className = 'node-port';
+  port.textContent = def.port;
+  el.appendChild(port);
+
+  if (def.tech) {
+    def.tech.forEach(t => {
+      const s = document.createElement('span');
+      s.className = 'node-tech ' + (t.includes('PostgreSQL')?'pg':t.includes('Rabbit')?'rabbit':'spring');
+      s.textContent = t;
+      el.appendChild(s);
+    });
+  }
+
+  el.addEventListener('click', e => { selectNode(def); e.stopPropagation(); });
+  document.getElementById('nodes').appendChild(el);
+});
+
+document.getElementById('nodes').addEventListener('click', e => {
+  if (e.target === document.getElementById('nodes')) selectNode(null);
+});
+
+function selectNode(def) {
+  document.querySelectorAll('.node-card.selected').forEach(el => el.classList.remove('selected'));
+  selected = def;
+  if (def) {
+    document.getElementById('node-'+def.id).classList.add('selected');
+    showDetail(def);
+  } else {
+    document.getElementById('detail').classList.remove('show');
+  }
+}
+
+function closeDetail(){ selectNode(null); }
+
+function showDetail(def) {
+  const p = document.getElementById('detail'); p.classList.add('show');
+  document.getElementById('detail-title').textContent = def.title + ' ' + def.port;
+  const st = nodeStatus(def.id);
+  const sData = statuses[def.id];
+  let html = `
+    <div class="row"><span class="l">Status</span><span class="${st==='UP'?'UP':'DOWN'}" style="font-weight:700">${st}</span></div>`;
+  if (sData && sData.host) {
+    html += `<div class="row"><span class="l">Host</span>${sData.host}:${sData.port||'?'}</div>`;
+  }
+  if (sData && sData.instances !== undefined) {
+    html += `<div class="row"><span class="l">Instancias</span>${sData.instances}</div>`;
+  }
+  if (sData && sData.detail && st === 'DOWN') {
+    html += `<div class="row"><span class="l">Error</span><span style="color:#ef4444;font-size:10px">${sData.detail||''}</span></div>`;
+  }
+  if (sData && sData.components) {
+    html += `<div class="comp"><strong style="color:#94a3b8">Componentes:</strong>`;
+    for (const [k,v] of Object.entries(sData.components)) {
+      html += `<div class="c ${v}"><span>${k}</span><span>${v}</span></div>`;
+    }
+    html += '</div>';
+  }
+  document.getElementById('detail-body').innerHTML = html;
+}
+
+function updateDot(id, st) {
+  const dot = document.getElementById('dot-' + id);
+  if (!dot) return;
+  const cls = st === 'UP' ? 'status-UP' : st === 'DOWN' ? 'status-DOWN' : st === 'STARTING' ? 'status-STARTING' : 'status-UNKNOWN';
+  dot.className = 'status-dot ' + cls;
+}
+
+// Canvas drawing
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  edges.forEach(([from, to, color, style]) => {
+    const fe = getEl(from), te = getEl(to);
+    if (!fe || !te) return;
+    const fr = fe.getBoundingClientRect(), tr = te.getBoundingClientRect();
+    const fx = fr.left + fr.width/2, fy = fr.top + fr.height/2;
+    const tx = tr.left + tr.width/2, ty = tr.top + tr.height/2;
+
+    ctx.save();
+    ctx.globalAlpha = selected && (selected.id === from || selected.id === to) ? 1 : selected ? 0.15 : 0.45;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = selected && (selected.id === from || selected.id === to) ? 2.5 : 1.2;
+    ctx.beginPath();
+    if (style === 'dashed') ctx.setLineDash([8,5]);
+    else if (style === 'dotted') ctx.setLineDash([3,5]);
+    else ctx.setLineDash([]);
+    ctx.moveTo(fx, fy);
+    const mx = (fx+tx)/2, my = (fy+ty)/2 + ((from+to).length%3-1)*18;
+    ctx.quadraticCurveTo(mx, my, tx, ty);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    const dx = tx-mx, dy = ty-my;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    if (dist > 0.001) {
+      const ux = dx/dist, uy = dy/dist;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty);
+      ctx.lineTo(tx - ux*8 + uy*3, ty - uy*8 - ux*3);
+      ctx.lineTo(tx - ux*8 - uy*3, ty - uy*8 + ux*3);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+    ctx.restore();
+  });
+  requestAnimationFrame(draw);
+}
+setTimeout(() => draw(), 200);
+
+// Polling
+async function pollNow() {
+  document.getElementById('timestamp').textContent = 'Sondeando...';
+  const start = performance.now();
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
+    const elapsed = Math.round(performance.now() - start);
+    document.getElementById('stat-latency').textContent = 'Lat: ' + elapsed + 'ms';
+    document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+
+    let up = 0, down = 0;
+    apiServices.forEach(svc => {
+      if (data[svc]) {
+        statuses[svc] = data[svc];
+        updateDot(svc, data[svc].status);
+        if (data[svc].status === 'UP') up++; else down++;
+      } else {
+        statuses[svc] = { status: 'DOWN', detail: 'No response' };
+        updateDot(svc, 'DOWN');
+        down++;
+      }
+    });
+
+    if (data.summary) {
+      document.getElementById('summary-badge').textContent = data.summary.healthy ? 'Todo Healthy' : 'Problemas Detectados';
+      document.getElementById('summary-badge').style.background = data.summary.healthy ? '#1a2a1a' : '#3a1a1a';
+      document.getElementById('summary-badge').style.color = data.summary.healthy ? '#4ade80' : '#ef4444';
+    }
+    document.getElementById('stat-up').textContent = 'UP: ' + up;
+    document.getElementById('stat-down').textContent = 'DOWN: ' + down;
+
+    // Update infra nodes
+    updateDot('eureka-server', 'UP');
+    updateDot('api-gateway', 'UP');
+    updateDot('rabbitmq', up >= 2 ? 'UP' : 'UNKNOWN');
+
+    const dbUp = data['AUTH-SERVICE']?.components?.db === 'UP';
+    updateDot('auth-db', dbUp ? 'UP' : 'UNKNOWN');
+    const pdbUp = data['PRESUPUESTO-SERVICE']?.components?.db === 'UP';
+    updateDot('presupuesto-db', pdbUp ? 'UP' : 'UNKNOWN');
+    const edbUp = data['EXPEDIENTE-SERVICE']?.components?.db === 'UP';
+    updateDot('expediente-db', edbUp ? 'UP' : 'UNKNOWN');
+    const ndbUp = data['NOTIFICACION-SERVICE']?.components?.db === 'UP';
+    updateDot('notificacion-db', ndbUp ? 'UP' : 'UNKNOWN');
+
+    if (selected) showDetail(selected);
+  } catch(e) {
+    document.getElementById('stat-latency').textContent = 'Lat: ERR';
+    document.getElementById('timestamp').textContent = 'Error: ' + e.message;
+    apiServices.forEach(svc => updateDot(svc, 'DOWN'));
+    document.getElementById('summary-badge').textContent = 'API Gateway OFFLINE';
+    document.getElementById('summary-badge').style.background = '#3a1a1a';
+    document.getElementById('summary-badge').style.color = '#ef4444';
+    updateDot('api-gateway', 'DOWN');
+  }
+}
+
+let pollTimer;
+function startPolling() { pollNow(); pollTimer = setInterval(pollNow, POLL_MS); }
+function togglePause() {
+  paused = !paused;
+  const btn = document.getElementById('btn-pause');
+  if (paused) { clearInterval(pollTimer); btn.textContent = 'Reanudar'; btn.classList.add('paused'); }
+  else { startPolling(); btn.textContent = 'Pausar'; btn.classList.remove('paused'); }
+}
+
+startPolling();
+</script>
+</body>
+</html>

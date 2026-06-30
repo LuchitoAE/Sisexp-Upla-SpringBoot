@@ -1,6 +1,0 @@
-[build]
-  builder = "DOCKERFILE"
-  dockerfilePath = "sisexp/Dockerfile"
-
-[deploy]
-  numReplicas = 1
