@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SisexpApplication {
 
     public static void main(String[] args) {
+        // Punto de entrada principal de la aplicación SISEXP-UPLA
         SpringApplication.run(SisexpApplication.class, args);
     }
 }
