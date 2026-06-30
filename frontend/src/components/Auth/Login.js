@@ -14,7 +14,7 @@ export default function Login({ onLogin }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [forzarAcceso, setForzarAcceso] = useState(false);
+  const [forzarAcceso, setForzarAcceso] = useState(true);
 
   const horarioOk = enHorarioLaboral();
 
