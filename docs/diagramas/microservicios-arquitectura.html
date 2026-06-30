@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SISEXP — Arquitectura de Microservicios (11 Contenedores)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0f14;color:#e2e8f0;overflow:hidden;height:100vh}
+#canvas{position:absolute;top:0;left:0;z-index:1}
+#nodes{position:absolute;top:0;left:0;z-index:2;width:100%;height:100%}
+.node{position:absolute;background:linear-gradient(135deg,#162535,#1e3350);border:2px solid #334b64;border-radius:12px;padding:14px 18px;cursor:move;user-select:none;transition:box-shadow .3s,transform .1s;min-width:175px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.node:hover{box-shadow:0 6px 28px rgba(0,0,0,.7),0 0 24px rgba(56,189,248,.08);z-index:10}
+.node:active{cursor:grabbing}
+.node.selected{border-color:#38bdf8;box-shadow:0 0 0 4px rgba(56,189,248,.25),0 4px 16px rgba(0,0,0,.5)}
+.node-icon{font-size:30px;margin-bottom:6px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.node-title{font-weight:700;font-size:13px;margin-bottom:2px;color:#e2e8f0}
+.node-port{font-size:11px;color:#7ea8c9;font-weight:600;margin-bottom:4px}
+.node-body{font-size:11px;color:#8899aa;margin-top:4px;line-height:1.4}
+.node-tech{display:inline-block;background:#1e3a5f;color:#60a5fa;font-size:10px;padding:1px 7px;border-radius:8px;margin:2px}
+.node-db{display:inline-block;background:#1a3a1a;color:#4ade80;font-size:10px;padding:1px 7px;border-radius:8px;margin:2px;border:1px solid #224422}
+.node-broker{display:inline-block;background:#3b1e5f;color:#c084fc;font-size:10px;padding:1px 7px;border-radius:8px;margin:2px;border:1px solid #553388}
+.node-discovery{display:inline-block;background:#5f3520;color:#fb923c;font-size:10px;padding:1px 7px;border-radius:8px;margin:2px;border:1px solid #774422}
+.status-dot{position:absolute;top:10px;right:10px;width:13px;height:13px;border-radius:50%;border:2px solid rgba(0,0,0,.3);transition:background .5s,box-shadow .5s}
+.status-running{background:#22c55e;box-shadow:0 0 10px #22c55e,0 0 4px #22c55e}
+.status-starting{background:#eab308;box-shadow:0 0 10px #eab308,0 0 4px #eab308;animation:pulse 1s infinite}
+.status-stopped{background:#ef4444;box-shadow:0 0 8px #ef4444,0 0 3px #ef4444}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* Database nodes */
+.node-db-node{background:linear-gradient(135deg,#1a2a1a,#1e3a1e);border:2px solid #335533;border-radius:10px}
+
+/* Broker node */
+.node-broker-node{background:linear-gradient(135deg,#2a1a3a,#3b1e5f);border:2px solid #664488;border-radius:10px}
+
+/* Discovery node */
+.node-discovery-node{background:linear-gradient(135deg,#352015,#5f3520);border:2px solid #885533;border-radius:10px}
+
+#toolbar{position:fixed;top:16px;left:16px;z-index:100;display:flex;gap:8px;flex-wrap:wrap}
+#toolbar button{background:rgba(22,37,53,.9);border:1px solid #334b64;color:#e2e8f0;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;transition:all .2s;backdrop-filter:blur(8px)}
+#toolbar button:hover{background:#1e3350}
+#toolbar button.active{background:#1e3a5f;border-color:#38bdf8;box-shadow:0 0 12px rgba(56,189,248,.2)}
+#legend{position:fixed;bottom:16px;left:16px;z-index:100;background:rgba(10,15,20,.85);backdrop-filter:blur(8px);border:1px solid #334b64;border-radius:12px;padding:12px 16px;font-size:11px;display:flex;gap:16px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-line{width:28px;height:2.5px;border-radius:2px}
+.legend-line.http{background:#38bdf8;box-shadow:0 0 4px #38bdf8}
+.legend-line.jdbc{background:transparent;background-image:repeating-linear-gradient(90deg,#4ade80 0,#4ade80 6px,transparent 6px,transparent 12px)}
+.legend-line.amqp{background:transparent;background-image:repeating-linear-gradient(90deg,#c084fc 0,#c084fc 3px,transparent 3px,transparent 8px)}
+.legend-line.discovery{background:transparent;background-image:repeating-linear-gradient(90deg,#fb923c 0,#fb923c 4px,transparent 4px,transparent 10px)}
+
+#detail-panel{position:fixed;top:16px;right:16px;z-index:100;background:rgba(10,15,20,.9);backdrop-filter:blur(12px);border:1px solid #334b64;border-radius:12px;padding:16px;width:290px;display:none;font-size:12px;line-height:1.6;max-height:80vh;overflow-y:auto}
+#detail-panel.show{display:block}
+#detail-panel h3{margin-bottom:8px;color:#38bdf8}
+#detail-panel .close{position:absolute;top:8px;right:12px;cursor:pointer;color:#94a3b8;font-size:18px}
+#detail-panel .close:hover{color:#fff}
+#detail-panel .prop{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(51,75,100,.2)}
+#detail-panel .prop-label{color:#94a3b8}
+#detail-panel .prop-value{color:#e2e8f0;font-weight:600}
+#detail-panel .desc{margin-top:8px;color:#94a3b8;font-size:11px}
+#detail-panel .endpoints{margin-top:8px}
+#detail-panel .endpoint{background:#0a0f14;border-radius:6px;padding:4px 8px;margin:3px 0;font-family:'Cascadia Code',monospace;font-size:10px}
+.method-get{color:#4ade80}
+.method-post{color:#eab308}
+.method-put{color:#38bdf8}
+.method-delete{color:#ef4444}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<div id="nodes"></div>
+
+<div id="toolbar">
+  <button onclick="startAll()">&#9654; Start All</button>
+  <button onclick="stopAll()">&#9632; Stop All</button>
+  <button onclick="simulateTraffic()">&#9889; Simular Request</button>
+  <button onclick="resetPositions()" style="margin-left:16px">&#8634; Reset Layout</button>
+</div>
+
+<div id="legend">
+  <div class="legend-item"><div class="legend-line http"></div> HTTP / REST</div>
+  <div class="legend-item"><div class="legend-line jdbc"></div> JDBC / DB</div>
+  <div class="legend-item"><div class="legend-line amqp"></div> AMQP / RabbitMQ</div>
+  <div class="legend-item"><div class="legend-line discovery"></div> Service Discovery</div>
+</div>
+
+<div id="detail-panel">
+  <span class="close" onclick="closeDetail()">&times;</span>
+  <h3 id="detail-title"></h3>
+  <div id="detail-content"></div>
+</div>
+
+<script>
+// ==================== NODE DEFINITIONS ====================
+const nodes = [
+  { id:'nginx', title:'NGINX', port:':80', icon:'&#127760;', color:'node', x:60,y:200, type:'nginx',
+    info:{desc:'Frontend React SPA + proxy reverso. Sirve archivos estaticos y redirige /api/* al Gateway.',tech:'React 19 + NGINX',endpoints:[{m:'GET', p:'/'},{m:'*', p:'/api/* → Gateway'}]}},
+  { id:'gateway', title:'API Gateway', port:':8080', icon:'&#9881;', color:'node', x:320,y:120, type:'gateway',
+    info:{desc:'Punto unico de entrada. Valida JWT globalmente y rutea a cada microservicio.',tech:'Spring Cloud Gateway + JWT Filter',endpoints:[{m:'POST', p:'/api/auth/**'},{m:'GET', p:'/api/presupuesto/**'},{m:'POST', p:'/api/presupuesto/**'},{m:'GET', p:'/api/expedientes/**'},{m:'POST', p:'/api/expedientes/**'},{m:'GET', p:'/api/notificaciones/**'}]}},
+  { id:'eureka', title:'Eureka Server', port:':8761', icon:'&#128269;', color:'node-discovery', x:600,y:50, type:'eureka',
+    info:{desc:'Service Discovery. Todos los microservicios se registran aqui al iniciar.',tech:'Spring Cloud Netflix Eureka',endpoints:[{m:'GET', p:'/eureka/apps'},{m:'GET', p:'/eureka/status'}]}},
+  { id:'auth', title:'Auth Service', port:':8081', icon:'&#128274;', color:'node', x:550,y:240, type:'service',
+    info:{desc:'Autenticacion y autorizacion. Genera y valida tokens JWT. Gestiona usuarios y roles.',tech:'Spring Boot 3.4 + Spring Security + JWT',endpoints:[{m:'POST', p:'/api/auth/login'},{m:'POST', p:'/api/auth/register'},{m:'GET', p:'/api/auth/me'},{m:'GET', p:'/api/usuarios'}]}},
+  { id:'presupuesto', title:'Presupuesto Service', port:':8082', icon:'&#128200;', color:'node', x:280,y:340, type:'service',
+    info:{desc:'Gestion de Techos Presupuestales, Actividades POI y Necesidades PAP.',tech:'Spring Boot 3.4 + JPA',endpoints:[{m:'GET', p:'/api/techos'},{m:'POST', p:'/api/techos'},{m:'GET', p:'/api/poi'},{m:'POST', p:'/api/poi'},{m:'GET', p:'/api/pap'},{m:'POST', p:'/api/pap'},{m:'GET', p:'/api/presupuesto/disponibilidad/{id}'}]}},
+  { id:'expediente', title:'Expediente Service', port:':8083', icon:'&#128196;', color:'node', x:520,y:420, type:'service',
+    info:{desc:'CRUD de Expedientes, documentos adjuntos, seguimiento de estados. Publica eventos a RabbitMQ.',tech:'Spring Boot 3.4 + JPA + RabbitMQ',endpoints:[{m:'GET', p:'/api/expedientes'},{m:'POST', p:'/api/expedientes'},{m:'PUT', p:'/api/expedientes/{id}/estado'},{m:'POST', p:'/api/expedientes/{id}/documentos'},{m:'GET', p:'/api/expedientes/{id}/logs'}]}},
+  { id:'notificacion', title:'Notificacion Service', port:':8084', icon:'&#128276;', color:'node', x:780,y:300, type:'service',
+    info:{desc:'Escucha eventos de RabbitMQ y crea notificaciones. Consulta de historial.',tech:'Spring Boot 3.4 + JPA + RabbitMQ Listener',endpoints:[{m:'GET', p:'/api/notificaciones'},{m:'GET', p:'/api/notificaciones/count'},{m:'PUT', p:'/api/notificaciones/{id}/leida'}]}},
+  { id:'db-auth', title:'PostgreSQL Auth', port:':5432', icon:'&#128451;', color:'node-db', x:720,y:150, type:'database',
+    info:{desc:'Base de datos del Auth Service. Tablas: usuarios, roles.',tech:'PostgreSQL 16',endpoints:[]}},
+  { id:'db-presupuesto', title:'PostgreSQL Presupuesto', port:':5433', icon:'&#128451;', color:'node-db', x:140,y:460, type:'database',
+    info:{desc:'Base de datos del Presupuesto Service. Tablas: techos, poi, pap.',tech:'PostgreSQL 16',endpoints:[]}},
+  { id:'db-expediente', title:'PostgreSQL Expediente', port:':5434', icon:'&#128451;', color:'node-db', x:620,y:550, type:'database',
+    info:{desc:'Base de datos del Expediente Service. Tablas: expedientes, documentos, logs.',tech:'PostgreSQL 16',endpoints:[]}},
+  { id:'db-notificacion', title:'PostgreSQL Notificacion', port:':5435', icon:'&#128451;', color:'node-db', x:900,y:420, type:'database',
+    info:{desc:'Base de datos del Notificacion Service. Tablas: notificaciones.',tech:'PostgreSQL 16',endpoints:[]}},
+  { id:'rabbitmq', title:'RabbitMQ', port:':5672', icon:'&#128012;', color:'node-broker', x:800,y:520, type:'broker',
+    info:{desc:'Message Broker. Expediente Service publica eventos; Notificacion Service los consume.',tech:'RabbitMQ 3.13 + Management :15672',endpoints:[{m:'*', p:'AMQP :5672'},{m:'GET', p:'Management UI :15672'}]}}
+];
+
+// Edges: [fromId, toId, type, label]
+const edges = [
+  ['nginx', 'gateway', 'http', 'Proxy /api/*'],
+  ['gateway', 'auth', 'http', 'POST /api/auth/**'],
+  ['gateway', 'presupuesto', 'http', 'GET/POST /api/presupuesto/**'],
+  ['gateway', 'expediente', 'http', 'GET/POST /api/expedientes/**'],
+  ['gateway', 'notificacion', 'http', 'GET /api/notificaciones/**'],
+  ['auth', 'db-auth', 'jdbc', 'JDBC'],
+  ['presupuesto', 'db-presupuesto', 'jdbc', 'JDBC'],
+  ['expediente', 'db-expediente', 'jdbc', 'JDBC'],
+  ['notificacion', 'db-notificacion', 'jdbc', 'JDBC'],
+  ['auth', 'eureka', 'discovery', 'Register'],
+  ['presupuesto', 'eureka', 'discovery', 'Register'],
+  ['expediente', 'eureka', 'discovery', 'Register'],
+  ['notificacion', 'eureka', 'discovery', 'Register'],
+  ['gateway', 'eureka', 'discovery', 'Fetch Registry'],
+  ['expediente', 'rabbitmq', 'amqp', 'Publish eventos'],
+  ['rabbitmq', 'notificacion', 'amqp', 'Consume eventos']
+];
+
+// ==================== STATE ====================
+const state = {};
+nodes.forEach(n => {
+  state[n.id] = { status:'stopped', html:null };
+});
+
+let selectedNode = null;
+let dragging = null;
+let dragOffX = 0, dragOffY = 0;
+
+// ==================== DRAWING ====================
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let animFrame;
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', () => { resize(); });
+resize();
+
+function findNode(id) { return nodes.find(n => n.id === id); }
+function statusColor(id) {
+  const s = state[id]?.status || 'stopped';
+  return s === 'running' ? '#22c55e' : s === 'starting' ? '#eab308' : '#ef4444';
+}
+function edgeColor(type) {
+  if (type === 'http') return '#38bdf8';
+  if (type === 'jdbc') return '#4ade80';
+  if (type === 'amqp') return '#c084fc';
+  if (type === 'discovery') return '#fb923c';
+  return '#64748b';
+}
+
+function drawConnections() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw glow for highlighted edges
+  const highlightedEdges = selectedNode ? edges.filter(e => e[0] === selectedNode.id || e[1] === selectedNode.id) : [];
+
+  // Draw all edges
+  edges.forEach(([fromId, toId, type, label]) => {
+    const fn = findNode(fromId), tn = findNode(toId);
+    if (!fn || !tn) return;
+    const fh = state[fromId]?.html, th = state[toId]?.html;
+    if (!fh || !th) return;
+    const fr = fh.getBoundingClientRect(), tr = th.getBoundingClientRect();
+    const fx = fr.left + fr.width/2, fy = fr.top + fr.height/2;
+    const tx = tr.left + tr.width/2, ty = tr.top + tr.height/2;
+
+    const isHighlighted = selectedNode && (fromId === selectedNode.id || toId === selectedNode.id);
+
+    ctx.save();
+    ctx.globalAlpha = isHighlighted ? 1 : selectedNode ? 0.2 : 0.5;
+    ctx.strokeStyle = edgeColor(type);
+    ctx.lineWidth = isHighlighted ? 2.5 : 1.5;
+    ctx.beginPath();
+    if (type === 'jdbc') ctx.setLineDash([6, 6]);
+    else if (type === 'amqp') ctx.setLineDash([2, 6]);
+    else if (type === 'discovery') ctx.setLineDash([4, 8]);
+    else ctx.setLineDash([]);
+    ctx.moveTo(fx, fy);
+
+    // Bezier curve
+    const midX = (fx + tx) / 2, midY = (fy + ty) / 2 + ((fromId + toId).length % 3 - 1) * 20;
+    ctx.quadraticCurveTo(midX, midY, tx, ty);
+    ctx.stroke();
+
+    // Arrow
+    ctx.setLineDash([]);
+    const dx = tx - midX, dy = ty - midY, dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 0.001) { ctx.restore(); return; }
+    const ux = dx/dist, uy = dy/dist;
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(tx - ux*10 + uy*4, ty - uy*10 - ux*4);
+    ctx.lineTo(tx - ux*10 - uy*4, ty - uy*10 + ux*4);
+    ctx.fillStyle = edgeColor(type);
+    ctx.fill();
+
+    // Label
+    if (isHighlighted) {
+      ctx.font = '10px Segoe UI';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, midX, midY - 6);
+    }
+    ctx.restore();
+  });
+
+  // Animate traffic
+  if (animatingTraffic.length > 0) {
+    animatingTraffic.forEach(t => {
+      const fn = findNode(t.from), tn = findNode(t.to);
+      if (!fn || !tn) return;
+      const fh = state[t.from]?.html, th = state[t.to]?.html;
+      if (!fh || !th) return;
+      const fr = fh.getBoundingClientRect(), tr = th.getBoundingClientRect();
+      const fx = fr.left + fr.width/2, fy = fr.top + fr.height/2;
+      const tx = tr.left + tr.width/2, ty = tr.top + tr.height/2;
+      const px = fx + (tx - fx) * t.progress, py = fy + (ty - fy) * t.progress;
+      ctx.beginPath();
+      ctx.arc(px, py, 5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(56, 189, 248, ${1 - t.progress})`;
+      ctx.fill();
+    });
+  }
+
+  animFrame = requestAnimationFrame(drawConnections);
+}
+
+// ==================== TRAFFIC ANIMATION ====================
+let animatingTraffic = [];
+function animateTraffic(fromId, toId) {
+  const t = { from: fromId, to: toId, progress: 0, speed: 0.02 };
+  animatingTraffic.push(t);
+  function step() {
+    t.progress += t.speed;
+    if (t.progress >= 1) {
+      animatingTraffic = animatingTraffic.filter(x => x !== t);
+    } else {
+      setTimeout(step, 20);
+    }
+  }
+  setTimeout(step, 20);
+}
+
+async function simulateTraffic() {
+  if (state['nginx'].status !== 'running' || state['gateway'].status !== 'running') return;
+
+  const routes = [
+    ['nginx', 'gateway'], ['gateway', 'auth'],
+    ['auth', 'db-auth'], ['gateway', 'expediente'],
+    ['expediente', 'db-expediente'], ['expediente', 'rabbitmq'],
+    ['rabbitmq', 'notificacion'], ['gateway', 'presupuesto'],
+    ['presupuesto', 'db-presupuesto'], ['gateway', 'notificacion']
+  ];
+  for (let i = 0; i < routes.length; i++) {
+    setTimeout(() => {
+      const [a, b] = routes[i];
+      if (state[a]?.status === 'running' && state[b]?.status === 'running') {
+        animateTraffic(a, b);
+      }
+    }, i * 150);
+  }
+}
+
+// ==================== NODE RENDERING ====================
+function renderNode(n) {
+  const el = document.createElement('div');
+  el.className = 'node';
+  if (n.type === 'database') el.classList.add('node-db-node');
+  if (n.type === 'broker') el.classList.add('node-broker-node');
+  if (n.type === 'eureka') el.classList.add('node-discovery-node');
+  el.style.left = n.x + 'px';
+  el.style.top = n.y + 'px';
+  el.id = 'node-' + n.id;
+
+  const dot = document.createElement('span');
+  dot.className = 'status-dot status-stopped';
+  dot.id = 'dot-' + n.id;
+  el.appendChild(dot);
+
+  const icon = document.createElement('div');
+  icon.className = 'node-icon';
+  icon.innerHTML = n.icon;
+  el.appendChild(icon);
+
+  const title = document.createElement('div');
+  title.className = 'node-title';
+  title.textContent = n.title;
+  el.appendChild(title);
+
+  const port = document.createElement('div');
+  port.className = 'node-port';
+  port.textContent = n.port;
+  el.appendChild(port);
+
+  const body = document.createElement('div');
+  body.className = 'node-body';
+  if (n.techs) n.techs.forEach(t => {
+    const s = document.createElement('span');
+    s.className = 'node-tech';
+    s.textContent = t;
+    body.appendChild(s);
+  });
+  el.appendChild(body);
+
+  // Drag
+  el.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    dragging = n;
+    const rect = el.getBoundingClientRect();
+    dragOffX = e.clientX - rect.left;
+    dragOffY = e.clientY - rect.top;
+    el.style.zIndex = 20;
+    e.preventDefault();
+  });
+  el.addEventListener('click', e => {
+    selectNode(n);
+    e.stopPropagation();
+  });
+
+  state[n.id].html = el;
+  document.getElementById('nodes').appendChild(el);
+  return el;
+}
+
+function updateDot(id, status) {
+  const dot = document.getElementById('dot-' + id);
+  if (!dot) return;
+  dot.className = 'status-dot status-' + status;
+}
+
+// ==================== INTERACTIONS ====================
+function selectNode(n) {
+  document.querySelectorAll('.node.selected').forEach(el => el.classList.remove('selected'));
+  if (n) {
+    selectedNode = n;
+    document.getElementById('node-' + n.id).classList.add('selected');
+    showDetail(n);
+  } else {
+    selectedNode = null;
+    document.getElementById('detail-panel').classList.remove('show');
+  }
+}
+
+function showDetail(n) {
+  if (!n.info) return;
+  const p = document.getElementById('detail-panel');
+  p.classList.add('show');
+  document.getElementById('detail-title').textContent = n.title + ' ' + n.port;
+  let html = `
+    <div class="prop"><span class="prop-label">Estado</span><span class="prop-value">${state[n.id]?.status || 'stopped'}</span></div>
+    <div class="prop"><span class="prop-label">Tipo</span><span class="prop-value">${n.type}</span></div>
+    <div class="prop"><span class="prop-label">Tecnologia</span><span class="prop-value">${n.info.tech}</span></div>
+    <p class="desc">${n.info.desc}</p>
+  `;
+  if (n.info.endpoints && n.info.endpoints.length > 0) {
+    html += '<div class="endpoints"><strong style="color:#94a3b8">Endpoints:</strong>';
+    n.info.endpoints.forEach(ep => {
+      const cls = ep.m === 'GET' ? 'method-get' : ep.m === 'POST' ? 'method-post' : ep.m === 'PUT' ? 'method-put' : 'method-delete';
+      html += `<div class="endpoint"><span class="${cls}">${ep.m}</span> ${ep.p}</div>`;
+    });
+    html += '</div>';
+  }
+  document.getElementById('detail-content').innerHTML = html;
+}
+
+function closeDetail() { selectNode(null); }
+
+// ==================== ACTIONS ====================
+async function startAll() {
+  document.querySelectorAll('#toolbar button').forEach(b => b.classList.add('active'));
+  const order = ['db-auth','db-presupuesto','db-expediente','db-notificacion','rabbitmq','eureka','auth','presupuesto','expediente','notificacion','gateway','nginx'];
+  for (const id of order) {
+    if (!state[id]) continue;
+    state[id].status = 'starting';
+    updateDot(id, 'starting');
+    await new Promise(r => setTimeout(r, 500 + Math.random() * 800));
+    state[id].status = 'running';
+    updateDot(id, 'running');
+  }
+  document.querySelectorAll('#toolbar button').forEach(b => b.classList.remove('active'));
+}
+
+function stopAll() {
+  const order = ['nginx','gateway','notificacion','expediente','presupuesto','auth','eureka','rabbitmq','db-notificacion','db-expediente','db-presupuesto','db-auth'];
+  order.forEach(id => {
+    if (!state[id]) return;
+    state[id].status = 'stopped';
+    updateDot(id, 'stopped');
+  });
+}
+
+function resetPositions() {
+  nodes.forEach(n => {
+    const el = document.getElementById('node-' + n.id);
+    if (el) { el.style.left = n.x + 'px'; el.style.top = n.y + 'px'; }
+  });
+}
+
+// ==================== DRAG ====================
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  dragging.x = e.clientX - dragOffX;
+  dragging.y = e.clientY - dragOffY;
+  const el = document.getElementById('node-' + dragging.id);
+  if (el) { el.style.left = dragging.x + 'px'; el.style.top = dragging.y + 'px'; }
+});
+document.addEventListener('mouseup', () => {
+  if (dragging) {
+    document.getElementById('node-' + dragging.id).style.zIndex = '';
+    dragging = null;
+  }
+});
+document.getElementById('nodes').addEventListener('click', e => {
+  if (e.target === document.getElementById('nodes')) selectNode(null);
+});
+
+// ==================== INIT ====================
+nodes.forEach(n => renderNode(n));
+resize();
+setTimeout(() => { drawConnections(); }, 100);
+console.log('SISEXP Microservicios — Diagrama interactivo cargado (%d nodos, %d conexiones)', nodes.length, edges.length);
+</script>
+</body>
+</html>

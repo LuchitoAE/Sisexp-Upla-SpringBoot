@@ -119,6 +119,24 @@ Es la memoria del proyecto. Se actualiza en cada fase completada. Al iniciar una
 - **32 diagramas Mermaid fuente** (.mmd) en `docs/diagramas/img/`: 14 BCE + 14 SSD + actores + arquitectura + dominio + flujo_estados
 - **Curso Arquitectura de Software completo**: 16 semanas finalizadas, resúmenes e infografías en la carpeta madre `arquitectura de software/semana X/`
 
+### Done (Session 2026-06-30, Microservicios)
+
+- **Docker Compose build exitoso**: 6 servicios Maven compilan — `docker compose build` sin errores
+- **12 contenedores healthy**: eureka (:8761), rabbitmq (:5672), 4 PostgreSQL (:5433-5436), auth (:8081), presupuesto (:8082), expediente (:8083), notificacion (:8084), gateway (:8080), nginx (:80)
+- **Health checks**: cada servicio expone `/actuator/health` — componentes: db, rabbit, diskSpace, discovery, ping, ssl
+- **`/api/status` endpoint**: `StatusController.java` en auth-service consulta DiscoveryClient y hace HTTP a `/actuator/health` de los 4 servicios. Devuelve status, instances, host, port + components detallados + summary (total/up/down/healthy)
+- **Gateway rutea** `/api/status` → `lb://auth-service`, exento de JWT en `JwtAuthFilter.RUTAS_EXENTAS`
+- **Dashboard monitoreo vivo**: `frontend/index.html` servido por NGINX — 12 nodos con estado en tiempo real, poll-ea `/api/status` cada 5s, botón pausar/reanudar, click en nodo muestra componentes
+- **NGINX proxy**: `/` sirve el dashboard, `/api/*` → api-gateway:8080
+- **Actuator en 6 pom.xml**: `spring-boot-starter-actuator` + `management.endpoints.web.exposure.include=health,info` + `management.endpoint.health.show-details=always`
+- **curl en 6 Dockerfiles**: `RUN apk add --no-cache curl` (solo auth y eureka lo tenían)
+- **Dockerfiles multi-module**: copian root `pom.xml` + todos los module `pom.xml` + `sisexp-common/src`; build con `-pl {module} -am`
+- **Fix auth SecurityConfig**: `/actuator/health` agregado a `permitAll()`
+- **Fix StatusController tipos**: `Map.of()` con tipos mixtos → `new LinkedHashMap<>()` + `.put()`
+- **Skill creado**: `.opencode/skills/arquitectura-microservicios/SKILL.md` — Clean Architecture, SOLID, 16 patrones arquitectónicos, GoF patterns
+- **Diagrama interactivo**: `docs/diagramas/microservicios-arquitectura.html`
+- **Proyecto**: `E:\proyecto\...\semana 10\sisexp-microservicios\` (120+ archivos)
+
 ## Critical Context
 
 | Dato | Valor |
