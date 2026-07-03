@@ -14,6 +14,5 @@ public interface ExpedienteRepository extends JpaRepository<Expediente, Long> {
     List<Expediente> findByActividadPOIId(Long actividadId);
     long countByEstado(EstadoExpediente estado);
     long countBySolicitanteId(Long solicitanteId);
-    @Query("SELECT e FROM Expediente e WHERE e.codigo LIKE :prefix% ORDER BY e.codigo DESC")
-    Optional<Expediente> findTopByCodigoStartingWithOrderByCodigoDesc(@Param("prefix") String prefix);
+    Optional<Expediente> findFirstByCodigoStartingWithOrderByCodigoDesc(String prefix);
 }

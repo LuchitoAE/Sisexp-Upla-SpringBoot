@@ -102,7 +102,7 @@ public class ExpedienteService {
     private String generarNumero() {
         int año = Year.now().getValue();
         String prefix = "EXP-" + año + "-";
-        return expedienteRepo.findTopByCodigoStartingWithOrderByCodigoDesc(prefix)
+        return expedienteRepo.findFirstByCodigoStartingWithOrderByCodigoDesc(prefix)
             .map(Expediente::getCodigo)
             .map(cod -> prefix + String.format("%04d", Integer.parseInt(cod.substring(cod.lastIndexOf('-') + 1)) + 1))
             .orElse(prefix + "0001");

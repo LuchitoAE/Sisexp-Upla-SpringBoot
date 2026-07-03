@@ -37,9 +37,14 @@ public class ApiExpedienteController {
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody Map<String, Object> body) {
         try {
+            String actKey = body.containsKey("actividadPoiId") ? "actividadPoiId" : "actividadPOIId";
+            String necKey = body.containsKey("necesidadPapId") ? "necesidadPapId" : "necesidadPAPId";
+            if (body.get(actKey) == null) return ResponseEntity.badRequest().body(Map.of("error", "actividadPoiId requerido"));
+            if (body.get(necKey) == null) return ResponseEntity.badRequest().body(Map.of("error", "necesidadPapId requerido"));
+            if (body.get("solicitanteId") == null) return ResponseEntity.badRequest().body(Map.of("error", "solicitanteId requerido"));
             var exp = expedienteService.crear(
-                Long.valueOf(body.get("actividadPoiId").toString()),
-                Long.valueOf(body.get("necesidadPapId").toString()),
+                Long.valueOf(body.get(actKey).toString()),
+                Long.valueOf(body.get(necKey).toString()),
                 Long.valueOf(body.get("solicitanteId").toString()),
                 (String) body.get("urgencia"),
                 (String) body.get("naturaleza"),

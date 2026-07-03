@@ -26,6 +26,9 @@ public class ApiTechoPresupuestalController {
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody Map<String, Object> body) {
         try {
+            if (body.get("año") == null && body.get("anio") != null) body.put("año", body.get("anio"));
+            if (body.get("año") == null) return ResponseEntity.badRequest().body(Map.of("error", "Campo 'año' requerido"));
+            if (body.get("montoTotal") == null) return ResponseEntity.badRequest().body(Map.of("error", "Campo 'montoTotal' requerido"));
             var t = techoService.crear(
                 Integer.valueOf(body.get("año").toString()),
                 new BigDecimal(body.get("montoTotal").toString()),
@@ -33,6 +36,7 @@ public class ApiTechoPresupuestalController {
             );
             return ResponseEntity.ok(t);
         } catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
+        catch (NumberFormatException e) { return ResponseEntity.badRequest().body(Map.of("error", "Formato numerico invalido")); }
     }
 
     @PutMapping("/{id}")
