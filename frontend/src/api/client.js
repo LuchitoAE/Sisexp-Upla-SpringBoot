@@ -63,7 +63,7 @@ async function handleResponse(res) {
 
 function authHeaders() {
   const token = getToken();
-  const headers = { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' };
+  const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
 }
@@ -72,7 +72,7 @@ async function get(path) {
   const cached = cacheGet(path);
   if (cached !== undefined) return cached;
   try {
-    const headers = { 'ngrok-skip-browser-warning': '1' };
+    const headers = {};
     const token = getToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(`${API_URL}${path}`, { headers });
@@ -109,7 +109,7 @@ async function put(path, body) {
 
 async function del(path) {
   try {
-    const headers = { 'ngrok-skip-browser-warning': '1' };
+    const headers = {};
     const token = getToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(`${API_URL}${path}`, {
@@ -140,7 +140,7 @@ async function upload(path, file, fieldName = 'archivo', extraFields = {}) {
   fd.append(fieldName, file);
   Object.entries(extraFields).forEach(([k, v]) => fd.append(k, v));
   try {
-    const headers = { 'ngrok-skip-browser-warning': '1' };
+    const headers = {};
     const token = getToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(`${API_URL}${path}`, {
