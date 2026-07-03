@@ -1,0 +1,111 @@
+# docker-compose.test.yml — Smoke test para SISEXP-UPLA
+# Ejecutar: docker compose -f docker-compose.yml -f docker-compose.test.yml up --exit-code-from tester
+
+version: "3.8"
+
+services:
+  tester:
+    image: curlimages/curl:latest
+    container_name: sisexp-tester
+    depends_on:
+      nginx:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo '╔══════════════════════════════════════╗'
+        echo '║  SISEXP-UPLA — SMOKE TEST SUITE    ║'
+        echo '╚══════════════════════════════════════╝'
+        echo ''
+        FAILS=0
+        PASS=0
+
+        test_endpoint() {
+          NAME=$1
+          URL=$2
+          EXPECT=$3
+          METHOD=${4:-GET}
+          DATA=${5:-}
+          AUTH=${6:-}
+
+          if [ "$AUTH" = "1" ]; then
+            TOKEN=$(curl -s -X POST http://nginx/api/auth/login -H "Content-Type: application/json" -d '{"email":"jefe@upla.edu.pe","password":"jefe123"}' | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+            RES=$(curl -s -w "%{http_code}" -o /tmp/resp.json -X $METHOD "http://nginx$URL" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d "$DATA")
+          else
+            RES=$(curl -s -w "%{http_code}" -o /tmp/resp.json -X $METHOD "http://nginx$URL" -H "Content-Type: application/json" -d "$DATA")
+          fi
+
+          if echo "$RES" | grep -qE "$EXPECT"; then
+            echo "  PASS  $NAME ($RES $EXPECT)"
+            PASS=$((PASS + 1))
+            return 0
+          else
+            echo "  FAIL  $NAME (got $RES, expected $EXPECT)"
+            FAILS=$((FAILS + 1))
+            return 1
+          fi
+        }
+
+        echo '─── Status & Health ───'
+        test_endpoint "Status API" "/api/status" "healthy" GET "" 0
+        test_endpoint "Eureka Dashboard" "http://eureka-server:8761" "200" GET "" 0
+
+        echo '─── Auth ───'
+        test_endpoint "Login correcto" "/api/auth/login" "200" POST '{"email":"jefe@upla.edu.pe","password":"jefe123"}' 0
+        test_endpoint "Login incorrecto" "/api/auth/login" "401|403" POST '{"email":"a@b.com","password":"x"}' 0
+
+        echo '─── Usuarios (JWT) ───'
+        test_endpoint "Listar usuarios" "/usuarios" "200" GET "" 1
+        test_endpoint "Auth me" "/auth/me" "200" GET "" 1
+
+        echo '─── Techos Presupuestales (JWT) ───'
+        test_endpoint "Listar techos" "/techos-presupuestales" "200" GET "" 1
+
+        echo '─── Actividades POI (JWT) ───'
+        TOKEN=$(curl -s -X POST http://nginx/api/auth/login -H "Content-Type: application/json" -d '{"email":"jefe@upla.edu.pe","password":"jefe123"}' | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+        TECHO_ID=$(curl -s http://nginx/api/techos-presupuestales -H "Authorization: Bearer $TOKEN" | grep -o '"id":[0-9]*' | head -1 | cut -d: -f2)
+        test_endpoint "Actividades por techo" "/actividades-poi/techo/$TECHO_ID" "200" GET "" 1
+
+        echo '─── Necesidades PAP (JWT) ───'
+        ACT_ID=$(curl -s "http://nginx/api/actividades-poi/techo/$TECHO_ID" -H "Authorization: Bearer $TOKEN" | grep -o '"id":[0-9]*' | head -1 | cut -d: -f2)
+        test_endpoint "Necesidades por actividad" "/necesidades-pap/actividad/$ACT_ID" "200" GET "" 1
+
+        echo '─── Expedientes (JWT) ───'
+        test_endpoint "Listar expedientes" "/expedientes" "200" GET "" 1
+
+        echo '─── Notas Modificatorias (JWT) ───'
+        test_endpoint "Listar notas" "/notas-modificatorias" "200" GET "" 1
+
+        echo '─── Dashboard (JWT) ───'
+        test_endpoint "Alertas" "/dashboard/alertas" "200" GET "" 1
+        test_endpoint "Saldos" "/dashboard/saldos" "200" GET "" 1
+
+        echo '─── Reportes (JWT) ───'
+        test_endpoint "Reportes POI 2026" "/reportes/poi?anio=2026" "200" GET "" 1
+        test_endpoint "Reportes PAP 2026" "/reportes/pap?anio=2026" "200" GET "" 1
+        test_endpoint "Reportes Anual 2026" "/reportes/anual/2026" "200" GET "" 1
+        test_endpoint "Reportes Expedientes 2026" "/reportes/expedientes?anio=2026" "200" GET "" 1
+
+        echo '─── Notificaciones (JWT) ───'
+        test_endpoint "Count notificaciones" "/notificaciones/count" "200" GET "" 1
+
+        echo '─── Expediente rastreo (public) ───'
+        test_endpoint "Rastreo publico" "/expedientes/rastreo/EXP-2026-001" "200" GET "" 0
+
+        echo ''
+        echo '══════════════════════════════════════════'
+        echo "  TOTAL: $((PASS + FAILS)) | PASS: $PASS | FAIL: $FAILS"
+        echo '══════════════════════════════════════════'
+
+        if [ "$FAILS" -gt 0 ]; then
+          echo 'SMOKE TESTS FAILED'
+          exit 1
+        fi
+        echo 'ALL SMOKE TESTS PASSED'
+        exit 0
+    networks:
+      - sisexp-net
+
+networks:
+  sisexp-net:
+    external: true

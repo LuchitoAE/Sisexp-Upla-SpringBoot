@@ -4,9 +4,11 @@ import com.upla.sisexp.common.enums.EstadoActividad;
 import com.upla.sisexp.common.enums.Naturaleza;
 import com.upla.sisexp.presupuesto.model.ActividadPOI;
 import com.upla.sisexp.presupuesto.model.NecesidadPAP;
+import com.upla.sisexp.presupuesto.model.NotaModificatoria;
 import com.upla.sisexp.presupuesto.model.TechoPresupuestal;
 import com.upla.sisexp.presupuesto.repository.ActividadPOIRepository;
 import com.upla.sisexp.presupuesto.repository.NecesidadPAPRepository;
+import com.upla.sisexp.presupuesto.repository.NotaModificatoriaRepository;
 import com.upla.sisexp.presupuesto.repository.TechoPresupuestalRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +26,16 @@ public class DataInitializer implements CommandLineRunner {
     private final TechoPresupuestalRepository techoRepo;
     private final ActividadPOIRepository actividadRepo;
     private final NecesidadPAPRepository necesidadRepo;
+    private final NotaModificatoriaRepository notaRepo;
 
     public DataInitializer(TechoPresupuestalRepository techoRepo,
                            ActividadPOIRepository actividadRepo,
-                           NecesidadPAPRepository necesidadRepo) {
+                           NecesidadPAPRepository necesidadRepo,
+                           NotaModificatoriaRepository notaRepo) {
         this.techoRepo = techoRepo;
         this.actividadRepo = actividadRepo;
         this.necesidadRepo = necesidadRepo;
+        this.notaRepo = notaRepo;
     }
 
     @Override
@@ -49,6 +54,11 @@ public class DataInitializer implements CommandLineRunner {
 
         log.info("Seed completado: 5 techos, {} actividades, {} necesidades",
             actividadRepo.count(), necesidadRepo.count());
+
+        if (notaRepo.count() == 0) {
+            seedNotas();
+            log.info("Seed notas: {} notas modificatorias", notaRepo.count());
+        }
     }
 
     private void seedTecho(int año, int montoTotal, int montoUtilizado) {
@@ -158,5 +168,42 @@ public class DataInitializer implements CommandLineRunner {
 
     private BigDecimal bd(double val) {
         return BigDecimal.valueOf(val).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private void seedNotas() {
+        seedNota("NOTA-2026-001", "inclusion_item", "Fotocopiadoras para laboratorio", "Se requiere equipo por desgaste del existente, indispensable para evaluaciones",
+            bd(8500), "Laboratorio de Fisica", 4L, "pendiente");
+        seedNota("NOTA-2026-002", "inclusion_actividad", "Programa de Salud Mental Estudiantil",
+            "Nueva actividad requerida por bienestar universitario, aprobada en consejo",
+            bd(25000), "Decanato", null, "pendiente");
+        seedNota("NOTA-2026-003", "inclusion_item", "Licencias antivirus campus",
+            "Renovacion urgente, vencimiento en 15 dias, riesgo de ciberataque",
+            bd(12000), "Direccion de TI", 12L, "configurada");
+        seedNota("NOTA-2026-004", "inclusion_item", "Sillas ergonomicas para docentes",
+            "Solicitado por salud ocupacional, previene lesiones posturales",
+            bd(5600), "Laboratorio de Computo", 5L, "rechazada");
+    }
+
+    private void seedNota(String codigo, String tipo, String nombre, String justificacion,
+                           BigDecimal costo, String origen, Long actividadId, String estado) {
+        NotaModificatoria n = new NotaModificatoria();
+        n.setCodigo(codigo);
+        n.setTipo(tipo);
+        n.setNuevoNombre(nombre);
+        n.setJustificacion(justificacion);
+        n.setCostoEstimadoReferencial(costo);
+        n.setOrigen(origen);
+        n.setActividadExistenteId(actividadId);
+        n.setEstado(estado);
+        n.setSolicitanteId(estado.equals("pendiente") ? 4L : 5L);
+        if ("configurada".equals(estado)) {
+            n.setMontoTransferir(costo);
+            n.setNuevoClasificadorGasto("2.3.1.5.1");
+            n.setNuevoTipo("Bien");
+        }
+        if ("rechazada".equals(estado)) {
+            n.setObservacionAdmin("No hay partida disponible este periodo. Reintentar en 2027.");
+        }
+        notaRepo.save(n);
     }
 }
