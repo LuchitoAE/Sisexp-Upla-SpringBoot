@@ -9,7 +9,7 @@ services:
       api-gateway: {condition: service_healthy}
     networks: [sisexp-net]
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:80/"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -37,6 +37,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: sisexp
       RABBITMQ_DEFAULT_PASS: sisexp
+      RABBITMQ_ERLANG_COOKIE: SisexpCookie2026
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
       interval: 15s
