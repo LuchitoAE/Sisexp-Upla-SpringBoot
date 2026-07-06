@@ -20,16 +20,25 @@ export default function Login({ onLogin }) {
 
   if (!horarioOk && !forzarAcceso) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #1e293b 100%)', padding: 20 }}>
-        <div style={{ background: 'rgba(255,255,255,0.98)', borderRadius: 24, padding: '40px', width: '100%', maxWidth: 420, boxShadow: '0 25px 60px rgba(0,0,0,0.25)', textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>&#x1F555;</div>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', marginBottom: 8 }}>Sistema fuera de horario</div>
-          <div style={{ fontSize: 14, color: '#64748b', marginBottom: 4 }}>SISEXP-UPLA opera en horario laboral:</div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: '#2563eb', margin: '12px 0' }}>8:00 AM — 8:00 PM</div>
-          <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 20 }}>Horario de Perú (UTC-5)</div>
-          <button onClick={() => setForzarAcceso(true)} style={{ background: 'transparent', border: '1px solid #e2e8f0', borderRadius: 10, padding: '8px 20px', color: '#64748b', cursor: 'pointer', fontSize: 12, fontFamily: 'Inter, sans-serif' }}>
-            Ingresar de todos modos
-          </button>
+      <div className="login-hours">
+        <div className="login-hours-left">
+          <div className="login-hours-inner">
+            <div className="login-hours-card">
+              <span className="login-hours-icon">&#x1F555;</span>
+              <div className="login-hours-title">Sistema fuera de horario</div>
+              <p className="login-hours-text">SISEXP-UPLA opera en horario laboral:</p>
+              <div className="login-hours-time">8:00 AM &mdash; 8:00 PM</div>
+              <div className="login-hours-zone">Horario de Per&uacute; (UTC-5)</div>
+              <button className="login-hours-btn" onClick={() => setForzarAcceso(true)}>
+                Ingresar de todos modos
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="login-hours-right">
+          <div className="login-right-slide login-right-slide--1" />
+          <div className="login-right-slide login-right-slide--2" />
+          <div className="login-right-overlay" />
         </div>
       </div>
     );
@@ -52,128 +61,94 @@ export default function Login({ onLogin }) {
     { email: 'decanato@upla.edu.pe', pass: 'decanato123', rol: 'Dec' },
   ];
 
+  const inputError = (field) => error && !field ? ' login-input--error' : '';
+
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #1e293b 100%)',
-      padding: 20
-    }}>
-      {/* Background decorative elements */}
-      <div style={{ position: 'absolute', top: '10%', left: '8%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '5%', right: '10%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.10) 0%, transparent 70%)', pointerEvents: 'none' }} />
+    <div className="login-container">
+      <div className="login-left">
+        <div className="login-left-inner">
+          <img
+            className="login-left-logo"
+            src={require('../../assets/login/logo/upla_logo_animado.gif')}
+            alt="Universidad Peruana Los Andes"
+          />
 
-      <div style={{
-        background: 'rgba(255,255,255,0.98)', backdropFilter: 'blur(20px)',
-        borderRadius: 24, padding: '44px 40px 36px', width: '100%', maxWidth: 420,
-        boxShadow: '0 25px 60px rgba(0,0,0,0.25), 0 8px 20px rgba(0,0,0,0.15)',
-        position: 'relative', zIndex: 1
-      }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 16,
-            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20, fontWeight: 900, color: '#fff',
-            boxShadow: '0 8px 24px rgba(37,99,235,0.30)',
-            marginBottom: 16
-          }}>S</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', letterSpacing: -0.5 }}>
-            SISEXP-UPLA
-          </div>
-          <div style={{ fontSize: 13, color: '#64748b', marginTop: 4, fontWeight: 500 }}>
-            Sistema de Gestión de Expedientes
-          </div>
-        </div>
-
-        {error && (
-          <div style={{
-            background: '#fef2f2', color: '#991b1b', padding: '10px 14px', borderRadius: 10,
-            fontSize: 13, marginBottom: 16, border: '1px solid #fecaca', fontWeight: 500,
-            display: 'flex', alignItems: 'center', gap: 8
-          }}>
-            <span style={{ fontSize: 16 }}>⚠</span> {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6, letterSpacing: 0.01 }}>
-              Correo electrónico
-            </label>
-            <input
-              style={{
-                width: '100%', padding: '12px 16px', borderRadius: 12, border: '1.5px solid #e2e8f0',
-                fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none',
-                transition: 'border 0.15s, box-shadow 0.15s', background: '#f8fafc'
-              }}
-              type="email" value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="correo@upla.edu.pe" autoFocus
-              onFocus={e => { e.target.style.borderColor = '#3b82f6'; e.target.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.10)'; e.target.style.background = '#fff'; }}
-              onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; e.target.style.background = '#f8fafc'; }}
-            />
+          <div className="login-left-brand">SISEXP</div>
+          <div className="login-left-tagline">
+            Sistema de Gesti&oacute;n de Expedientes
           </div>
 
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6, letterSpacing: 0.01 }}>
-              Contraseña
-            </label>
-            <input
-              style={{
-                width: '100%', padding: '12px 16px', borderRadius: 12, border: '1.5px solid #e2e8f0',
-                fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none',
-                transition: 'border 0.15s, box-shadow 0.15s', background: '#f8fafc'
-              }}
-              type="password" value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              onFocus={e => { e.target.style.borderColor = '#3b82f6'; e.target.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.10)'; e.target.style.background = '#fff'; }}
-              onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; e.target.style.background = '#f8fafc'; }}
-            />
-          </div>
+          <div className="login-form-section">
+            <h1 className="login-title">Iniciar sesi&oacute;n</h1>
+            <p className="login-subtitle">
+              Ingrese sus credenciales para acceder al sistema
+            </p>
 
-          <button
-            type="submit" disabled={loading}
-            style={{
-              width: '100%', padding: '12px 0', borderRadius: 12, border: 'none',
-              background: loading
-                ? '#93c5fd'
-                : 'linear-gradient(135deg, #3b82f6, #2563eb)',
-              color: '#fff', fontSize: 14, fontWeight: 700, cursor: loading ? 'default' : 'pointer',
-              fontFamily: 'Inter, sans-serif',
-              boxShadow: loading ? 'none' : '0 4px 14px rgba(37,99,235,0.30)',
-              transition: 'all 0.2s',
-              letterSpacing: 0.02
-            }}
-          >
-            {loading ? 'Ingresando…' : 'Ingresar al sistema'}
-          </button>
-        </form>
+            {error && (
+              <div className="login-error">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="15" y1="9" x2="9" y2="15" />
+                  <line x1="9" y1="9" x2="15" y2="15" />
+                </svg>
+                {error}
+              </div>
+            )}
 
-        {/* Quick access seeds */}
-        <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #f1f5f9' }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', marginBottom: 10, textAlign: 'center', letterSpacing: 0.04, textTransform: 'uppercase' }}>
-            Acceso rápido demo
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
-            {seeds.map(s => (
-              <button key={s.email} type="button"
-                onClick={() => { setEmail(s.email); setPassword(s.pass); }}
-                style={{
-                  padding: '7px 10px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff',
-                  cursor: 'pointer', fontSize: 10, fontFamily: 'Inter, sans-serif', fontWeight: 500,
-                  color: '#475569', transition: 'all 0.12s', textAlign: 'left'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#3b82f6'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
-              >
-                <span style={{ fontWeight: 700, color: '#2563eb' }}>{s.rol}</span>{' '}
-                <span style={{ color: '#94a3b8', fontSize: 9 }}>{s.email}</span>
+            <form className="login-form" onSubmit={handleSubmit}>
+              <div className="login-input-group">
+                <label className="login-label" htmlFor="login-email">Correo electr&oacute;nico</label>
+                <input
+                  id="login-email"
+                  className={'login-input' + inputError(email)}
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="correo@upla.edu.pe"
+                  autoFocus
+                  autoComplete="email"
+                />
+              </div>
+
+              <div className="login-input-group">
+                <label className="login-label" htmlFor="login-password">Contrase&ntilde;a</label>
+                <input
+                  id="login-password"
+                  className={'login-input' + inputError(password)}
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                  autoComplete="current-password"
+                />
+              </div>
+
+              <button type="submit" disabled={loading} className="login-btn">
+                {loading ? 'Ingresando\u2026' : 'Ingresar al sistema'}
               </button>
-            ))}
+            </form>
+
+            <div className="login-seeds">
+              <div className="login-seeds-label">Acceso r&aacute;pido demo</div>
+              <div className="login-seeds-grid">
+                {seeds.map(s => (
+                  <button key={s.email} type="button" className="login-seed-btn"
+                    onClick={() => { setEmail(s.email); setPassword(s.pass); }}
+                  >
+                    <span className="login-seed-btn-rol">{s.rol}</span>
+                    <span className="login-seed-btn-email">{s.email}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div className="login-right">
+        <div className="login-right-slide login-right-slide--1" />
+        <div className="login-right-slide login-right-slide--2" />
+        <div className="login-right-overlay" />
       </div>
     </div>
   );
