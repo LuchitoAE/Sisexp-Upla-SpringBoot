@@ -1,7 +1,9 @@
 package com.upla.sisexp.presupuesto.config;
 
 import com.upla.sisexp.common.enums.EstadoActividad;
+import com.upla.sisexp.common.enums.EstadoNota;
 import com.upla.sisexp.common.enums.Naturaleza;
+import com.upla.sisexp.common.enums.TipoNota;
 import com.upla.sisexp.presupuesto.model.ActividadPOI;
 import com.upla.sisexp.presupuesto.model.NecesidadPAP;
 import com.upla.sisexp.presupuesto.model.NotaModificatoria;
@@ -171,21 +173,21 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedNotas() {
-        seedNota("NOTA-2026-001", "inclusion_item", "Fotocopiadoras para laboratorio", "Se requiere equipo por desgaste del existente, indispensable para evaluaciones",
-            bd(8500), "Laboratorio de Fisica", 4L, "pendiente");
-        seedNota("NOTA-2026-002", "inclusion_actividad", "Programa de Salud Mental Estudiantil",
+        seedNota("NOTA-2026-001", TipoNota.inclusion_item, "Fotocopiadoras para laboratorio", "Se requiere equipo por desgaste del existente, indispensable para evaluaciones",
+            bd(8500), "Laboratorio de Fisica", 4L, EstadoNota.pendiente);
+        seedNota("NOTA-2026-002", TipoNota.inclusion_actividad, "Programa de Salud Mental Estudiantil",
             "Nueva actividad requerida por bienestar universitario, aprobada en consejo",
-            bd(25000), "Decanato", null, "pendiente");
-        seedNota("NOTA-2026-003", "inclusion_item", "Licencias antivirus campus",
+            bd(25000), "Decanato", null, EstadoNota.pendiente);
+        seedNota("NOTA-2026-003", TipoNota.inclusion_item, "Licencias antivirus campus",
             "Renovacion urgente, vencimiento en 15 dias, riesgo de ciberataque",
-            bd(12000), "Direccion de TI", 12L, "configurada");
-        seedNota("NOTA-2026-004", "inclusion_item", "Sillas ergonomicas para docentes",
+            bd(12000), "Direccion de TI", 12L, EstadoNota.configurada);
+        seedNota("NOTA-2026-004", TipoNota.inclusion_item, "Sillas ergonomicas para docentes",
             "Solicitado por salud ocupacional, previene lesiones posturales",
-            bd(5600), "Laboratorio de Computo", 5L, "rechazada");
+            bd(5600), "Laboratorio de Computo", 5L, EstadoNota.rechazada);
     }
 
-    private void seedNota(String codigo, String tipo, String nombre, String justificacion,
-                           BigDecimal costo, String origen, Long actividadId, String estado) {
+    private void seedNota(String codigo, TipoNota tipo, String nombre, String justificacion,
+                           BigDecimal costo, String origen, Long actividadId, EstadoNota estado) {
         NotaModificatoria n = new NotaModificatoria();
         n.setCodigo(codigo);
         n.setTipo(tipo);
@@ -195,13 +197,13 @@ public class DataInitializer implements CommandLineRunner {
         n.setOrigen(origen);
         n.setActividadExistenteId(actividadId);
         n.setEstado(estado);
-        n.setSolicitanteId(estado.equals("pendiente") ? 4L : 5L);
-        if ("configurada".equals(estado)) {
+        n.setSolicitanteId(estado == EstadoNota.pendiente ? 4L : 5L);
+        if (estado == EstadoNota.configurada) {
             n.setMontoTransferir(costo);
             n.setNuevoClasificadorGasto("2.3.1.5.1");
-            n.setNuevoTipo("Bien");
+            n.setNuevoTipo(Naturaleza.Bien);
         }
-        if ("rechazada".equals(estado)) {
+        if (estado == EstadoNota.rechazada) {
             n.setObservacionAdmin("No hay partida disponible este periodo. Reintentar en 2027.");
         }
         notaRepo.save(n);
