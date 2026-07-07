@@ -1,0 +1,6 @@
+.filterBar {
+  margin-bottom: var(--space-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

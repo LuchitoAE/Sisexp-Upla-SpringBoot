@@ -1,0 +1,145 @@
+.container {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 400px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-0);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-neutral-200);
+  pointer-events: auto;
+  animation: toastIn 0.2s ease-out;
+  position: relative;
+}
+
+.toastExiting {
+  animation: toastOut 0.15s ease-in forwards;
+}
+
+.icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin-top: 1px;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.message {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-neutral-800);
+  line-height: var(--leading-normal);
+}
+
+.dismiss {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  padding: 0;
+}
+
+.dismiss:hover {
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-600);
+}
+
+/* Variants */
+.success {
+  border-left: 3px solid var(--color-success-500);
+}
+
+.success .icon {
+  color: var(--color-success-500);
+}
+
+.error {
+  border-left: 3px solid var(--color-danger-500);
+}
+
+.error .icon {
+  color: var(--color-danger-500);
+}
+
+.warning {
+  border-left: 3px solid var(--color-warning-500);
+}
+
+.warning .icon {
+  color: var(--color-warning-500);
+}
+
+.info {
+  border-left: 3px solid var(--color-info-500);
+}
+
+.info .icon {
+  color: var(--color-info-500);
+}
+
+/* Progress bar for auto-dismiss */
+.progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  animation: toastProgress linear forwards;
+}
+
+.success .progress { background: var(--color-success-500); }
+.error .progress { background: var(--color-danger-500); }
+.warning .progress { background: var(--color-warning-500); }
+.info .progress { background: var(--color-info-500); }
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+}
+
+@keyframes toastProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}

@@ -1,0 +1,193 @@
+@import './tokens.css';
+@import './reset.css';
+
+html {
+  font-size: 14px;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-neutral-900);
+  background: var(--color-neutral-50);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--color-primary-100);
+  color: var(--color-primary-900);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-300);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-400);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* ─── Page Layout ─── */
+.pageLayout {
+  padding: var(--space-6) var(--space-8);
+}
+
+@media (max-width: 768px) {
+  .pageLayout {
+    padding: var(--space-4);
+  }
+}
+
+.pageHeader {
+  margin-bottom: var(--space-7);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.pageTitle {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-extrabold);
+  color: var(--color-neutral-900);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pageSubtitle {
+  font-size: var(--text-sm);
+  color: var(--color-neutral-400);
+  margin: var(--space-1) 0 0;
+}
+
+/* ─── Card feedback ─── */
+.cardError {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-danger-600);
+  font-size: var(--text-sm);
+  background: var(--color-danger-50);
+  border-radius: var(--radius-md);
+  animation: fadeIn 0.15s ease-out;
+}
+
+.cardSuccess {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-success-600);
+  font-size: var(--text-sm);
+  background: var(--color-success-50);
+  border-radius: var(--radius-md);
+  animation: fadeIn 0.15s ease-out;
+}
+
+/* ─── Utility Classes ─── */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.flex { display: flex; }
+.flexCenter { display: flex; align-items: center; }
+.flexBetween { display: flex; align-items: center; justify-content: space-between; }
+.flexWrap { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+
+.textMuted {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+
+/* ─── Native Select (consistent with Input) ─── */
+.selectNative {
+  height: var(--input-height);
+  padding: 0 var(--space-3);
+  padding-right: var(--space-8);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  color: var(--color-neutral-800);
+  background: #fff;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3b0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.selectNative:focus {
+  border-color: var(--color-brand-500);
+  box-shadow: 0 0 0 3px var(--color-brand-100);
+}
+
+.selectNative:hover:not(:focus) {
+  border-color: var(--color-neutral-400);
+}
+
+/* ─── Animations ─── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-4px); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.page-enter {
+  animation: fadeIn 0.15s ease-out;
+}
+
+.page-exit {
+  animation: fadeOut 0.1s ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .page-exit {
+    animation: none;
+  }
+}
+

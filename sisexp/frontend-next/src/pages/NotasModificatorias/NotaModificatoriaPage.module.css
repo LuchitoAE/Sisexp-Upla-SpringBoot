@@ -1,0 +1,16 @@
+.descCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.descName {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-neutral-900);
+}
+
+.descMeta {
+  font-size: 11px;
+  color: var(--color-neutral-400);
+}
