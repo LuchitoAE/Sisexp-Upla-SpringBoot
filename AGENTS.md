@@ -138,8 +138,9 @@ microservicios/
 │   └── controller/        # ApiTecho, ApiActividadPOI, ApiNecesidadPAP, Dashboard, Reportes, NotaModificatoria
 ├── expediente-service/
 │   ├── model/             # Expediente, SeguimientoLog, DocumentoAdjunto
-│   ├── config/            # DataInitializer (seed 8 expedientes), RabbitMQConfig
-│   └── controller/        # ApiExpediente (CRUD, estado, rastreo, documentos)
+│   ├── config/            # DataInitializer (seed 8 expedientes), RabbitMQConfig, RestTemplateConfig
+│   ├── service/           # ExpedienteService (crear, estado, docs, disponibilidad, generarNumero)
+│   └── controller/        # ApiExpediente (CRUD + estado + rastreo + documentos + disponibilidad)
 └── notificacion-service/
     └── model/Notificacion, controller/ApiNotificacion, consumer/ExpedienteEventConsumer
 
@@ -170,7 +171,7 @@ frontend/
 
 ---
 
-## Endpoints API (43 total)
+## Endpoints API (44 total)
 
 | Metodo | Ruta | Servicio | Auth |
 |:-------|:-----|:---------|:----:|
@@ -194,6 +195,7 @@ frontend/
 | GET | /api/reportes/poi/{id} | presupuesto-service | JWT |
 | GET | /api/reportes/pap/{id} | presupuesto-service | JWT |
 | GET/POST | /api/expedientes | expediente-service | JWT |
+| GET | /api/expedientes/disponibilidad/{poiId}/{papId}?cantidad= | expediente-service | JWT |
 | PUT | /api/expedientes/{id}/estado | expediente-service | JWT |
 | GET | /api/expedientes/rastreo/{codigo} | expediente-service | No |
 | GET | /api/notificaciones?usuarioId= | notificacion-service | JWT |
@@ -264,6 +266,7 @@ Todos los montos: BigDecimal precision=12 scale=2. Enums: @Enumerated(EnumType.S
 | expediente-service | SPRING_DATASOURCE_URL | `jdbc:postgresql://expediente-db.railway.internal:5432/expediente_db` |
 | notificacion-service | SPRING_DATASOURCE_URL | `jdbc:postgresql://notificacion-db.railway.internal:5432/notific_db` |
 | expediente-service | SPRING_RABBITMQ_HOST | `rabbitmq.railway.internal` |
+| expediente-service | PRESUPUESTO_SERVICE_URL | `http://presupuesto-service:8082` (Docker) / `http://presupuesto-service.railway.internal:8082` (Railway) |
 | notificacion-service | SPRING_RABBITMQ_HOST | `rabbitmq.railway.internal` |
 
 ### Railway CLI — Patrones seguros
