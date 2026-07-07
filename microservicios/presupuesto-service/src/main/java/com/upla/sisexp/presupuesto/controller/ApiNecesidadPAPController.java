@@ -51,20 +51,4 @@ public class ApiNecesidadPAPController {
         try { necesidadService.eliminar(id); return ResponseEntity.ok(Map.of("ok", true)); }
         catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
     }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> editar(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        try {
-            var pap = necesidadService.editar(id,
-                (String) body.get("nombre"),
-                body.get("cantidad") != null ? Integer.parseInt(body.get("cantidad").toString()) : null,
-                body.get("precioEstimado") != null ? new BigDecimal(body.get("precioEstimado").toString()) : null,
-                (String) body.get("unidad"),
-                (String) body.get("oficinaLaboratorio"),
-                (String) body.get("clasificadorGasto")
-            );
-            return ResponseEntity.ok(pap);
-        } catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
-        catch (NumberFormatException e) { return ResponseEntity.badRequest().body(Map.of("error", "Formato numerico invalido")); }
-    }
 }

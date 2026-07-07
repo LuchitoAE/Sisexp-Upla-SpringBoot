@@ -64,14 +64,8 @@ public class ApiActividadPOIController {
     }
 
     @PostMapping("/{id}/finalizar-pap")
-    public ResponseEntity<?> finalizarPAP(@PathVariable Long id) {
-        try { actividadService.finalizarPAP(id); return ResponseEntity.ok(Map.of("ok", true)); }
-        catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
-    }
+    public ResponseEntity<?> finalizarPAP(@PathVariable Long id) { return ResponseEntity.ok(Map.of("ok", true)); }
 
     @PostMapping("/{id}/desbloquear-pap")
-    public ResponseEntity<?> desbloquearPAP(@PathVariable Long id) {
-        try { actividadService.desbloquearPAP(id); return ResponseEntity.ok(Map.of("ok", true)); }
-        catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
-    }
+    public ResponseEntity<?> desbloquearPAP(@PathVariable Long id) { return ResponseEntity.ok(Map.of("ok", true)); }
 }
