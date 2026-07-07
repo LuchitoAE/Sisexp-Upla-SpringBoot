@@ -28,27 +28,22 @@ export default function NecesidadPAPPage() {
     if (!anio) return;
     setLoading(true);
     try {
-      const [necs, exps] = await Promise.all([
+      const techoActual = techos.find(t => String(t.año) === anio);
+      if (!techoActual) { setLoading(false); return; }
+
+      const [necs, acts, exps] = await Promise.all([
         client.get('/necesidades-pap'),
+        client.get(`/actividades-poi/techo/${techoActual.id}`),
         client.get(`/reportes/expedientes?anio=${anio}`)
       ]);
       setNecesidades(necs);
+      setActividades(acts);
       setExp((exps.listado || []));
-
-      // Extract unique actividades from necesidades for the selected year
-      const actMap = {};
-      necs.forEach(n => {
-        const act = n.actividad;
-        if (act && String(act.techo?.año) === String(anio)) {
-          actMap[act.id] = act;
-        }
-      });
-      setActividades(Object.values(actMap).sort((a, b) => (a.codigo || '').localeCompare(b.codigo || '')));
     } catch (err) { /* ignore */ }
     finally { setLoading(false); }
-  }, []);
+  }, [techos]);
 
-  useEffect(() => { load(filtroAnio); }, [filtroAnio, load]);
+  useEffect(() => { if (filtroAnio && techos.length > 0) load(filtroAnio); }, [filtroAnio, load, techos.length]);
 
   const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
 
@@ -107,7 +102,10 @@ export default function NecesidadPAPPage() {
       {!loading && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {actividades.map(act => {
-            const items = necesidades.filter(n => n.actividadPoiId === act.id);
+            const items = necesidades.filter(n => {
+              const fk = n.actividadPOIId || n.actividadpoiId || n.actividadPoiId;
+              return fk === act.id;
+            });
             const isOpen = expanded[`act-${act.id}`];
             const totalPlan = items.reduce((s, i) => s + parseInt(i.cantidad) * parseFloat(i.precioEstimado), 0);
             const totalEjec = items.reduce((s, i) => s + (parseFloat(i.montoEjecutado) || 0), 0);

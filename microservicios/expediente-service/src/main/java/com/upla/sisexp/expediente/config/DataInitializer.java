@@ -28,12 +28,11 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void run(String... args) {
-        if (expedienteRepo.count() > 0) {
-            log.info("Expediente DB ya tiene datos, omitiendo seed");
-            return;
-        }
-        log.info("Sembrando expedientes de muestra...");
+        log.info("Reseteando y sembrando expedientes de muestra...");
+        logRepo.deleteAll();
+        expedienteRepo.deleteAll();
 
         crear("EXP-2026-001", "Solicitud de computadoras para laboratorio de computo",
             4L, 1L, 5L, Urgencia.Urgente, Naturaleza.Bien, 10, 28000,
