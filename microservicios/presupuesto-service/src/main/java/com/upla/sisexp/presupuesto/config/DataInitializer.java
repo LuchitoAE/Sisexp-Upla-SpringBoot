@@ -41,13 +41,12 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional
     public void run(String... args) {
-        log.info("Reseteando y sembrando datos presupuestales 2022-2026...");
-        notaRepo.deleteAll();
-        necesidadRepo.deleteAll();
-        actividadRepo.deleteAll();
-        techoRepo.deleteAll();
+        if (techoRepo.count() > 0) {
+            log.info("Presupuesto DB ya tiene datos, omitiendo seed");
+            return;
+        }
+        log.info("Sembrando datos presupuestales 2022-2026...");
 
         seedTecho(2022, 90000, 90000);
         seedTecho(2023, 110000, 110000);
