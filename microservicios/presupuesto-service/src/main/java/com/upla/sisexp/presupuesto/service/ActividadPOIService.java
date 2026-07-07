@@ -59,7 +59,7 @@ public class ActividadPOIService {
     @Transactional
     public void finalizarPAP(Long id) {
         ActividadPOI a = obtener(id);
-        a.setEstado(EstadoActividad.Finalizada);
+        a.setEstado(EstadoActividad.Cerrado);
         actividadRepo.save(a);
     }
 
