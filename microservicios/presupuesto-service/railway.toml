@@ -1,0 +1,8 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "microservicios/presupuesto-service/Dockerfile"
+
+[deploy]
+numReplicas = 1
+startCommand = "java -jar app.jar"
+healthcheckPath = "/actuator/health"
