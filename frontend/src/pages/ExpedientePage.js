@@ -97,7 +97,10 @@ export default function ExpedientePage() {
       await client.post('/expedientes', {
         ...form,
         naturaleza: form.naturaleza,
-        cantidadSolicitada: form.cantidadSolicitada || 1
+        cantidadSolicitada: form.cantidadSolicitada || 1,
+        solicitanteId: user?.id || 5,
+        costoEstimado: disponibilidad?.costo || 0,
+        fechaLimite: disponibilidad?.fechaLimite?.fecha || null
       });
       setShowForm(false);
       setForm({ actividadPoiId: '', necesidadPapId: '', urgencia: '', naturaleza: '', descripcion: '', cantidadSolicitada: 1 });
@@ -212,24 +215,22 @@ export default function ExpedientePage() {
           )}
           <div style={{ marginBottom: 12 }}>
             <label className="label">Cantidad a solicitar *</label>
-            <input className="input" type="number" min={1} max={disponibilidad?.pap?.cantidadDisponible || 1}
+            <input className="input" type="number" min={1}
+              max={disponibilidad?.pap?.cantidadDisponible || 9999}
               value={form.cantidadSolicitada}
               onChange={e => {
                 const val = parseInt(e.target.value) || 1;
-                const max = disponibilidad?.pap?.cantidadDisponible || 1;
+                const max = disponibilidad?.pap?.cantidadDisponible || 9999;
                 setForm({ ...form, cantidadSolicitada: Math.min(val, max) });
-              }}
-              disabled={!disponibilidad} />
-            {disponibilidad && form.cantidadSolicitada > disponibilidad.pap?.cantidadDisponible && (
+              }} />
+            {disponibilidad && form.cantidadSolicitada > (disponibilidad.pap?.cantidadDisponible || 0) && (
               <div style={{ fontSize: 11, color: '#b91c1c', marginTop: 4, fontWeight: 600 }}>
                 No puede solicitar una cantidad mayor al saldo disponible en su PAP (Máx. {disponibilidad.pap?.cantidadDisponible})
               </div>
             )}
-            {disponibilidad && (
-              <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-                Costo estimado: <strong>{formatMoney((form.cantidadSolicitada || 1) * (disponibilidad?.pap?.precioUnitario || 0))}</strong>
-              </div>
-            )}
+            <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+              Costo estimado: <strong>{formatMoney((form.cantidadSolicitada || 1) * (disponibilidad?.pap?.precioUnitario || 0))}</strong>
+            </div>
           </div>
           <div style={{ marginBottom: 12 }}>
             <label className="label">4. Naturaleza del requerimiento (RF-3.4) *</label>
