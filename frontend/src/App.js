@@ -141,30 +141,38 @@ function AppContent() {
     }
   };
 
+  const isMonitor = active === 'monitor';
+
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar
-        active={active}
-        onNavigate={setActive}
-        user={user}
-        onLogout={logout}
-        collapsed={collapsed}
-        onToggle={() => setCollapsed(!collapsed)}
-      />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Header user={user} onMonitorClick={() => setActive('monitor')} />
-        <main style={
-          active === 'monitor'
-            ? { flex: 1, overflow: 'hidden', background: '#0a0f14' }
-            : { flex: 1, overflowY: 'auto', background: '#f8fafc' }
-        }>
-          <div className="animate-in" key={active} style={active === 'monitor' ? { height: '100%' } : {}}>
-            <Suspense fallback={<PageSkeleton />}>
-              {renderContent()}
-            </Suspense>
+      {isMonitor ? (
+        <div style={{ flex: 1, position: 'relative', background: '#0a0f14' }}>
+          <Suspense fallback={<PageSkeleton />}>
+            <MonitorPage onBack={() => setActive('dashboard')} />
+          </Suspense>
+        </div>
+      ) : (
+        <>
+          <Sidebar
+            active={active}
+            onNavigate={setActive}
+            user={user}
+            onLogout={logout}
+            collapsed={collapsed}
+            onToggle={() => setCollapsed(!collapsed)}
+          />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <Header user={user} onMonitorClick={() => setActive('monitor')} />
+            <main style={{ flex: 1, overflowY: 'auto', background: '#f8fafc' }}>
+              <div className="animate-in" key={active}>
+                <Suspense fallback={<PageSkeleton />}>
+                  {renderContent()}
+                </Suspense>
+              </div>
+            </main>
           </div>
-        </main>
-      </div>
+        </>
+      )}
     </div>
   );
 }

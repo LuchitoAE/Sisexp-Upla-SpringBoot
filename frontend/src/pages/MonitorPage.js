@@ -294,7 +294,7 @@ const SERVICE_TO_NAV = {
   'nginx': null, 'api-gateway': null, 'eureka-server': null
 };
 
-export default function MonitorPage() {
+export default function MonitorPage({ onBack }) {
   const [statuses, setStatuses] = useState({});
   const [selected, setSelected] = useState(null);
   const [paused, setPaused] = useState(false);
@@ -435,6 +435,11 @@ export default function MonitorPage() {
     <div className="monitor-page">
       <div className="monitor-topbar">
         <div className="topbar-left">
+          {onBack && (
+            <button className="topbar-back-btn" onClick={onBack} title="Volver al sistema">
+              ← Volver
+            </button>
+          )}
           <span className={'topbar-dot' + (downCount > 0 ? ' has-down' : '')} />
           <span className="topbar-count">{upCount}/{serviceDefs.length} UP</span>
         </div>
