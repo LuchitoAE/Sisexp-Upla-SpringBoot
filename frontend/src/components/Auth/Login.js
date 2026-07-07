@@ -69,7 +69,7 @@ export default function Login({ onLogin }) {
         <div className="login-left-inner">
           <img
             className="login-left-logo"
-            src={require('../../assets/login/logo/upla_logo_transparente.png')}
+            src={require('../../assets/images/logo/upla_logo_transparente.png')}
             alt="Universidad Peruana Los Andes"
           />
 

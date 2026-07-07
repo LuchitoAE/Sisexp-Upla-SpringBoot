@@ -42,7 +42,7 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
         display: 'flex', alignItems: 'center', gap: 12
       }}>
         <img
-          src={require('../../assets/login/logo/upla_logo_transparente.png')}
+          src={require('../../assets/images/logo/upla_logo_transparente.png')}
           alt="UPLA"
           style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, objectFit: 'contain' }}
         />
