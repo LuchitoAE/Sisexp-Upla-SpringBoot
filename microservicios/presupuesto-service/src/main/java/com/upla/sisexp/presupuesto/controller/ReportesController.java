@@ -5,12 +5,8 @@ import com.upla.sisexp.presupuesto.model.ActividadPOI;
 import com.upla.sisexp.presupuesto.model.NecesidadPAP;
 import com.upla.sisexp.presupuesto.model.TechoPresupuestal;
 import com.upla.sisexp.presupuesto.repository.*;
-import com.upla.sisexp.presupuesto.service.ExportService;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,18 +22,15 @@ public class ReportesController {
     private final ActividadPOIRepository actividadRepo;
     private final NecesidadPAPRepository necesidadRepo;
     private final RestTemplate restTemplate;
-    private final ExportService exportService;
 
     public ReportesController(TechoPresupuestalRepository techoRepo,
                                ActividadPOIRepository actividadRepo,
                                NecesidadPAPRepository necesidadRepo,
-                               RestTemplate restTemplate,
-                               ExportService exportService) {
+                               RestTemplate restTemplate) {
         this.techoRepo = techoRepo;
         this.actividadRepo = actividadRepo;
         this.necesidadRepo = necesidadRepo;
         this.restTemplate = restTemplate;
-        this.exportService = exportService;
     }
 
     @GetMapping("/anual/{anio}")
@@ -379,109 +372,5 @@ public class ReportesController {
         result.put("necesidades", necList);
 
         return result;
-    }
-
-    @GetMapping("/anual/{anio}/excel")
-    public ResponseEntity<?> excelAnual(@PathVariable int anio) {
-        try {
-            byte[] data = exportService.exportarExcelAnual(anio);
-            return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=informe_anual_" + anio + ".xlsx")
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(data);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Error generando Excel: " + e.getMessage()));
-        }
-    }
-
-    @GetMapping("/anual/{anio}/pdf")
-    public ResponseEntity<?> pdfAnual(@PathVariable int anio) {
-        try {
-            byte[] data = exportService.exportarPDFAnual(anio);
-            return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=informe_anual_" + anio + ".html")
-                .contentType(MediaType.TEXT_HTML)
-                .body(data);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Error generando PDF: " + e.getMessage()));
-        }
-    }
-
-    @GetMapping("/expedientes/excel")
-    public ResponseEntity<?> excelExpedientes(@RequestParam(defaultValue = "2026") int anio) {
-        try {
-            byte[] data = exportService.exportarExcelExpedientes(anio);
-            return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_expedientes_" + anio + ".xlsx")
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(data);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Error generando Excel: " + e.getMessage()));
-        }
-    }
-
-    @GetMapping("/expedientes/pdf")
-    public ResponseEntity<?> pdfExpedientes(@RequestParam(defaultValue = "2026") int anio) {
-        try {
-            byte[] data = exportService.exportarPDFExpedientes(anio);
-            return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_expedientes_" + anio + ".html")
-                .contentType(MediaType.TEXT_HTML)
-                .body(data);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Error generando PDF: " + e.getMessage()));
-        }
-    }
-
-    @GetMapping("/poi/excel")
-    public ResponseEntity<?> excelPOI(@RequestParam(defaultValue = "2026") int anio) {
-        try {
-            byte[] data = exportService.exportarExcelPOI(anio);
-            return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_poi_" + anio + ".xlsx")
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(data);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Error generando Excel: " + e.getMessage()));
-        }
-    }
-
-    @GetMapping("/poi/pdf")
-    public ResponseEntity<?> pdfPOI(@RequestParam(defaultValue = "2026") int anio) {
-        try {
-            byte[] data = exportService.exportarPDFPOI(anio);
-            return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_poi_" + anio + ".html")
-                .contentType(MediaType.TEXT_HTML)
-                .body(data);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Error generando PDF: " + e.getMessage()));
-        }
-    }
-
-    @GetMapping("/pap/excel")
-    public ResponseEntity<?> excelPAP(@RequestParam(defaultValue = "2026") int anio) {
-        try {
-            byte[] data = exportService.exportarExcelPAP(anio);
-            return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_pap_" + anio + ".xlsx")
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(data);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Error generando Excel: " + e.getMessage()));
-        }
-    }
-
-    @GetMapping("/pap/pdf")
-    public ResponseEntity<?> pdfPAP(@RequestParam(defaultValue = "2026") int anio) {
-        try {
-            byte[] data = exportService.exportarPDFPAP(anio);
-            return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_pap_" + anio + ".html")
-                .contentType(MediaType.TEXT_HTML)
-                .body(data);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Error generando PDF: " + e.getMessage()));
-        }
     }
 }
