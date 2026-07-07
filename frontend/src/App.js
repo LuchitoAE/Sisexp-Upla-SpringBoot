@@ -1,4 +1,5 @@
 import React, { useState, createContext, useContext, useCallback, Suspense, lazy, memo } from 'react';
+import { HiOutlineXCircle, HiOutlineCheckCircle } from 'react-icons/hi';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Auth/Login';
 import Sidebar from './components/Layout/Sidebar';
@@ -97,7 +98,7 @@ function ModalProvider({ children }) {
             )}
             {modal.type === 'alert' && (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 36, marginBottom: 8 }}>{modal.variant === 'error' ? '✗' : '✓'}</div>
+                <div style={{ fontSize: 36, marginBottom: 8 }}>{modal.variant === 'error' ? <HiOutlineXCircle style={{fontSize:36}} /> : <HiOutlineCheckCircle style={{fontSize:36}} />}</div>
                 <div style={{ fontSize: 16, fontWeight: 700, color: modal.variant === 'error' ? '#dc2626' : '#16a34a', marginBottom: 4 }}>{modal.title}</div>
                 <div style={{ fontSize: 13, color: modal.variant === 'error' ? '#991b1b' : '#64748b', lineHeight: 1.5, marginBottom: 16 }}>{modal.message}</div>
                 <button className="btn btn-primary btn-sm" onClick={() => close()}>Entendido</button>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModals } from '../App';
 import { client } from '../api/client';
+import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlinePencilAlt, HiOutlineX } from 'react-icons/hi';
 
 function formatMoney(n) {
   return 'S/ ' + Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2 });
@@ -214,15 +215,15 @@ export default function ActividadPOIPage() {
                     <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{formatMoney(a.presupuestoAsignado)}</span>
                     <div style={{ display: 'flex', gap: 4 }} onClick={e => e.stopPropagation()}>
                       {puedeCerrarPAP && !a.planificado && (
-                        <button className="btn btn-success btn-sm" onClick={() => handleFinalizarPAP(a.id, a.nombre)}>🔒 Finalizar PAP</button>
+                          <button className="btn btn-success btn-sm" onClick={() => handleFinalizarPAP(a.id, a.nombre)}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineLockClosed/>Finalizar PAP</span></button>
                       )}
                       {isAdmin && a.planificado && (
-                        <button className="btn btn-warning btn-sm" onClick={() => handleDesbloquearPAP(a.id, a.nombre)}>🔓 Desbloquear PAP</button>
+                          <button className="btn btn-warning btn-sm" onClick={() => handleDesbloquearPAP(a.id, a.nombre)}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineLockOpen/>Desbloquear PAP</span></button>
                       )}
                       {isAdmin && !a.planificado && !techoPlanificado && (
                         <>
-                          <button className="btn btn-secondary btn-sm" onClick={() => openEdit(a)}>✎ Editar</button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(a.id)}>✗ Eliminar</button>
+                            <button className="btn btn-secondary btn-sm" onClick={() => openEdit(a)}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlinePencilAlt/>Editar</span></button>
+                            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(a.id)}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineX/>Eliminar</span></button>
                         </>
                       )}
                       {isAdmin && !a.planificado && techoPlanificado && (
@@ -363,8 +364,8 @@ function NecesidadSubList({ actividadId, actividadNombre, planificado }) {
                 {puede && (
                   <td style={{ padding: '6px 10px' }}>
                     <div style={{ display: 'flex', gap: 4 }}>
-                      <button className="btn btn-secondary btn-sm" onClick={() => { setEditId(i.id); setForm({ nombre: i.nombre, cantidad: i.cantidad, precioEstimado: i.precioEstimado, unidad: i.unidad || 'unidad', oficinaLaboratorio: i.oficinaLaboratorio || '', tipo: i.tipo, clasificadorGasto: i.clasificadorGasto || '' }); setShowForm(true); }}>✎ Editar</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(i.id)}>✗ Eliminar</button>
+                        <button className="btn btn-secondary btn-sm" onClick={() => { setEditId(i.id); setForm({ nombre: i.nombre, cantidad: i.cantidad, precioEstimado: i.precioEstimado, unidad: i.unidad || 'unidad', oficinaLaboratorio: i.oficinaLaboratorio || '', tipo: i.tipo, clasificadorGasto: i.clasificadorGasto || '' }); setShowForm(true); }}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlinePencilAlt/>Editar</span></button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(i.id)}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineX/>Eliminar</span></button>
                     </div>
                   </td>
                 )}

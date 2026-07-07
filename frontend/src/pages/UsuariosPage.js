@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModals } from '../App';
 import { client } from '../api/client';
+import { HiOutlineClock, HiOutlineLockClosed, HiOutlineBan } from 'react-icons/hi';
 
 const ROLES = ['Administrador', 'Coordinacion', 'Secretaria', 'Director', 'Laboratorio', 'Decanato'];
 const ROL_COLORS = {
@@ -145,9 +146,9 @@ export default function UsuariosPage() {
 
       {/* Info banner */}
       <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 14, background: '#f8fafc', padding: '8px 14px', borderRadius: 8, display: 'flex', gap: 20 }}>
-        <span>🕐 <strong>Horario laboral:</strong> Lunes a Domingo, 8:00 AM – 8:00 PM</span>
-        <span>🔒 <strong>Usuarios restringidos</strong> solo acceden en ese horario</span>
-        <span>🚫 <strong>Inactivos</strong> no pueden iniciar sesión</span>
+        <span style={{display:'flex',alignItems:'center',gap:6}}><HiOutlineClock style={{fontSize:14}}/> <strong>Horario laboral:</strong> Lunes a Domingo, 8:00 AM – 8:00 PM</span>
+        <span style={{display:'flex',alignItems:'center',gap:6}}><HiOutlineLockClosed style={{fontSize:14}}/> <strong>Usuarios restringidos</strong> solo acceden en ese horario</span>
+        <span style={{display:'flex',alignItems:'center',gap:6}}><HiOutlineBan style={{fontSize:14}}/> <strong>Inactivos</strong> no pueden iniciar sesión</span>
       </div>
 
       {/* Table */}

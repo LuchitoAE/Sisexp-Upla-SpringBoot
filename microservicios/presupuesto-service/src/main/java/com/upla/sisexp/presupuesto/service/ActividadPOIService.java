@@ -3,7 +3,9 @@ package com.upla.sisexp.presupuesto.service;
 import com.upla.sisexp.common.enums.EstadoActividad;
 import com.upla.sisexp.common.exception.BusinessException;
 import com.upla.sisexp.presupuesto.model.ActividadPOI;
+import com.upla.sisexp.presupuesto.model.TechoPresupuestal;
 import com.upla.sisexp.presupuesto.repository.ActividadPOIRepository;
+import com.upla.sisexp.presupuesto.repository.TechoPresupuestalRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +16,11 @@ import java.util.List;
 @Service
 public class ActividadPOIService {
     private final ActividadPOIRepository actividadRepo;
-    public ActividadPOIService(ActividadPOIRepository actividadRepo) { this.actividadRepo = actividadRepo; }
+    private final TechoPresupuestalRepository techoRepo;
+    public ActividadPOIService(ActividadPOIRepository actividadRepo, TechoPresupuestalRepository techoRepo) {
+        this.actividadRepo = actividadRepo;
+        this.techoRepo = techoRepo;
+    }
 
     public List<ActividadPOI> listar() { return actividadRepo.findAll(); }
     public List<ActividadPOI> listarPorTecho(Long techoId) { return actividadRepo.findByTechoPresupuestalId(techoId); }
@@ -44,16 +50,24 @@ public class ActividadPOIService {
 
     @Transactional
     public void planificarPOI(Long techoId) {
+        TechoPresupuestal techo = techoRepo.findById(techoId)
+            .orElseThrow(() -> new BusinessException("Techo no encontrado"));
         List<ActividadPOI> actividades = actividadRepo.findByTechoPresupuestalId(techoId);
         for (ActividadPOI a : actividades) { a.setPlanificado(true); }
         actividadRepo.saveAll(actividades);
+        techo.setPlanificado(true);
+        techoRepo.save(techo);
     }
 
     @Transactional
     public void desplanificarPOI(Long techoId) {
+        TechoPresupuestal techo = techoRepo.findById(techoId)
+            .orElseThrow(() -> new BusinessException("Techo no encontrado"));
         List<ActividadPOI> actividades = actividadRepo.findByTechoPresupuestalId(techoId);
         for (ActividadPOI a : actividades) { a.setPlanificado(false); }
         actividadRepo.saveAll(actividades);
+        techo.setPlanificado(false);
+        techoRepo.save(techo);
     }
 
     @Transactional

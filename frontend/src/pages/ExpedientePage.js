@@ -4,6 +4,7 @@ import { client, API_URL } from '../api/client';
 import { useModals } from '../App';
 import NotaModificatoriaPage from './NotaModificatoriaPage';
 import { puede } from '../utils/config';
+import { HiOutlineSearch, HiOutlineCube, HiOutlineCog, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineCheck, HiOutlineReply, HiOutlineX, HiOutlinePaperAirplane } from 'react-icons/hi';
 
 const TIPOS_DOC = ['TDR', 'Especificaciones_Tecnicas', 'Cotizacion', 'Informe_Tecnico'];
 const TIPOS_LABEL = { 'TDR': 'TDR', 'Especificaciones_Tecnicas': 'Esp. Técnicas', 'Cotizacion': 'Cotización', 'Informe_Tecnico': 'Informe Técnico' };
@@ -186,7 +187,7 @@ export default function ExpedientePage() {
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#2563eb'; e.currentTarget.style.background = '#f8fafc'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.color = '#64748b'; e.currentTarget.style.background = 'transparent'; }}
             >
-              🔍 ¿No encuentra su necesidad? Solicitar Inclusión / Modificación
+              <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineSearch style={{fontSize:14}}/>¿No encuentra su necesidad? Solicitar Inclusión / Modificación</span>
             </button>
           </div>
           {disponibilidad && (
@@ -246,7 +247,7 @@ export default function ExpedientePage() {
                 }}>
                   <input type="radio" name="naturaleza" checked={form.naturaleza === n}
                     onChange={() => setForm({ ...form, naturaleza: n })} style={{ accentColor: '#2563eb' }} />
-                  {n === 'Bien' ? '📦 Bien' : '🔧 Servicio'}
+                  {n === 'Bien' ? <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineCube style={{fontSize:14}}/>Bien</span> : <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineCog style={{fontSize:14}}/>Servicio</span>}
                 </label>
               ))}
             </div>
@@ -283,14 +284,14 @@ export default function ExpedientePage() {
                 background: disponibilidad.fechaLimite.ok ? '#dcfce7' : '#fee2e2',
                 color: disponibilidad.fechaLimite.ok ? '#166534' : '#b91c1c'
               }}>
-                <span>{disponibilidad.fechaLimite.ok ? '✓' : '✗'}</span>
+                <span>{disponibilidad.fechaLimite.ok ? <HiOutlineCheckCircle style={{fontSize:16,color:'#16a34a'}}/> : <HiOutlineXCircle style={{fontSize:16,color:'#b91c1c'}}/>}</span>
                 <span>{disponibilidad.fechaLimite.ok ? 'Fecha límite vigente' : disponibilidad.fechaLimite.error}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 6, fontSize: 12, fontWeight: 500,
                 background: disponibilidad.saldo.ok ? '#dcfce7' : '#fee2e2',
                 color: disponibilidad.saldo.ok ? '#166534' : '#b91c1c'
               }}>
-                <span>{disponibilidad.saldo.ok ? '✓' : '✗'}</span>
+                <span>{disponibilidad.saldo.ok ? <HiOutlineCheckCircle style={{fontSize:16,color:'#16a34a'}}/> : <HiOutlineXCircle style={{fontSize:16,color:'#b91c1c'}}/>}</span>
                 <span>
                   Costo: {formatMoney(disponibilidad.costo)} |
                   Disponible: {formatMoney(disponibilidad.saldo.disponible || 0)}
@@ -359,26 +360,26 @@ export default function ExpedientePage() {
           )}
           {puedeAprobar && d.estado === 'En_revision' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-success btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Aprobado')}>✓ Aprobar</button>
-              <button className="btn btn-warning btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Observado')}>↩ Observar</button>
-              <button className="btn btn-danger btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
+              <button className="btn btn-success btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Aprobado')}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineCheck style={{fontSize:14}}/>Aprobar</span></button>
+              <button className="btn btn-warning btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Observado')}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineReply style={{fontSize:14}}/>Observar</span></button>
+              <button className="btn btn-danger btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Rechazado')}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineX style={{fontSize:14}}/>Rechazar</span></button>
             </div>
           )}
           {puedeAprobar && d.estado === 'Observado' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <button className="btn btn-warning btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('En_revision')}>↻ Reenviar a revisión</button>
-              <button className="btn btn-danger btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
+              <button className="btn btn-danger btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Rechazado')}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineX style={{fontSize:14}}/>Rechazar</span></button>
             </div>
           )}
           {puedeFinalizar && d.estado === 'Aprobado' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-primary btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Finalizado')}>✓ Finalizar</button>
-              {puedeDerivar && <button className="btn btn-info btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Derivado')}>📤 Derivar a DGA</button>}
+              <button className="btn btn-primary btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Finalizado')}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineCheck style={{fontSize:14}}/>Finalizar</span></button>
+              {puedeDerivar && <button className="btn btn-info btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Derivado')}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlinePaperAirplane style={{fontSize:14}}/>Derivar a DGA</span></button>}
             </div>
           )}
           {d.estado === 'Derivado' && puedeFinalizar && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-primary btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Finalizado')}>✓ Finalizar</button>
+              <button className="btn btn-primary btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Finalizado')}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineCheck style={{fontSize:14}}/>Finalizar</span></button>
               {puedeVerDerivacion && (
                 <a href={`${API_URL}/expedientes/${d.id}/derivacion`} target="_blank" rel="noreferrer">
                   <button className="btn btn-secondary btn-sm">Hoja de Derivación</button>

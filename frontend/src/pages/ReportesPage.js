@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModals } from '../App';
 import { client, API_URL } from '../api/client';
+import { HiOutlineClipboardList, HiOutlineFolder, HiOutlineChartBar, HiOutlineCube, HiOutlineDownload, HiOutlineDocumentText } from 'react-icons/hi';
 
 function formatMoney(n) {
   return 'S/ ' + Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2 });
@@ -72,11 +73,18 @@ function exportarPDF(titulo, secciones, nombreArchivo) {
 }
 
 const SECCIONES = [
-  { id: 'anual', label: 'Informe Anual', icon: '📋' },
-  { id: 'expedientes', label: 'Expedientes', icon: '📁' },
-  { id: 'poi', label: 'POI General', icon: '📊' },
-  { id: 'pap', label: 'PAP General', icon: '📦' },
+  { id: 'anual', label: 'Informe Anual', icon: 'clipboard' },
+  { id: 'expedientes', label: 'Expedientes', icon: 'folder' },
+  { id: 'poi', label: 'POI General', icon: 'chartbar' },
+  { id: 'pap', label: 'PAP General', icon: 'cube' },
 ];
+
+const TAB_ICONS = {
+  clipboard: HiOutlineClipboardList,
+  folder: HiOutlineFolder,
+  chartbar: HiOutlineChartBar,
+  cube: HiOutlineCube,
+};
 
 function Badge({ label, color = '#64748b', bg = '#f1f5f9' }) {
   return <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 8, background: bg, color, fontWeight: 600 }}>{label}</span>;
@@ -260,7 +268,7 @@ export default function ReportesPage() {
             color: seccion === s.id ? '#2563eb' : '#64748b',
             border: `1px solid ${seccion === s.id ? '#bfdbfe' : '#e2e8f0'}`
           }}>
-            <span style={{ marginRight: 4 }}>{s.icon}</span> {s.label}
+            <span style={{ marginRight: 4 }}>{(() => { const Icon = TAB_ICONS[s.icon]; return <Icon style={{fontSize:14}}/>; })()}</span> {s.label}
           </button>
         ))}
         {/* Año selector */}
@@ -281,11 +289,11 @@ export default function ReportesPage() {
             <button onClick={() => handleExportExcel()} style={{
               padding: '7px 16px', borderRadius: 8, border: '1px solid #16a34a', background: '#fff',
               color: '#16a34a', cursor: 'pointer', fontSize: 12, fontWeight: 600
-            }}>📥 Exportar Excel</button>
+            }}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineDownload style={{fontSize:14}}/> Exportar Excel</span></button>
             <button onClick={() => handleExportPDF()} style={{
               padding: '7px 16px', borderRadius: 8, border: '1px solid #dc2626', background: '#fff',
               color: '#dc2626', cursor: 'pointer', fontSize: 12, fontWeight: 600
-            }}>📄 Exportar PDF</button>
+            }}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineDocumentText style={{fontSize:14}}/> Exportar PDF</span></button>
           </div>
 
           {seccion === 'anual' && <InformeAnual data={data} anio={anio} />}

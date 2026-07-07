@@ -65,11 +65,13 @@ public class ApiTechoPresupuestalController {
     public ResponseEntity<?> finalizarPOI(@PathVariable Long id) {
         try { actividadService.planificarPOI(id); return ResponseEntity.ok(Map.of("ok", true)); }
         catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
+        catch (RuntimeException e) { return ResponseEntity.status(500).body(Map.of("error", "Error al finalizar POI: " + e.getMessage())); }
     }
 
     @PostMapping("/{id}/desbloquear-poi")
     public ResponseEntity<?> desbloquearPOI(@PathVariable Long id) {
         try { actividadService.desplanificarPOI(id); return ResponseEntity.ok(Map.of("ok", true)); }
         catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
+        catch (RuntimeException e) { return ResponseEntity.status(500).body(Map.of("error", "Error al desbloquear POI: " + e.getMessage())); }
     }
 }

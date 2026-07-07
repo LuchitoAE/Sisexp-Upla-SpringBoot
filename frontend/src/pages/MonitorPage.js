@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
+import { HiOutlineGlobe, HiOutlineCog, HiOutlineSearch, HiOutlineLockClosed, HiOutlineChartBar, HiOutlineDocumentText, HiOutlineBell, HiOutlineDatabase, HiOutlineChip, HiOutlineClock, HiOutlinePlay, HiOutlinePause, HiOutlineStop, HiOutlineRefresh, HiOutlineClipboardList, HiOutlineFilm, HiOutlineTrash, HiOutlineDesktopComputer } from 'react-icons/hi';
 import { useRecorder, getRecordings } from '../contexts/RecorderContext';
 import { API_URL } from '../api/client';
 import './MonitorPage.css';
@@ -17,19 +18,32 @@ function savePositions(pos) {
 }
 
 const POLL_MS = 5000;
+
+const NODE_ICONS = {
+  'nginx': HiOutlineGlobe,
+  'api-gateway': HiOutlineCog,
+  'eureka': HiOutlineSearch,
+  'auth': HiOutlineLockClosed,
+  'presupuesto': HiOutlineChartBar,
+  'expediente': HiOutlineDocumentText,
+  'notificacion': HiOutlineBell,
+  'db': HiOutlineDatabase,
+  'rabbitmq': HiOutlineChip,
+};
+
 const serviceDefs = [
-  { id: 'nginx', title: 'NGINX Frontend', port: ':80', x: 40, y: 170, icon: '🌐', cls: 'gateway', type: 'proxy' },
-  { id: 'api-gateway', title: 'API Gateway', port: ':8080', x: 280, y: 90, icon: '⚙', cls: 'gateway', type: 'gateway' },
-  { id: 'eureka-server', title: 'Eureka Server', port: ':8761', x: 560, y: 30, icon: '🔍', cls: 'discovery', type: 'discovery' },
-  { id: 'auth-service', title: 'AUTH-SERVICE', port: ':8081', x: 540, y: 220, icon: '🔒', type: 'service' },
-  { id: 'presupuesto-service', title: 'PRESUPUESTO-SERVICE', port: ':8082', x: 240, y: 340, icon: '📊', type: 'service' },
-  { id: 'expediente-service', title: 'EXPEDIENTE-SERVICE', port: ':8083', x: 500, y: 410, icon: '📄', type: 'service' },
-  { id: 'notificacion-service', title: 'NOTIFICACION-SERVICE', port: ':8084', x: 800, y: 300, icon: '🔔', type: 'service' },
-  { id: 'auth-db', title: 'PostgreSQL Auth', port: ':5433', x: 760, y: 130, icon: '🗄', cls: 'db', type: 'db' },
-  { id: 'presupuesto-db', title: 'PostgreSQL Presup.', port: ':5434', x: 100, y: 450, icon: '🗄', cls: 'db', type: 'db' },
-  { id: 'expediente-db', title: 'PostgreSQL Exped.', port: ':5435', x: 620, y: 530, icon: '🗄', cls: 'db', type: 'db' },
-  { id: 'notificacion-db', title: 'PostgreSQL Notif.', port: ':5436', x: 940, y: 420, icon: '🗄', cls: 'db', type: 'db' },
-  { id: 'rabbitmq', title: 'RabbitMQ', port: ':5672', x: 860, y: 510, icon: '🐰', cls: 'broker', type: 'broker' },
+  { id: 'nginx', title: 'NGINX Frontend', port: ':80', x: 40, y: 170, iconKey: 'nginx', cls: 'gateway', type: 'proxy' },
+  { id: 'api-gateway', title: 'API Gateway', port: ':8080', x: 280, y: 90, iconKey: 'api-gateway', cls: 'gateway', type: 'gateway' },
+  { id: 'eureka-server', title: 'Eureka Server', port: ':8761', x: 560, y: 30, iconKey: 'eureka', cls: 'discovery', type: 'discovery' },
+  { id: 'auth-service', title: 'AUTH-SERVICE', port: ':8081', x: 540, y: 220, iconKey: 'auth', type: 'service' },
+  { id: 'presupuesto-service', title: 'PRESUPUESTO-SERVICE', port: ':8082', x: 240, y: 340, iconKey: 'presupuesto', type: 'service' },
+  { id: 'expediente-service', title: 'EXPEDIENTE-SERVICE', port: ':8083', x: 500, y: 410, iconKey: 'expediente', type: 'service' },
+  { id: 'notificacion-service', title: 'NOTIFICACION-SERVICE', port: ':8084', x: 800, y: 300, iconKey: 'notificacion', type: 'service' },
+  { id: 'auth-db', title: 'PostgreSQL Auth', port: ':5433', x: 760, y: 130, iconKey: 'db', cls: 'db', type: 'db' },
+  { id: 'presupuesto-db', title: 'PostgreSQL Presup.', port: ':5434', x: 100, y: 450, iconKey: 'db', cls: 'db', type: 'db' },
+  { id: 'expediente-db', title: 'PostgreSQL Exped.', port: ':5435', x: 620, y: 530, iconKey: 'db', cls: 'db', type: 'db' },
+  { id: 'notificacion-db', title: 'PostgreSQL Notif.', port: ':5436', x: 940, y: 420, iconKey: 'db', cls: 'db', type: 'db' },
+  { id: 'rabbitmq', title: 'RabbitMQ', port: ':5672', x: 860, y: 510, iconKey: 'rabbitmq', cls: 'broker', type: 'broker' },
 ];
 
 const apiKeyToId = {
@@ -156,7 +170,7 @@ function NodeCard({ def, status, selected, onClick, replayHighlight, pos, onDrag
       onMouseDown={(e) => { e.stopPropagation(); onDragStart(def, e); }}
     >
       <span className={'node-dot status-' + st} />
-      <div className="node-icon">{def.icon}</div>
+      <div className="node-icon">{React.createElement(NODE_ICONS[def.iconKey] || HiOutlineDesktopComputer, {style:{fontSize:18}})}</div>
       <div className="node-title">{def.title}</div>
       <div className="node-port">{def.port}</div>
     </div>
@@ -237,7 +251,7 @@ function ActivityFeed({ activities, replayActions, replayIndex, isReplaying }) {
   if (isReplaying && items) {
     return (
       <div className="activity-feed" ref={feedRef}>
-        <div className="activity-header-replay">▶ REPRODUCIENDO — Accion {replayIndex + 1}/{items.length}</div>
+        <div className="activity-header-replay"><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlinePlay style={{fontSize:14}}/>REPRODUCIENDO — Accion {replayIndex + 1}/{items.length}</span></div>
         {items.map((a, i) => (
           <div key={i} className={'activity-row' + (i <= replayIndex ? ' played' : ' pending')}>
             <span className="act-time">{new Date(a.ts).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
@@ -289,8 +303,8 @@ function RecordingsPanel({ recordings, onPlay, onDelete }) {
             <div className="rec-date">{new Date(r.date).toLocaleString('es-PE')}</div>
           </div>
           <div className="rec-actions">
-            <button className="rec-btn play" onClick={() => onPlay(r)} title="Reproducir">▶</button>
-            <button className="rec-btn delete" onClick={() => onDelete(r.id)} title="Eliminar">✕</button>
+            <button className="rec-btn play" onClick={() => onPlay(r)} title="Reproducir"><HiOutlinePlay style={{fontSize:14}}/></button>
+            <button className="rec-btn delete" onClick={() => onDelete(r.id)} title="Eliminar"><HiOutlineTrash style={{fontSize:14}}/></button>
           </div>
         </div>
       ))}
@@ -514,23 +528,23 @@ export default function MonitorPage({ onBack }) {
           <span className="topbar-count">{upCount}/{serviceDefs.length} UP</span>
         </div>
         <div className="topbar-center">
-          {latency !== null && <span className="topbar-lat">⏱ {latency}ms</span>}
+          {latency !== null && <span className="topbar-lat"><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineClock style={{fontSize:14}}/>{latency}ms</span></span>}
           {replaying && (
             <span className="topbar-replaying">
-              ▶ {replaying.name} — {replayIndex + 1}/{replaying.actions.length}
+              <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlinePlay style={{fontSize:14}}/>{replaying.name} — {replayIndex + 1}/{replaying.actions.length}</span>
             </span>
           )}
         </div>
         <div className="topbar-right">
           {replaying ? (
-            <button className="topbar-btn" onClick={stopReplay}>⏹ Detener</button>
+            <button className="topbar-btn" onClick={stopReplay}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineStop style={{fontSize:14}}/>Detener</span></button>
           ) : (
             <>
               <button className="topbar-btn" onClick={togglePause}>
-                {paused ? '▶ Reanudar' : '⏸ Pausar'}
+                {paused ? <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlinePlay style={{fontSize:14}}/>Reanudar</span> : <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlinePause style={{fontSize:14}}/>Pausar</span>}
               </button>
               <button className="topbar-btn" onClick={() => { pollStatus(); fetchActivity(); }}>
-                🔄 Sondear
+                <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineRefresh style={{fontSize:14}}/>Sondear</span>
               </button>
             </>
           )}
@@ -565,14 +579,14 @@ export default function MonitorPage({ onBack }) {
       <div className="monitor-bottom">
         <div className="bottom-tabs">
           <button className={'bottom-tab' + (tab === 'activity' ? ' active' : '')} onClick={() => { setTab('activity'); stopReplay(); }}>
-            📋 Actividad
+            <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineClipboardList style={{fontSize:14}}/>Actividad</span>
           </button>
           <button className={'bottom-tab' + (tab === 'recordings' ? ' active' : '')} onClick={() => { setTab('recordings'); stopReplay(); }}>
-            📼 Grabaciones ({recordings.length})
+            <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineFilm style={{fontSize:14}}/>Grabaciones ({recordings.length})</span>
           </button>
           {replaying && (
             <div className="replay-controls">
-              <button className="replay-ctrl-btn" onClick={stopReplay}>⏹</button>
+              <button className="replay-ctrl-btn" onClick={stopReplay}><HiOutlineStop style={{fontSize:14}}/></button>
               <span className="replay-speed-label">Velocidad:</span>
               {[1, 2, 4].map(s => (
                 <button key={s} className={'replay-speed-btn' + (replaySpeed === s ? ' active' : '')}

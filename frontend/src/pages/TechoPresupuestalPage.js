@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModals } from '../App';
 import { client } from '../api/client';
+import { HiOutlinePencilAlt, HiOutlineLockClosed, HiOutlineLockOpen } from 'react-icons/hi';
 
 function formatMoney(n) {
   return 'S/ ' + Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2 });
@@ -67,7 +68,7 @@ export default function TechoPresupuestalPage() {
   const handleFinalizarPOI = async (id) => {
     const ok = await modals.confirm(
       'Finalizar planificación del POI',
-      'Se validará que la suma de las actividades coincida exactamente con el techo presupuestal. Una vez cerrado, no se podrán modificar actividades ni crear nuevas.'
+      'Se marcarán todas las actividades como planificadas y se bloqueará el techo presupuestal. No se podrán crear ni modificar actividades mientras esté cerrado.'
     );
     if (!ok) return;
     try {
@@ -180,16 +181,16 @@ export default function TechoPresupuestalPage() {
                     </button>
                   )}
                   {isAdmin && !t.planificado && !inactive && (
-                    <button className="btn btn-secondary btn-sm" onClick={() => openEdit(t)}>✎ Editar</button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => openEdit(t)}><HiOutlinePencilAlt style={{fontSize:14, marginRight:4}}/> Editar</button>
                   )}
                   {isAdmin && !t.planificado && !inactive && (
                     <button className="btn btn-success btn-sm" onClick={() => handleFinalizarPOI(t.id)}>
-                      🔒 Finalizar POI
+                      <HiOutlineLockClosed style={{fontSize:14, marginRight:4}}/> Finalizar POI
                     </button>
                   )}
                   {isAdmin && t.planificado && !inactive && (
                     <button className="btn btn-warning btn-sm" onClick={() => handleDesbloquearPOI(t.id)}>
-                      🔓 Desbloquear POI
+                      <HiOutlineLockOpen style={{fontSize:14, marginRight:4}}/> Desbloquear POI
                     </button>
                   )}
                 </div>

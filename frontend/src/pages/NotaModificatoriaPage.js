@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModals } from '../App';
 import { client, API_URL } from '../api/client';
+import { HiOutlinePencilAlt, HiOutlineCog, HiOutlineCube, HiOutlineClipboardList, HiOutlineSearch, HiOutlineCurrencyDollar, HiOutlineDocumentText, HiOutlineExclamationCircle, HiOutlineCheck, HiOutlineX } from 'react-icons/hi';
 
 function formatMoney(n) { return 'S/ ' + Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2 }); }
 
@@ -134,8 +135,8 @@ export default function NotaModificatoriaPage({ embedded, onSuccess }) {
       {/* ─── Formulario del Laboratorio ─── */}
       {showForm && !esAdmin && (
         <div className="card animate-in" style={{ padding: 24, marginBottom: 24 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 20 }}>
-            📝 Solicitud de Inclusión / Modificación
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 20, display:'flex',alignItems:'center',gap:6 }}>
+            <HiOutlinePencilAlt style={{fontSize:18}}/>Solicitud de Inclusión / Modificación
           </div>
 
           <div style={{ marginBottom: 16 }}>
@@ -229,7 +230,7 @@ export default function NotaModificatoriaPage({ embedded, onSuccess }) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
                         <span style={{ fontSize: 12, fontFamily: 'monospace', color: '#2563eb', fontWeight: 700 }}>{n.codigo}</span>
                         <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>
-                          {n.tipo === 'inclusion_actividad' ? '🏗' : '📦'} {n.nuevoNombre}
+                          {n.tipo === 'inclusion_actividad' ? <HiOutlineCog style={{fontSize:14}}/> : <HiOutlineCube style={{fontSize:14}}/>} {n.nuevoNombre}
                         </span>
                         <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 20, background: ec.bg, color: ec.fg, fontWeight: 600 }}>
                           {n.estado === 'configurada' ? 'Aprobada y configurada' : n.estado === 'rechazada' ? 'Rechazada' : 'Pendiente'}
@@ -237,14 +238,14 @@ export default function NotaModificatoriaPage({ embedded, onSuccess }) {
                       </div>
                       <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.5, marginBottom: 6 }}>{n.justificacion}</div>
                       <div style={{ display: 'flex', gap: 16, fontSize: 11, color: '#64748b', flexWrap: 'wrap' }}>
-                        <span>📌 {n.origen || n.solicitante?.nombre || '—'}</span>
-                        {n.actividadExistente && <span>🎯 Destino: <strong>{n.actividadExistente.codigo}</strong></span>}
-                        <span>💰 Ref: {formatMoney(n.costoEstimadoReferencial)}</span>
-                        {n.actividadOrigen && <span>💸 Origen: <strong>{n.actividadOrigen.codigo}</strong> ({formatMoney(n.montoTransferir)})</span>}
+                        <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineClipboardList style={{fontSize:12}}/>{n.origen || n.solicitante?.nombre || '—'}</span>
+                        {n.actividadExistente && <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineSearch style={{fontSize:12}}/>Destino: <strong>{n.actividadExistente.codigo}</strong></span>}
+                        <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineCurrencyDollar style={{fontSize:12}}/>Ref: {formatMoney(n.costoEstimadoReferencial)}</span>
+                        {n.actividadOrigen && <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineCurrencyDollar style={{fontSize:12}}/>Origen: <strong>{n.actividadOrigen.codigo}</strong> ({formatMoney(n.montoTransferir)})</span>}
                         {n.nombreArchivo && (
                           <a href={`${API_URL}/notas-modificatorias/${n.id}/archivo`} target="_blank" rel="noreferrer"
-                            style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                            📄 Ver PDF
+                            style={{ color: '#2563eb', textDecoration: 'underline', display:'flex',alignItems:'center',gap:4 }}>
+                            <HiOutlineDocumentText style={{fontSize:12}}/>Ver PDF
                           </a>
                         )}
                       </div>
@@ -260,17 +261,17 @@ export default function NotaModificatoriaPage({ embedded, onSuccess }) {
                   {esAdmin && n.estado === 'pendiente' && configId !== n.id && (
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button className="btn btn-success btn-sm" onClick={() => { setConfigId(n.id); setConfigNotaTipo(n.tipo); setConfigForm({ actividadOrigenId: '', montoTransferir: n.costoEstimadoReferencial || '', nuevoClasificadorGasto: '', nuevoTipo: 'Servicio' }); }}>
-                        ⚙ Configurar y aprobar
+                        <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineCog/>Configurar y aprobar</span>
                       </button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleRechazar(n.id)}>✗ Rechazar</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleRechazar(n.id)}><span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineX/>Rechazar</span></button>
                     </div>
                   )}
 
                   {/* Config panel for admin */}
                   {esAdmin && n.estado === 'pendiente' && configId === n.id && (
                     <div style={{ marginTop: 14, padding: 16, background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 12 }}>
-                        ⚙ Configurar — {n.codigo} ({(n.tipo === 'inclusion_actividad' ? 'Actividad nueva' : 'Ítem nuevo')})
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 12, display:'flex',alignItems:'center',gap:6 }}>
+                        <HiOutlineCog style={{fontSize:14}}/>Configurar — {n.codigo} ({(n.tipo === 'inclusion_actividad' ? 'Actividad nueva' : 'Ítem nuevo')})
                       </div>
                       <div style={{ fontSize: 12, color: '#64748b', marginBottom: 14 }}>
                         {n.tipo === 'inclusion_actividad' ? 'Seleccione la actividad de la cual quitar presupuesto y asigne el monto.' : 'Asigne el monto del nuevo ítem. Se validará que la actividad destino tenga espacio presupuestal suficiente. No se resta dinero de otras actividades.'}
@@ -296,8 +297,8 @@ export default function NotaModificatoriaPage({ embedded, onSuccess }) {
                           {(configNotaTipo === 'inclusion_actividad' ? actividadConfigOrigen : actividadConfigDestino) && (
                             <div style={{ fontSize: 11, marginTop: 4, color: parseFloat(configForm.montoTransferir) > dispConfig ? '#b91c1c' : '#16a34a', fontWeight: 600 }}>
                               {parseFloat(configForm.montoTransferir) > dispConfig
-                                ? `⚠ Excede disponible (${formatMoney(dispConfig)})`
-                                : `✓ Disponible en {configNotaTipo === 'inclusion_actividad' ? 'origen' : 'destino'}: ${formatMoney(dispConfig)}`}
+                                ? <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineExclamationCircle style={{fontSize:12}}/>Excede disponible ({formatMoney(dispConfig)})</span>
+                                : <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineCheck style={{fontSize:12}}/>Disponible en {configNotaTipo === 'inclusion_actividad' ? 'origen' : 'destino'}: {formatMoney(dispConfig)}</span>}
                             </div>
                           )}
                         </div>
@@ -320,7 +321,7 @@ export default function NotaModificatoriaPage({ embedded, onSuccess }) {
                         <button className="btn btn-secondary btn-sm" onClick={() => setConfigId(null)}>Cancelar</button>
                         <button className="btn btn-success btn-sm" onClick={handleConfigurar}
                           disabled={!configForm.montoTransferir || parseFloat(configForm.montoTransferir) <= 0 || (necesitaOrigen && !configForm.actividadOrigenId) || parseFloat(configForm.montoTransferir) > dispConfig || configSubmitting}>
-                          {configSubmitting ? 'Aplicando...' : '✓ Aprobar y ejecutar cambios'}
+                          {configSubmitting ? 'Aplicando...' : <span style={{display:'flex',alignItems:'center',gap:4}}><HiOutlineCheck/>Aprobar y ejecutar cambios</span>}
                         </button>
                       </div>
                     </div>

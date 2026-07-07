@@ -1,7 +1,7 @@
 import React, { useEffect, useState, memo } from 'react';
 import { ROL_LABEL, ROL_PROFILE, ROL_COLOR } from '../../utils/config';
 import { client } from '../../api/client';
-import { HiOutlineBell, HiOutlineDesktopComputer, HiOutlineVideoCamera, HiOutlineStop } from 'react-icons/hi';
+import { HiOutlineBell, HiOutlineDesktopComputer, HiOutlineVideoCamera, HiOutlineStop, HiOutlineReply, HiOutlineXCircle, HiOutlineCheckCircle, HiOutlineCalendar, HiOutlineBadgeCheck, HiOutlineInformationCircle } from 'react-icons/hi';
 import { useRecorder } from '../../contexts/RecorderContext';
 export default memo(function Header({ user, onMonitorClick }) {
   const profile = ROL_PROFILE[user?.rol] || {};
@@ -52,7 +52,12 @@ export default memo(function Header({ user, onMonitorClick }) {
     return Math.floor(hrs / 24) + 'd';
   };
 
-  const TIPO_ICON = { observacion: '↩', rechazo: '✗', aprobacion: '✓', alerta_fecha: '📅', nota_aprobada: '✅', nota_rechazada: '❌', info: 'i' };
+  const TIPO_ICON = { observacion: HiOutlineReply, rechazo: HiOutlineXCircle, aprobacion: HiOutlineCheckCircle, alerta_fecha: HiOutlineCalendar, nota_aprobada: HiOutlineBadgeCheck, nota_rechazada: HiOutlineXCircle, info: HiOutlineInformationCircle };
+
+  const renderTipoIcon = (tipo) => {
+    const Icon = TIPO_ICON[tipo];
+    return Icon ? <Icon style={{fontSize:14}} /> : <span style={{fontSize:14}}>•</span>;
+  };
 
   return (
     <header style={{
@@ -155,7 +160,7 @@ export default memo(function Header({ user, onMonitorClick }) {
                     opacity: n.leida ? 0.75 : 1, transition: 'background 0.15s'
                   }}>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                      <span style={{ fontSize: 14, flexShrink: 0 }}>{TIPO_ICON[n.tipo] || '•'}</span>
+                      <span style={{ fontSize: 14, flexShrink: 0 }}>{renderTipoIcon(n.tipo)}</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 12, color: '#334155', lineHeight: 1.5 }}>{n.mensaje}</div>
                         <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 3 }}>{timeAgo(n.createdAt)}</div>
