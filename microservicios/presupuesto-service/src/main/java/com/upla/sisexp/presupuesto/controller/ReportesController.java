@@ -399,8 +399,8 @@ public class ReportesController {
         try {
             byte[] data = exportService.exportarPDFAnual(anio);
             return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=informe_anual_" + anio + ".pdf")
-                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=informe_anual_" + anio + ".html")
+                .contentType(MediaType.TEXT_HTML)
                 .body(data);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Error generando PDF: " + e.getMessage()));
@@ -425,8 +425,8 @@ public class ReportesController {
         try {
             byte[] data = exportService.exportarPDFExpedientes(anio);
             return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_expedientes_" + anio + ".pdf")
-                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_expedientes_" + anio + ".html")
+                .contentType(MediaType.TEXT_HTML)
                 .body(data);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Error generando PDF: " + e.getMessage()));
@@ -451,8 +451,8 @@ public class ReportesController {
         try {
             byte[] data = exportService.exportarPDFPOI(anio);
             return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_poi_" + anio + ".pdf")
-                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_poi_" + anio + ".html")
+                .contentType(MediaType.TEXT_HTML)
                 .body(data);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Error generando PDF: " + e.getMessage()));
@@ -477,8 +477,8 @@ public class ReportesController {
         try {
             byte[] data = exportService.exportarPDFPAP(anio);
             return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_pap_" + anio + ".pdf")
-                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_pap_" + anio + ".html")
+                .contentType(MediaType.TEXT_HTML)
                 .body(data);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Error generando PDF: " + e.getMessage()));

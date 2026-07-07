@@ -211,10 +211,10 @@ export default function ReportesPage() {
 
   const handleExportPDF = () => {
     switch (seccion) {
-      case 'anual': downloadFile(`${API_URL}/reportes/anual/${anio}/pdf`, `informe_anual_${anio}.pdf`); break;
-      case 'expedientes': downloadFile(`${API_URL}/reportes/expedientes/pdf?anio=${anio}`, `reporte_expedientes_${anio}.pdf`); break;
-      case 'poi': downloadFile(`${API_URL}/reportes/poi/pdf?anio=${anio}`, `reporte_poi_${anio}.pdf`); break;
-      case 'pap': downloadFile(`${API_URL}/reportes/pap/pdf?anio=${anio}`, `reporte_pap_${anio}.pdf`); break;
+      case 'anual': downloadFile(`${API_URL}/reportes/anual/${anio}/pdf`, `informe_anual_${anio}.html`); break;
+      case 'expedientes': downloadFile(`${API_URL}/reportes/expedientes/pdf?anio=${anio}`, `reporte_expedientes_${anio}.html`); break;
+      case 'poi': downloadFile(`${API_URL}/reportes/poi/pdf?anio=${anio}`, `reporte_poi_${anio}.html`); break;
+      case 'pap': downloadFile(`${API_URL}/reportes/pap/pdf?anio=${anio}`, `reporte_pap_${anio}.html`); break;
       default: break;
     }
   };

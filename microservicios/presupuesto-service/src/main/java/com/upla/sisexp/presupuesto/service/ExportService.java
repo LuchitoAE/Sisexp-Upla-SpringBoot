@@ -6,9 +6,6 @@ import com.upla.sisexp.presupuesto.model.TechoPresupuestal;
 import com.upla.sisexp.presupuesto.repository.ActividadPOIRepository;
 import com.upla.sisexp.presupuesto.repository.NecesidadPAPRepository;
 import com.upla.sisexp.presupuesto.repository.TechoPresupuestalRepository;
-import com.lowagie.text.*;
-import com.lowagie.text.Font;
-import com.lowagie.text.pdf.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -17,13 +14,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -34,8 +27,6 @@ public class ExportService {
     private final NecesidadPAPRepository necesidadRepo;
     private final RestTemplate restTemplate;
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-
     public ExportService(TechoPresupuestalRepository techoRepo, ActividadPOIRepository actividadRepo,
                          NecesidadPAPRepository necesidadRepo, RestTemplate restTemplate) {
         this.techoRepo = techoRepo;
@@ -44,15 +35,12 @@ public class ExportService {
         this.restTemplate = restTemplate;
     }
 
-    private String fmt(BigDecimal n) { return "S/ " + n.setScale(2, RoundingMode.HALF_UP).toString(); }
-
     // ==================== EXCEL ====================
 
     public byte[] exportarExcelAnual(int anio) {
         try (XSSFWorkbook wb = new XSSFWorkbook()) {
-            CellStyle header = headerStyle(wb, "#2563eb");
+            CellStyle header = headerStyle(wb);
             CellStyle money = moneyStyle(wb);
-            CellStyle pct = pctStyle(wb);
 
             TechoPresupuestal techo = techoRepo.findByAño(anio).orElse(null);
             List<ActividadPOI> actividades = techo != null
@@ -67,19 +55,13 @@ public class ExportService {
             int row = 2;
             BigDecimal montoTotal = techo != null ? techo.getMontoTotal() : BigDecimal.ZERO;
             BigDecimal ejercido = techo != null ? techo.getMontoUtilizado() : BigDecimal.ZERO;
-            int pctEjec = montoTotal.compareTo(BigDecimal.ZERO) > 0
-                ? Math.round(montoTotal.subtract(montoTotal.subtract(ejercido)).divide(montoTotal, 4, RoundingMode.HALF_UP).floatValue() * 100)
-                : 0;
 
-            row = addRow(s1, row, "Presupuesto Total", fmt(montoTotal), null);
-            row = addRow(s1, row, "% Ejecucion", pctEjec + "%", pct);
-            row = addRow(s1, row, "Ejecutado", fmt(ejercido), null);
+            row = addRow(s1, row, "Presupuesto Total", "S/ " + montoTotal.setScale(2, RoundingMode.HALF_UP), null);
+            row = addRow(s1, row, "Ejecutado", "S/ " + ejercido.setScale(2, RoundingMode.HALF_UP), null);
             row = addRow(s1, row, "Actividades POI", String.valueOf(actividades.size()), null);
             row = addRow(s1, row, "Pendientes", String.valueOf(actividades.stream().filter(a -> !a.getPlanificado()).count()), null);
 
-            // Expedientes
-            int totalExp = 0;
-            double totalCosto = 0;
+            int totalExp = 0; double totalCosto = 0;
             try {
                 List<Map<String, Object>> expedientes = restTemplate.exchange(
                     "http://expediente-service:8083/api/expedientes",
@@ -98,7 +80,6 @@ public class ExportService {
             } catch (Exception ignored) {}
             addRow(s1, row, "Expedientes", String.valueOf(totalExp), null);
 
-            // Sheet 2: Actividades POI
             Sheet s2 = wb.createSheet("Actividades POI");
             Row r2h = s2.createRow(1);
             String[] actH = {"Codigo", "Nombre", "Estado", "Presupuesto", "Ejecutado", "Disponible", "PAP"};
@@ -126,7 +107,7 @@ public class ExportService {
     public byte[] exportarExcelExpedientes(int anio) {
         try (XSSFWorkbook wb = new XSSFWorkbook()) {
             Sheet s = wb.createSheet("Expedientes " + anio);
-            CellStyle header = headerStyle(wb, "#2563eb");
+            CellStyle header = headerStyle(wb);
             sheetTitle(s, wb, "SISEXP-UPLA — Reporte de Expedientes " + anio);
             Row rh = s.createRow(1);
             String[] hdrs = {"Codigo", "Estado", "Urgencia", "Naturaleza", "Cant. Sol.", "Costo", "Descripcion"};
@@ -164,7 +145,7 @@ public class ExportService {
     public byte[] exportarExcelPOI(int anio) {
         try (XSSFWorkbook wb = new XSSFWorkbook()) {
             Sheet s = wb.createSheet("POI General " + anio);
-            CellStyle header = headerStyle(wb, "#16a34a");
+            CellStyle header = headerStyle(wb);
             sheetTitle(s, wb, "SISEXP-UPLA — POI General " + anio);
             Row rh = s.createRow(1);
             String[] hdrs = {"Codigo", "Nombre", "Estado", "Presupuesto", "Ejecutado", "Comprometido", "Disponible", "PAP"};
@@ -196,7 +177,7 @@ public class ExportService {
     public byte[] exportarExcelPAP(int anio) {
         try (XSSFWorkbook wb = new XSSFWorkbook()) {
             Sheet s = wb.createSheet("PAP General " + anio);
-            CellStyle header = headerStyle(wb, "#d97706");
+            CellStyle header = headerStyle(wb);
             sheetTitle(s, wb, "SISEXP-UPLA — PAP General " + anio);
             Row rh = s.createRow(1);
             String[] hdrs = {"Item", "Actividad", "Tipo", "Plan.", "Disp.", "Ejec.", "P. Unitario"};
@@ -226,72 +207,71 @@ public class ExportService {
         } catch (Exception e) { throw new RuntimeException("Error generando Excel PAP", e); }
     }
 
-    // ==================== PDF ====================
+    // ==================== PDF (Simple HTML) ====================
 
     public byte[] exportarPDFAnual(int anio) {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            Document doc = new Document(PageSize.A4.rotate(), 30, 30, 30, 30);
-            PdfWriter.getInstance(doc, bos);
-            doc.open();
-            addPdfHeader(doc, "Informe Anual " + anio, "SISEXP-UPLA");
-            doc.add(new Paragraph(" "));
-
-            TechoPresupuestal techo = techoRepo.findByAño(anio).orElse(null);
-            List<ActividadPOI> actividades = techo != null
-                ? actividadRepo.findByTechoPresupuestalId(techo.getId()) : List.of();
-
-            BigDecimal montoTotal = techo != null ? techo.getMontoTotal() : BigDecimal.ZERO;
-            BigDecimal ejercido = techo != null ? techo.getMontoUtilizado() : BigDecimal.ZERO;
-            BigDecimal disponible = montoTotal.subtract(ejercido);
-
-            PdfPTable resumen = new PdfPTable(2);
-            resumen.setWidthPercentage(100);
-            resumen.setWidths(new float[]{3, 1});
-            addPdfRow(resumen, boldCell("Indicador"), boldCell("Valor"));
-            addPdfRow(resumen, "Presupuesto Total", fmt(montoTotal));
-            addPdfRow(resumen, "Ejecutado", fmt(ejercido));
-            addPdfRow(resumen, "Disponible", fmt(disponible));
-            addPdfRow(resumen, "Actividades POI", String.valueOf(actividades.size()));
-            addPdfRow(resumen, "Pendientes", String.valueOf(actividades.stream().filter(a -> !a.getPlanificado()).count()));
-            addPdfRow(resumen, "Cerradas", String.valueOf(actividades.stream().filter(ActividadPOI::getPlanificado).count()));
-            doc.add(resumen);
-            doc.add(new Paragraph(" "));
-
-            // Tabla de actividades
-            doc.add(new Paragraph("Actividades POI", boldFont()));
-            PdfPTable t = new PdfPTable(6);
-            t.setWidthPercentage(100);
-            t.setWidths(new float[]{2, 3, 1.5f, 2, 2, 2});
-            String[] th = {"Codigo", "Nombre", "Estado", "Presupuesto", "Ejecutado", "Disponible"};
-            for (String h : th) t.addCell(boldCell(h));
-            for (ActividadPOI a : actividades) {
-                BigDecimal disp = a.getPresupuestoAsignado().subtract(a.getSaldoEjecutado()).subtract(a.getSaldoComprometido());
-                t.addCell(a.getCodigo()); t.addCell(a.getNombre());
-                t.addCell(a.getEstado().name()); t.addCell(fmt(a.getPresupuestoAsignado()));
-                t.addCell(fmt(a.getSaldoEjecutado())); t.addCell(fmt(disp));
-            }
-            doc.add(t);
-
-            addPdfFooter(doc);
-            doc.close();
-            return bos.toByteArray();
-        } catch (Exception e) { throw new RuntimeException("Error generando PDF anual", e); }
+        return generarPDFHtml("SISEXP-UPLA — Informe Anual " + anio, anio, "anual");
     }
 
     public byte[] exportarPDFExpedientes(int anio) {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            Document doc = new Document(PageSize.A4.rotate(), 30, 30, 30, 30);
-            PdfWriter.getInstance(doc, bos);
-            doc.open();
-            addPdfHeader(doc, "Reporte de Expedientes " + anio, "SISEXP-UPLA");
-            doc.add(new Paragraph(" "));
+        return generarPDFHtml("SISEXP-UPLA — Reporte de Expedientes " + anio, anio, "expedientes");
+    }
 
-            PdfPTable t = new PdfPTable(6);
-            t.setWidthPercentage(100);
-            t.setWidths(new float[]{2.5f, 1.5f, 2, 1.5f, 2, 4});
-            String[] th = {"Codigo", "Estado", "Urgencia", "Naturaleza", "Costo", "Descripcion"};
-            for (String h : th) t.addCell(boldCell(h));
+    public byte[] exportarPDFPOI(int anio) {
+        return generarPDFHtml("SISEXP-UPLA — POI General " + anio, anio, "poi");
+    }
 
+    public byte[] exportarPDFPAP(int anio) {
+        return generarPDFHtml("SISEXP-UPLA — PAP General " + anio, anio, "pap");
+    }
+
+    private byte[] generarPDFHtml(String title, int anio, String tipo) {
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html><html><head><meta charset='utf-8'><title>").append(title).append("</title>");
+        html.append("<style>body{font-family:Arial,sans-serif;margin:30px;color:#1e293b;font-size:11pt;}");
+        html.append("h1{font-size:18pt;color:#0f172a;margin-bottom:4px;text-align:center;}");
+        html.append(".sub{color:#64748b;font-size:10pt;margin-bottom:20px;text-align:center;}");
+        html.append("table{width:100%;border-collapse:collapse;margin:10px 0 18px;font-size:10pt;}");
+        html.append("th{background:#f1f5f9;color:#475569;padding:6px 8px;text-align:left;font-weight:600;border-bottom:2px solid #cbd5e1;}");
+        html.append("td{padding:6px 8px;border-bottom:1px solid #f1f5f9;}");
+        html.append(".footer{margin-top:30px;font-size:9pt;color:#94a3b8;text-align:center;}");
+        html.append("</style></head><body>");
+        html.append("<h1>").append(title).append("</h1>");
+        html.append("<div class='sub'>Generado: ").append(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("</div>");
+
+        TechoPresupuestal techo = techoRepo.findByAño(anio).orElse(null);
+        List<ActividadPOI> actividades = techo != null ? actividadRepo.findByTechoPresupuestalId(techo.getId()) : List.of();
+
+        html.append("<table><thead><tr>");
+        if (tipo.equals("anual") || tipo.equals("poi")) {
+            html.append("<th>Codigo</th><th>Nombre</th><th>Estado</th><th>Presupuesto</th><th>Ejecutado</th><th>Disponible</th><th>PAP</th>");
+            html.append("</tr></thead><tbody>");
+            for (ActividadPOI a : actividades) {
+                BigDecimal disp = a.getPresupuestoAsignado().subtract(a.getSaldoEjecutado()).subtract(a.getSaldoComprometido());
+                html.append("<tr><td>").append(a.getCodigo()).append("</td><td>").append(a.getNombre()).append("</td>");
+                html.append("<td>").append(a.getEstado().name()).append("</td>");
+                html.append("<td>S/ ").append(a.getPresupuestoAsignado().setScale(2, RoundingMode.HALF_UP)).append("</td>");
+                html.append("<td>S/ ").append(a.getSaldoEjecutado().setScale(2, RoundingMode.HALF_UP)).append("</td>");
+                html.append("<td>S/ ").append(disp.setScale(2, RoundingMode.HALF_UP)).append("</td>");
+                html.append("<td>").append(a.getPlanificado() ? "Cerrado" : "Abierto").append("</td></tr>");
+            }
+        } else if (tipo.equals("pap")) {
+            html.append("<th>Item</th><th>Actividad</th><th>Tipo</th><th>Plan.</th><th>Disp.</th><th>Ejec.</th><th>P. Unit.</th>");
+            html.append("</tr></thead><tbody>");
+            for (ActividadPOI act : actividades) {
+                List<NecesidadPAP> needs = necesidadRepo.findByActividadPOIId(act.getId());
+                for (NecesidadPAP n : needs) {
+                    html.append("<tr><td>").append(n.getNombre()).append("</td><td>").append(act.getCodigo()).append("</td>");
+                    html.append("<td>").append(n.getTipo().name()).append("</td>");
+                    html.append("<td>").append(n.getCantidad()).append("</td>");
+                    html.append("<td>").append(n.getCantidadDisponible() != null ? n.getCantidadDisponible() : 0).append("</td>");
+                    html.append("<td>").append(n.getCantidadEjecutada() != null ? n.getCantidadEjecutada() : 0).append("</td>");
+                    html.append("<td>S/ ").append(n.getPrecioEstimado().setScale(2, RoundingMode.HALF_UP)).append("</td></tr>");
+                }
+            }
+        } else { // expedientes
+            html.append("<th>Codigo</th><th>Estado</th><th>Urgencia</th><th>Naturaleza</th><th>Descripcion</th>");
+            html.append("</tr></thead><tbody>");
             try {
                 List<Map<String, Object>> all = restTemplate.exchange(
                     "http://expediente-service:8083/api/expedientes", HttpMethod.GET, null,
@@ -300,136 +280,35 @@ public class ExportService {
                     for (Map<String, Object> e : all) {
                         String codigo = (String) e.get("codigo");
                         if (codigo == null || !codigo.contains("-" + anio + "-")) continue;
-                        t.addCell(codigo);
-                        t.addCell(String.valueOf(e.get("estado")));
-                        t.addCell(String.valueOf(e.get("urgencia")));
-                        t.addCell(String.valueOf(e.get("naturaleza")));
-                        Object costo = e.get("costoEstimado");
-                        t.addCell(costo != null ? "S/ " + ((Number) costo).toString() : "S/ 0");
-                        t.addCell(String.valueOf(e.getOrDefault("descripcion", "")));
+                        html.append("<tr><td>").append(codigo).append("</td>");
+                        html.append("<td>").append(e.get("estado")).append("</td>");
+                        html.append("<td>").append(e.get("urgencia")).append("</td>");
+                        html.append("<td>").append(e.get("naturaleza")).append("</td>");
+                        html.append("<td>").append(e.getOrDefault("descripcion", "")).append("</td></tr>");
                     }
                 }
             } catch (Exception ignored) {}
-            doc.add(t);
-            addPdfFooter(doc);
-            doc.close();
-            return bos.toByteArray();
-        } catch (Exception e) { throw new RuntimeException("Error generando PDF de expedientes", e); }
-    }
-
-    public byte[] exportarPDFPOI(int anio) {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            Document doc = new Document(PageSize.A4.rotate(), 30, 30, 30, 30);
-            PdfWriter.getInstance(doc, bos);
-            doc.open();
-            addPdfHeader(doc, "POI General " + anio, "SISEXP-UPLA");
-            doc.add(new Paragraph(" "));
-
-            PdfPTable t = new PdfPTable(7);
-            t.setWidthPercentage(100);
-            t.setWidths(new float[]{2, 3.5f, 1.5f, 2, 2, 2, 1.5f});
-            String[] th = {"Codigo", "Nombre", "Estado", "Presupuesto", "Ejecutado", "Disponible", "PAP"};
-            for (String h : th) t.addCell(boldCell(h));
-
-            TechoPresupuestal techo = techoRepo.findByAño(anio).orElse(null);
-            List<ActividadPOI> actividades = techo != null
-                ? actividadRepo.findByTechoPresupuestalId(techo.getId()) : List.of();
-            for (ActividadPOI a : actividades) {
-                BigDecimal disp = a.getPresupuestoAsignado().subtract(a.getSaldoEjecutado()).subtract(a.getSaldoComprometido());
-                t.addCell(a.getCodigo()); t.addCell(a.getNombre());
-                t.addCell(a.getEstado().name()); t.addCell(fmt(a.getPresupuestoAsignado()));
-                t.addCell(fmt(a.getSaldoEjecutado())); t.addCell(fmt(disp));
-                t.addCell(a.getPlanificado() ? "Cerrado" : "Abierto");
-            }
-            doc.add(t);
-            addPdfFooter(doc);
-            doc.close();
-            return bos.toByteArray();
-        } catch (Exception e) { throw new RuntimeException("Error generando PDF POI", e); }
-    }
-
-    public byte[] exportarPDFPAP(int anio) {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            Document doc = new Document(PageSize.A4.rotate(), 30, 30, 30, 30);
-            PdfWriter.getInstance(doc, bos);
-            doc.open();
-            addPdfHeader(doc, "PAP General " + anio, "SISEXP-UPLA");
-            doc.add(new Paragraph(" "));
-
-            PdfPTable t = new PdfPTable(7);
-            t.setWidthPercentage(100);
-            t.setWidths(new float[]{3, 2.5f, 1.5f, 1, 1, 1, 2});
-            String[] th = {"Item", "Actividad", "Tipo", "Plan.", "Disp.", "Ejec.", "P. Unit."};
-            for (String h : th) t.addCell(boldCell(h));
-
-            TechoPresupuestal techo = techoRepo.findByAño(anio).orElse(null);
-            List<ActividadPOI> actividades = techo != null
-                ? actividadRepo.findByTechoPresupuestalId(techo.getId()) : List.of();
-            for (ActividadPOI act : actividades) {
-                List<NecesidadPAP> needs = necesidadRepo.findByActividadPOIId(act.getId());
-                for (NecesidadPAP n : needs) {
-                    t.addCell(n.getNombre());
-                    t.addCell(act.getCodigo());
-                    t.addCell(n.getTipo().name());
-                    t.addCell(String.valueOf(n.getCantidad()));
-                    t.addCell(String.valueOf(n.getCantidadDisponible() != null ? n.getCantidadDisponible() : 0));
-                    t.addCell(String.valueOf(n.getCantidadEjecutada() != null ? n.getCantidadEjecutada() : 0));
-                    t.addCell(fmt(n.getPrecioEstimado()));
-                }
-            }
-            doc.add(t);
-            addPdfFooter(doc);
-            doc.close();
-            return bos.toByteArray();
-        } catch (Exception e) { throw new RuntimeException("Error generando PDF PAP", e); }
+        }
+        html.append("</tbody></table>");
+        html.append("<div class='footer'>SISEXP-UPLA — Universidad Peruana Los Andes</div>");
+        html.append("</body></html>");
+        return html.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
     }
 
     // ==================== HELPERS ====================
 
-    private void addPdfHeader(Document doc, String title, String subtitle) throws DocumentException {
-        Paragraph p = new Paragraph(title, new Font(Font.HELVETICA, 16, Font.BOLD, new Color(15, 23, 42)));
-        p.setAlignment(Element.ALIGN_CENTER);
-        doc.add(p);
-        Paragraph sub = new Paragraph(subtitle + " — Generado: " +
-            LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
-            new Font(Font.HELVETICA, 9, Font.ITALIC, Color.GRAY));
-        sub.setAlignment(Element.ALIGN_CENTER);
-        doc.add(sub);
-    }
-
-    private void addPdfFooter(Document doc) {
-        Paragraph f = new Paragraph("SISEXP-UPLA — Universidad Peruana Los Andes",
-            new Font(Font.HELVETICA, 8, Font.ITALIC, Color.GRAY));
-        f.setAlignment(Element.ALIGN_CENTER);
-        doc.add(new Paragraph(" "));
-        doc.add(f);
-    }
-
-    private static Font boldFont() { return new Font(Font.HELVETICA, 10, Font.BOLD); }
-    private PdfPCell boldCell(String text) { return new PdfPCell(new Phrase(text, boldFont())); }
-
-    private void addPdfRow(PdfPTable table, String label, String value) {
-        table.addCell(label);
-        table.addCell(value);
-    }
-    private void addPdfRow(PdfPTable table, PdfPCell label, PdfPCell value) {
-        table.addCell(label);
-        table.addCell(value);
-    }
-
-    // Excel helpers
     private void sheetTitle(Sheet s, XSSFWorkbook wb, String title) {
         Row r = s.createRow(0);
         Cell c = r.createCell(0);
         c.setCellValue(title);
         CellStyle cs = wb.createCellStyle();
-        Font f = wb.createFont(); f.setBold(true); f.setFontHeightInPoints((short) 14); f.setColor(IndexedColors.BLACK.getIndex());
+        Font f = wb.createFont(); f.setBold(true); f.setFontHeightInPoints((short) 14);
         cs.setFont(f);
         c.setCellStyle(cs);
         s.addMergedRegion(new CellRangeAddress(0, 0, 0, 7));
     }
 
-    private CellStyle headerStyle(XSSFWorkbook wb, String hex) {
+    private CellStyle headerStyle(XSSFWorkbook wb) {
         CellStyle cs = wb.createCellStyle();
         Font f = wb.createFont(); f.setBold(true); f.setFontHeightInPoints((short) 11); f.setColor(IndexedColors.WHITE.getIndex());
         cs.setFont(f); cs.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex()); cs.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -443,13 +322,6 @@ public class ExportService {
         CellStyle cs = wb.createCellStyle();
         cs.setDataFormat(wb.createDataFormat().getFormat("#,##0.00"));
         cs.setAlignment(HorizontalAlignment.RIGHT);
-        return cs;
-    }
-
-    private CellStyle pctStyle(XSSFWorkbook wb) {
-        CellStyle cs = wb.createCellStyle();
-        cs.setDataFormat(wb.createDataFormat().getFormat("0%"));
-        cs.setAlignment(HorizontalAlignment.CENTER);
         return cs;
     }
 
