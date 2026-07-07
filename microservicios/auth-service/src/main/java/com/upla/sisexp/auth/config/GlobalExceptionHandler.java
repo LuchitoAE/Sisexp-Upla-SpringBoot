@@ -1,4 +1,4 @@
-package com.upla.sisexp.common.config;
+package com.upla.sisexp.auth.config;
 
 import com.upla.sisexp.common.exception.BusinessException;
 import org.slf4j.Logger;
