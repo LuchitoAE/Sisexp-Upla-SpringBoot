@@ -15,4 +15,5 @@ public interface ExpedienteRepository extends JpaRepository<Expediente, Long> {
     long countByEstado(EstadoExpediente estado);
     long countBySolicitanteId(Long solicitanteId);
     Optional<Expediente> findFirstByCodigoStartingWithOrderByCodigoDesc(String prefix);
+    long countByCodigoStartingWith(String prefix);
 }

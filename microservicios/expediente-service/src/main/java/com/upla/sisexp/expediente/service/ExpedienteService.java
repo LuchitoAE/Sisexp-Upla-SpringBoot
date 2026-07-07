@@ -102,10 +102,8 @@ public class ExpedienteService {
     private String generarNumero() {
         int año = Year.now().getValue();
         String prefix = "EXP-" + año + "-";
-        return expedienteRepo.findFirstByCodigoStartingWithOrderByCodigoDesc(prefix)
-            .map(Expediente::getCodigo)
-            .map(cod -> prefix + String.format("%04d", Integer.parseInt(cod.substring(cod.lastIndexOf('-') + 1)) + 1))
-            .orElse(prefix + "0001");
+        long count = expedienteRepo.countByCodigoStartingWith(prefix);
+        return prefix + String.format("%03d", count + 1);
     }
 
     private void crearLog(Expediente exp, String anterior, String nuevo, Long usuarioId, String obs) {
