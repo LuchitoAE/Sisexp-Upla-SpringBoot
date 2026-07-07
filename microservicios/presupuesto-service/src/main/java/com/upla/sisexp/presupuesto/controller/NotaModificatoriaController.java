@@ -1,5 +1,8 @@
 package com.upla.sisexp.presupuesto.controller;
 
+import com.upla.sisexp.common.enums.EstadoNota;
+import com.upla.sisexp.common.enums.Naturaleza;
+import com.upla.sisexp.common.enums.TipoNota;
 import com.upla.sisexp.presupuesto.model.ActividadPOI;
 import com.upla.sisexp.presupuesto.model.NotaModificatoria;
 import com.upla.sisexp.presupuesto.repository.ActividadPOIRepository;
@@ -28,8 +31,7 @@ public class NotaModificatoriaController {
     public List<Map<String, Object>> listar() {
         List<Map<String, Object>> result = new ArrayList<>();
         for (NotaModificatoria n : service.listarTodas()) {
-            Map<String, Object> m = toMap(n);
-            result.add(m);
+            result.add(toMap(n));
         }
         return result;
     }
@@ -51,7 +53,7 @@ public class NotaModificatoriaController {
                                       @RequestParam(required = false) MultipartFile archivo,
                                       @RequestParam(defaultValue = "1") Long solicitanteId) {
         NotaModificatoria nota = new NotaModificatoria();
-        nota.setTipo(tipo);
+        nota.setTipo(TipoNota.valueOf(tipo));
         nota.setNuevoNombre(nuevoNombre);
         nota.setJustificacion(justificacion);
         nota.setOrigen(origen);
@@ -76,7 +78,8 @@ public class NotaModificatoriaController {
             ? Long.valueOf(body.get("actividadOrigenId").toString()) : null;
         BigDecimal monto = new BigDecimal(body.get("montoTransferir").toString());
         String clasificador = (String) body.getOrDefault("nuevoClasificadorGasto", "2.3.1.x.x.x");
-        String tipo = (String) body.getOrDefault("nuevoTipo", "Servicio");
+        String tipoStr = (String) body.getOrDefault("nuevoTipo", "Servicio");
+        Naturaleza tipo = Naturaleza.valueOf(tipoStr);
         NotaModificatoria saved = service.configurar(id, actividadOrigenId, monto, clasificador, tipo);
         return toMap(saved);
     }
@@ -105,17 +108,17 @@ public class NotaModificatoriaController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", n.getId());
         m.put("codigo", n.getCodigo());
-        m.put("tipo", n.getTipo());
+        m.put("tipo", n.getTipo() != null ? n.getTipo().name() : null);
         m.put("nuevoNombre", n.getNuevoNombre());
         m.put("justificacion", n.getJustificacion());
         m.put("costoEstimadoReferencial", n.getCostoEstimadoReferencial());
         m.put("origen", n.getOrigen());
-        m.put("estado", n.getEstado());
+        m.put("estado", n.getEstado() != null ? n.getEstado().name() : null);
         m.put("montoTransferir", n.getMontoTransferir());
         m.put("actividadExistenteId", n.getActividadExistenteId());
         m.put("actividadOrigenId", n.getActividadOrigenId());
         m.put("nuevoClasificadorGasto", n.getNuevoClasificadorGasto());
-        m.put("nuevoTipo", n.getNuevoTipo());
+        m.put("nuevoTipo", n.getNuevoTipo() != null ? n.getNuevoTipo().name() : null);
         m.put("observacionAdmin", n.getObservacionAdmin());
         m.put("nombreArchivo", n.getNombreArchivo());
         m.put("solicitanteId", n.getSolicitanteId());

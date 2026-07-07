@@ -95,7 +95,7 @@ public class ExpedienteService {
         doc.setNombreOriginal(archivo.getOriginalFilename());
         doc.setNombreArchivo(UUID.randomUUID().toString());
         doc.setMimeType(archivo.getContentType());
-        doc.setTamaño((int) archivo.getSize());
+        doc.setTamaño(archivo.getSize());
         return documentoRepo.save(doc);
     }
 

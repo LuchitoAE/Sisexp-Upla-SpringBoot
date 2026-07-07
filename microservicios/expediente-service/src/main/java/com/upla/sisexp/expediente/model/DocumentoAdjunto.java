@@ -23,7 +23,7 @@ public class DocumentoAdjunto {
     @Column(nullable = false)
     private String nombreArchivo;
     private String mimeType;
-    private Integer tamaño;
+    private Long tamaño;
     private LocalDateTime createdAt;
 
     public DocumentoAdjunto() {}
@@ -40,8 +40,8 @@ public class DocumentoAdjunto {
     public void setNombreArchivo(String nombreArchivo) { this.nombreArchivo = nombreArchivo; }
     public String getMimeType() { return mimeType; }
     public void setMimeType(String mimeType) { this.mimeType = mimeType; }
-    public Integer getTamaño() { return tamaño; }
-    public void setTamaño(Integer tamaño) { this.tamaño = tamaño; }
+    public Long getTamaño() { return tamaño; }
+    public void setTamaño(Long tamaño) { this.tamaño = tamaño; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

@@ -1,5 +1,7 @@
 package com.upla.sisexp.presupuesto.service;
 
+import com.upla.sisexp.common.enums.EstadoNota;
+import com.upla.sisexp.common.enums.Naturaleza;
 import com.upla.sisexp.presupuesto.model.ActividadPOI;
 import com.upla.sisexp.presupuesto.model.NecesidadPAP;
 import com.upla.sisexp.presupuesto.model.NotaModificatoria;
@@ -42,17 +44,17 @@ public class NotaModificatoriaService {
     public NotaModificatoria crear(NotaModificatoria nota) {
         long count = notaRepo.count();
         nota.setCodigo("NOTA-2026-" + String.format("%03d", count + 1));
-        nota.setEstado("pendiente");
+        nota.setEstado(EstadoNota.pendiente);
         return notaRepo.save(nota);
     }
 
     @Transactional
     public NotaModificatoria configurar(Long id, Long actividadOrigenId, BigDecimal monto,
-                                         String clasificador, String tipo) {
+                                         String clasificador, Naturaleza tipo) {
         NotaModificatoria nota = notaRepo.findById(id)
             .orElseThrow(() -> new RuntimeException("Nota no encontrada"));
 
-        if ("inclusion_actividad".equals(nota.getTipo()) && actividadOrigenId != null) {
+        if (nota.getTipo().name().contains("actividad") && actividadOrigenId != null) {
             ActividadPOI origen = actividadRepo.findById(actividadOrigenId)
                 .orElseThrow(() -> new RuntimeException("Actividad origen no encontrada"));
             BigDecimal disponible = origen.getPresupuestoAsignado()
@@ -65,7 +67,7 @@ public class NotaModificatoriaService {
             nota.setActividadOrigenId(actividadOrigenId);
         }
 
-        if ("inclusion_item".equals(nota.getTipo())) {
+        if (nota.getTipo().name().contains("item")) {
             Long actId = nota.getActividadExistenteId();
             if (actId != null) {
                 ActividadPOI dest = actividadRepo.findById(actId)
@@ -84,7 +86,7 @@ public class NotaModificatoriaService {
                 pap.setPrecioEstimado(monto);
                 pap.setUnidad("servicio");
                 pap.setOficinaLaboratorio(nota.getOrigen());
-                pap.setTipo(com.upla.sisexp.common.enums.Naturaleza.valueOf(tipo));
+                pap.setTipo(tipo);
                 pap.setClasificadorGasto(clasificador);
                 pap.setActividadPOIId(actId);
                 pap.setCantidadDisponible(1);
@@ -96,7 +98,7 @@ public class NotaModificatoriaService {
         nota.setMontoTransferir(monto);
         nota.setNuevoClasificadorGasto(clasificador);
         nota.setNuevoTipo(tipo);
-        nota.setEstado("configurada");
+        nota.setEstado(EstadoNota.configurada);
         nota.setUpdatedAt(LocalDateTime.now());
         return notaRepo.save(nota);
     }
@@ -105,7 +107,7 @@ public class NotaModificatoriaService {
     public NotaModificatoria rechazar(Long id, String observacion) {
         NotaModificatoria nota = notaRepo.findById(id)
             .orElseThrow(() -> new RuntimeException("Nota no encontrada"));
-        nota.setEstado("rechazada");
+        nota.setEstado(EstadoNota.rechazada);
         nota.setObservacionAdmin(observacion);
         nota.setUpdatedAt(LocalDateTime.now());
         return notaRepo.save(nota);

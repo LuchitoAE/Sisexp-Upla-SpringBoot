@@ -1,5 +1,8 @@
 package com.upla.sisexp.presupuesto.model;
 
+import com.upla.sisexp.common.enums.EstadoNota;
+import com.upla.sisexp.common.enums.Naturaleza;
+import com.upla.sisexp.common.enums.TipoNota;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,26 +14,29 @@ public class NotaModificatoria {
     private Long id;
     @Column(nullable = false, length = 30)
     private String codigo;
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private String tipo;
+    private TipoNota tipo;
     @Column(nullable = false, length = 255)
     private String nuevoNombre;
-    @Column(nullable = false, length = 2000)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String justificacion;
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal costoEstimadoReferencial = BigDecimal.ZERO;
     @Column(length = 255)
     private String origen;
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String estado = "pendiente";
+    private EstadoNota estado = EstadoNota.pendiente;
     @Column(precision = 12, scale = 2)
     private BigDecimal montoTransferir;
     private Long actividadExistenteId;
     private Long actividadOrigenId;
     @Column(length = 50)
     private String nuevoClasificadorGasto;
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private String nuevoTipo;
+    private Naturaleza nuevoTipo;
     @Column(length = 500)
     private String observacionAdmin;
     @Column(length = 255)
@@ -49,8 +55,8 @@ public class NotaModificatoria {
     public void setId(Long id) { this.id = id; }
     public String getCodigo() { return codigo; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
+    public TipoNota getTipo() { return tipo; }
+    public void setTipo(TipoNota tipo) { this.tipo = tipo; }
     public String getNuevoNombre() { return nuevoNombre; }
     public void setNuevoNombre(String nuevoNombre) { this.nuevoNombre = nuevoNombre; }
     public String getJustificacion() { return justificacion; }
@@ -59,8 +65,8 @@ public class NotaModificatoria {
     public void setCostoEstimadoReferencial(BigDecimal costoEstimadoReferencial) { this.costoEstimadoReferencial = costoEstimadoReferencial; }
     public String getOrigen() { return origen; }
     public void setOrigen(String origen) { this.origen = origen; }
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public EstadoNota getEstado() { return estado; }
+    public void setEstado(EstadoNota estado) { this.estado = estado; }
     public BigDecimal getMontoTransferir() { return montoTransferir; }
     public void setMontoTransferir(BigDecimal montoTransferir) { this.montoTransferir = montoTransferir; }
     public Long getActividadExistenteId() { return actividadExistenteId; }
@@ -69,8 +75,8 @@ public class NotaModificatoria {
     public void setActividadOrigenId(Long actividadOrigenId) { this.actividadOrigenId = actividadOrigenId; }
     public String getNuevoClasificadorGasto() { return nuevoClasificadorGasto; }
     public void setNuevoClasificadorGasto(String nuevoClasificadorGasto) { this.nuevoClasificadorGasto = nuevoClasificadorGasto; }
-    public String getNuevoTipo() { return nuevoTipo; }
-    public void setNuevoTipo(String nuevoTipo) { this.nuevoTipo = nuevoTipo; }
+    public Naturaleza getNuevoTipo() { return nuevoTipo; }
+    public void setNuevoTipo(Naturaleza nuevoTipo) { this.nuevoTipo = nuevoTipo; }
     public String getObservacionAdmin() { return observacionAdmin; }
     public void setObservacionAdmin(String observacionAdmin) { this.observacionAdmin = observacionAdmin; }
     public String getNombreArchivo() { return nombreArchivo; }
