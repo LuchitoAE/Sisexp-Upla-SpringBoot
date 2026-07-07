@@ -17,7 +17,7 @@ Arquitectura de microservicios con 12 contenedores Docker Compose. Proyecto fina
 | Auth | JWT stateless (jjwt 0.12.6) |
 | GitHub | https://github.com/LuchitoAE/Sisexp-Upla-SpringBoot |
 | Deploy Frontend | Vercel: https://frontend-ivory-nine-43.vercel.app |
-| Deploy Backend | Local Docker Compose / Railway (parcial) |
+| Deploy Backend | Railway: https://api-gateway-production-e01a.up.railway.app |
 | Working Dir | `E:\proyecto\UPLA - Clases\octavo ciclo\arquitectura de software\semana 10\Proyecto-spring boot\` |
 
 ---
@@ -196,14 +196,23 @@ Todos los montos: BigDecimal precision=12 scale=2. Enums: @Enumerated(EnumType.S
 
 | Item | Estado |
 |:-----|:------|
-| auth-db, presupuesto-db | SUCCESS |
-| expediente-db, notificacion-db | FAILED (recrear en Dashboard) |
+| TODOS (12/12) | SUCCESS |
+| auth-db, presupuesto-db, expediente-db, notificacion-db | SUCCESS |
 | rabbitmq, eureka-server, api-gateway | SUCCESS |
 | auth-service, presupuesto-service | SUCCESS |
-| expediente-service, notificacion-service | CRASHED (dependen de DBs caidas) |
-| nginx | FAILED (no necesario, frontend en Vercel) |
+| expediente-service, notificacion-service | SUCCESS |
+| nginx | No necesario (frontend en Vercel) |
 
-**Railway CLI v4.30.5**: interactiva, no soporta flags en modo no-TTY. Usar Dashboard. Rate limit Cloudflare Error 1015: espaciar consultas API cada 2+ segundos.
+**URL publica API Gateway:** `https://api-gateway-production-e01a.up.railway.app`
+
+**Railway CLI v4.30.5**: interactiva, usar flags `--service`, `--variables`, `--image`, `-y`.
+
+**Fixes aplicados:**
+- `EUREKA_INSTANCE_HOSTNAME` = `RAILWAY_PRIVATE_DOMAIN` en cada servicio (sin esto, Eureka registra el container ID que no es resoluble)
+- `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE` usa el private domain real del eureka-server (`sisexp-upla-springboot.railway.internal`, no `eureka-server.railway.internal`)
+- `railway add --image postgres:16-alpine --service {name} --variables "..."` para crear DBs
+- `railway domain --service api-gateway --port 8080` para exponer el gateway publicamente
+- `railway service redeploy --service {name} -y` para redesplegar
 
 Proyecto ID: `38350e4a-d078-4836-bf40-290719260fde`
 
