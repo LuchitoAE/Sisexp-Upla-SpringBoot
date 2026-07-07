@@ -1,13 +1,15 @@
 import React, { useEffect, useState, memo } from 'react';
 import { ROL_LABEL, ROL_PROFILE, ROL_COLOR } from '../../utils/config';
 import { client } from '../../api/client';
-import { HiOutlineBell, HiOutlineCalendar } from 'react-icons/hi';
-export default memo(function Header({ user }) {
+import { HiOutlineBell, HiOutlineDesktopComputer, HiOutlineVideoCamera, HiOutlineStop } from 'react-icons/hi';
+import { useRecorder } from '../../contexts/RecorderContext';
+export default memo(function Header({ user, onMonitorClick }) {
   const profile = ROL_PROFILE[user?.rol] || {};
   const color = profile.color || ROL_COLOR[user?.rol] || '#2563eb';
   const [notifCount, setNotifCount] = useState(0);
   const [notifs, setNotifs] = useState([]);
   const [showNotifs, setShowNotifs] = useState(false);
+  const { isRecording, elapsed, startRecording, stopRecording } = useRecorder();
 
   useEffect(() => {
     const load = () => {
@@ -63,6 +65,52 @@ export default memo(function Header({ user }) {
         <span style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8' }}>
           {new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button onClick={onMonitorClick} style={{
+          display: 'flex', alignItems: 'center', gap: 5,
+          background: '#f1f5f9', border: '1.5px solid #e2e8f0', borderRadius: 8,
+          padding: '5px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+          color: '#0f172a', transition: 'all 0.15s',
+        }}
+          onMouseEnter={e => { e.target.style.background = '#e2e8f0'; }}
+          onMouseLeave={e => { e.target.style.background = '#f1f5f9'; }}
+        >
+          <HiOutlineDesktopComputer style={{ fontSize: 15 }} />
+          Monitor
+        </button>
+        <button onClick={isRecording ? stopRecording : startRecording} style={{
+          display: 'flex', alignItems: 'center', gap: 5,
+          background: isRecording ? '#fef2f2' : '#f1f5f9',
+          border: isRecording ? '1.5px solid #fecaca' : '1.5px solid #e2e8f0',
+          borderRadius: 8, padding: '5px 12px', cursor: 'pointer',
+          fontSize: 12, fontWeight: 600, color: isRecording ? '#dc2626' : '#0f172a',
+          transition: 'all 0.15s', position: 'relative',
+        }}
+          onMouseEnter={e => {
+            if (!isRecording) e.target.style.background = '#e2e8f0';
+          }}
+          onMouseLeave={e => {
+            if (!isRecording) e.target.style.background = '#f1f5f9';
+          }}
+        >
+          {isRecording ? (
+            <>
+              <span style={{
+                width: 7, height: 7, borderRadius: '50%', background: '#dc2626',
+                animation: 'recPulse 1s infinite', display: 'inline-block'
+              }} />
+              <HiOutlineStop style={{ fontSize: 15 }} />
+              {elapsed}s
+            </>
+          ) : (
+            <>
+              <HiOutlineVideoCamera style={{ fontSize: 15 }} />
+              Grabar
+            </>
+          )}
+        </button>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>

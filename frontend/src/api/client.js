@@ -1,6 +1,17 @@
 const API_URL = (window.__SISEXP_CONFIG__ && window.__SISEXP_CONFIG__.API_URL) || process.env.REACT_APP_API_URL || '/api';
 const CACHE_TTL = 30_000;
 
+function recordAction(method, path, status, body) {
+  if (!window.__SISEXP_RECORDING__ || !window.__SISEXP_RECORDING_BUFFER__) return;
+  window.__SISEXP_RECORDING_BUFFER__.push({
+    ts: Date.now(),
+    method,
+    path,
+    status,
+    bodySnapshot: body ? JSON.stringify(body).substring(0, 200) : null
+  });
+}
+
 const cache = new Map();
 
 function getToken() {
@@ -76,9 +87,10 @@ async function get(path) {
     const token = getToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(`${API_URL}${path}`, { headers });
+    recordAction('GET', path, res.status);
     const data = await handleResponse(res);
     return cacheSet(path, data);
-  } catch (err) { throw errorDeRed(err); }
+  } catch (err) { recordAction('GET', path, 0); throw errorDeRed(err); }
 }
 
 async function post(path, body) {
@@ -88,6 +100,7 @@ async function post(path, body) {
       headers: authHeaders(),
       body: JSON.stringify(body)
     });
+    recordAction('POST', path, res.status, body);
     const data = await handleResponse(res);
     invalidarCache(path.split('/').slice(0, 2).join('/'));
     return data;
@@ -101,6 +114,7 @@ async function put(path, body) {
       headers: authHeaders(),
       body: JSON.stringify(body)
     });
+    recordAction('PUT', path, res.status, body);
     const data = await handleResponse(res);
     invalidarCache(path.split('/').slice(0, 2).join('/'));
     return data;
@@ -116,6 +130,7 @@ async function del(path) {
       method: 'DELETE',
       headers
     });
+    recordAction('DELETE', path, res.status);
     const data = await handleResponse(res);
     invalidarCache(path.split('/').slice(0, 2).join('/'));
     return data;
@@ -129,6 +144,7 @@ async function patch(path, body) {
       headers: authHeaders(),
       body: JSON.stringify(body)
     });
+    recordAction('PATCH', path, res.status, body);
     const data = await handleResponse(res);
     invalidarCache(path.split('/').slice(0, 2).join('/'));
     return data;
@@ -148,6 +164,7 @@ async function upload(path, file, fieldName = 'archivo', extraFields = {}) {
       headers,
       body: fd
     });
+    recordAction('UPLOAD', path, res.status);
     const data = await handleResponse(res);
     invalidarCache(path.split('/').slice(0, 2).join('/'));
     return data;

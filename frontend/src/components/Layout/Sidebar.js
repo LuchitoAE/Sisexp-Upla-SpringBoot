@@ -6,7 +6,7 @@ import {
   HiOutlineClipboardList, HiOutlineArchive, HiOutlineChartPie,
   HiOutlineUsers, HiOutlinePencilAlt, HiOutlineDownload,
   HiOutlineUpload, HiOutlineLogout, HiOutlineChevronLeft,
-  HiOutlineChevronRight
+  HiOutlineChevronRight, HiOutlineDesktopComputer
 } from 'react-icons/hi';
 
 const MODULE_ICONS = {
@@ -18,6 +18,7 @@ const MODULE_ICONS = {
   reportes: HiOutlineChartPie,
   usuarios: HiOutlineUsers,
   notas: HiOutlinePencilAlt,
+  monitor: HiOutlineDesktopComputer,
 };
 
 export default memo(function Sidebar({ active, onNavigate, user, onLogout, collapsed, onToggle }) {

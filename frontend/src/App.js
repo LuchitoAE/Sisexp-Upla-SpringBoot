@@ -5,6 +5,7 @@ import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
 import Placeholder from './components/Common/Placeholder';
 import { NAV_PERMISSIONS } from './utils/config';
+import { RecorderProvider } from './contexts/RecorderContext';
 import './App.css';
 
 // ─── Lazy loading de paginas (code splitting automatico) ───
@@ -17,6 +18,7 @@ const NecesidadPAPPage   = lazy(() => import('./pages/NecesidadPAPPage'));
 const ReportesPage       = lazy(() => import('./pages/ReportesPage'));
 const NotaModificatoriaPage = lazy(() => import('./pages/NotaModificatoriaPage'));
 const ExpedientePage     = lazy(() => import('./pages/ExpedientePage'));
+const MonitorPage        = lazy(() => import('./pages/MonitorPage'));
 
 // ─── Skeleton de carga (se muestra mientras la pagina se descarga) ───
 function PageSkeleton() {
@@ -119,6 +121,7 @@ function AppContent() {
 
   const allowed = NAV_PERMISSIONS[user?.rol] || [];
   const canAccess = (m) => allowed.includes(m);
+  window.__SISEXP_NAVIGATE__ = setActive;
 
   const renderContent = () => {
     if (!canAccess(active)) {
@@ -133,6 +136,7 @@ function AppContent() {
       case 'reportes': return <ReportesPage />;
       case 'notas': return <NotaModificatoriaPage />;
       case 'usuarios': return <UsuariosPage />;
+      case 'monitor': return <MonitorPage />;
       default: return <Dashboard />;
     }
   };
@@ -148,7 +152,7 @@ function AppContent() {
         onToggle={() => setCollapsed(!collapsed)}
       />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Header user={user} />
+        <Header user={user} onMonitorClick={() => setActive('monitor')} />
         <main style={{ flex: 1, overflowY: 'auto', background: '#f8fafc' }}>
           <div className="animate-in" key={active}>
             <Suspense fallback={<PageSkeleton />}>
@@ -164,9 +168,11 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <ModalProvider>
-        <AppContent />
-      </ModalProvider>
+      <RecorderProvider>
+        <ModalProvider>
+          <AppContent />
+        </ModalProvider>
+      </RecorderProvider>
     </AuthProvider>
   );
 }
