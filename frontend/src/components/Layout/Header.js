@@ -1,6 +1,7 @@
 import React, { useEffect, useState, memo } from 'react';
 import { ROL_LABEL, ROL_PROFILE, ROL_COLOR } from '../../utils/config';
 import { client } from '../../api/client';
+import { HiOutlineBell, HiOutlineCalendar } from 'react-icons/hi';
 export default memo(function Header({ user }) {
   const profile = ROL_PROFILE[user?.rol] || {};
   const color = profile.color || ROL_COLOR[user?.rol] || '#2563eb';
@@ -49,7 +50,7 @@ export default memo(function Header({ user }) {
     return Math.floor(hrs / 24) + 'd';
   };
 
-  const TIPO_ICON = { observacion: '↩', rechazo: '✗', aprobacion: '✓', alerta_fecha: '📅', nota_aprobada: '✅', nota_rechazada: '❌', info: 'ℹ' };
+  const TIPO_ICON = { observacion: '↩', rechazo: '✗', aprobacion: '✓', alerta_fecha: '📅', nota_aprobada: '✅', nota_rechazada: '❌', info: 'i' };
 
   return (
     <header style={{
@@ -71,7 +72,7 @@ export default memo(function Header({ user }) {
             background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, padding: 4,
             position: 'relative', lineHeight: 1
           }}>
-            🔔
+            <HiOutlineBell style={{ color: '#94a3b8' }} />
             {notifCount > 0 && (
               <span style={{
                 position: 'absolute', top: -2, right: -4,

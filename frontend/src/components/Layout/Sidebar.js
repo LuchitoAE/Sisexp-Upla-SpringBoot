@@ -1,9 +1,23 @@
 import React, { memo } from 'react';
 import { NAV_MODULES, NAV_PERMISSIONS, ROL_COLOR, ROL_LABEL, ROL_PROFILE } from '../../utils/config';
 import { client } from '../../api/client';
+import {
+  HiOutlineChartBar, HiOutlineFolderOpen, HiOutlineCurrencyDollar,
+  HiOutlineClipboardList, HiOutlineArchive, HiOutlineChartPie,
+  HiOutlineUsers, HiOutlinePencilAlt, HiOutlineDownload,
+  HiOutlineUpload, HiOutlineLogout, HiOutlineChevronLeft,
+  HiOutlineChevronRight
+} from 'react-icons/hi';
 
 const MODULE_ICONS = {
-  dashboard: '📊', expedientes: '📁', techos: '💰', poi: '📋', pap: '📦', reportes: '📈', usuarios: '👥'
+  dashboard: HiOutlineChartBar,
+  expedientes: HiOutlineFolderOpen,
+  techos: HiOutlineCurrencyDollar,
+  poi: HiOutlineClipboardList,
+  pap: HiOutlineArchive,
+  reportes: HiOutlineChartPie,
+  usuarios: HiOutlineUsers,
+  notas: HiOutlinePencilAlt,
 };
 
 export default memo(function Sidebar({ active, onNavigate, user, onLogout, collapsed, onToggle }) {
@@ -14,7 +28,7 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
   return (
     <aside style={{
       width: collapsed ? 72 : 240,
-      background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',
+      background: 'linear-gradient(180deg, #0f172a 0%, #1e3a5f 100%)',
       color: '#cbd5e1',
       display: 'flex', flexDirection: 'column', flexShrink: 0,
       transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -23,22 +37,22 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
       {/* Brand */}
       <div style={{
         padding: collapsed ? '20px 12px' : '20px 20px',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
         display: 'flex', alignItems: 'center', gap: 12
       }}>
         <div style={{
-          width: 38, height: 38, borderRadius: 12, flexShrink: 0,
-          background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
+          width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+          background: 'linear-gradient(135deg, #1a56db, #1e40af)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 15, fontWeight: 900, color: '#fff',
-          boxShadow: '0 4px 12px rgba(59,130,246,0.35)'
+          boxShadow: '0 4px 14px rgba(26,86,219,0.35)'
         }}>S</div>
         {!collapsed && (
           <div>
             <div style={{ fontSize: 14, fontWeight: 800, color: '#f8fafc', letterSpacing: -0.3, lineHeight: 1.1 }}>
               SISEXP
             </div>
-            <div style={{ fontSize: 10, fontWeight: 500, color: '#64748b', letterSpacing: 0.04 }}>
+            <div style={{ fontSize: 10, fontWeight: 500, color: '#64748b', letterSpacing: 0.06 }}>
               UPLA v2
             </div>
           </div>
@@ -47,19 +61,20 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
 
       {/* Navigation */}
       <nav style={{ flex: 1, padding: '12px 8px', overflowY: 'auto' }}>
-        <div style={{ fontSize: collapsed ? 0 : 9, fontWeight: 700, color: '#475569', letterSpacing: 0.08, textTransform: 'uppercase', padding: collapsed ? 0 : '6px 12px 8px', marginBottom: 4 }}>
-          {!collapsed && 'Navegación'}
+        <div style={{ fontSize: collapsed ? 0 : 9, fontWeight: 700, color: '#64748b', letterSpacing: 0.1, textTransform: 'uppercase', padding: collapsed ? 0 : '6px 14px 8px', marginBottom: 4 }}>
+          {!collapsed && 'Principal'}
         </div>
         {visible.map(m => {
           const isActive = active === m.id;
+          const Icon = MODULE_ICONS[m.id] || HiOutlineChartBar;
           return (
             <button key={m.id} onClick={() => onNavigate(m.id)}
               title={collapsed ? m.label : undefined}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                padding: collapsed ? '12px 0' : '10px 14px', marginBottom: 2,
-                borderRadius: 10, border: 'none', cursor: 'pointer', textAlign: 'left',
-                background: isActive ? 'rgba(59,130,246,0.18)' : 'transparent',
+                padding: collapsed ? '12px 0' : '10px 14px', marginBottom: 1,
+                borderRadius: 8, border: 'none', cursor: 'pointer', textAlign: 'left',
+                background: isActive ? 'rgba(26,86,219,0.20)' : 'transparent',
                 color: isActive ? '#93c5fd' : '#94a3b8',
                 fontSize: 13, fontWeight: isActive ? 600 : 500,
                 transition: 'all 0.15s',
@@ -67,21 +82,17 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
                 fontFamily: 'Inter, sans-serif'
               }}
               onMouseEnter={e => {
-                if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e2e8f0'; }
+                if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#e2e8f0'; }
               }}
               onMouseLeave={e => {
                 if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }
               }}
             >
-              {/* Active indicator */}
-              {isActive && !collapsed && (
-                <div style={{ position: 'absolute', left: 0, top: '20%', height: '60%', width: 3, background: '#3b82f6', borderRadius: '0 3px 3px 0' }} />
+              {isActive && (
+                <div style={{ position: 'absolute', left: 0, top: '25%', height: '50%', width: 3, background: '#3b82f6', borderRadius: '0 3px 3px 0' }} />
               )}
-              {isActive && collapsed && (
-                <div style={{ position: 'absolute', left: 0, top: '20%', height: '60%', width: 3, background: '#3b82f6', borderRadius: '0 3px 3px 0' }} />
-              )}
-              <span style={{ fontSize: collapsed ? 16 : 14, width: collapsed ? '100%' : 'auto', textAlign: 'center', flexShrink: 0 }}>
-                {MODULE_ICONS[m.id] || '·'}
+              <span style={{ fontSize: collapsed ? 18 : 16, width: collapsed ? '100%' : 20, textAlign: 'center', flexShrink: 0, display: 'flex', justifyContent: 'center' }}>
+                <Icon />
               </span>
               {!collapsed && <span>{m.label}</span>}
             </button>
@@ -89,12 +100,12 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
         })}
       </nav>
 
-      {/* Administracion section (Admin only) */}
+      {/* Admin section */}
       {user?.rol === 'Administrador' && (
         <div style={{ padding: collapsed ? '4px 8px' : '8px 8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           {!collapsed && (
-            <div style={{ fontSize: 9, fontWeight: 700, color: '#475569', letterSpacing: 0.08, textTransform: 'uppercase', padding: '0 12px 6px' }}>
-              Administración
+            <div style={{ fontSize: 9, fontWeight: 700, color: '#64748b', letterSpacing: 0.1, textTransform: 'uppercase', padding: '0 14px 6px' }}>
+              Administracion
             </div>
           )}
           <button onClick={async () => {
@@ -112,15 +123,17 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
           title={collapsed ? 'Descargar backup' : undefined}
           style={{
             width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-            padding: collapsed ? '12px 0' : '8px 12px', marginBottom: 2,
-            borderRadius: 10, border: 'none', cursor: 'pointer', textAlign: 'left',
+            padding: collapsed ? '12px 0' : '8px 14px', marginBottom: 1,
+            borderRadius: 8, border: 'none', cursor: 'pointer', textAlign: 'left',
             background: 'transparent', color: '#94a3b8',
             fontSize: 12, fontWeight: 500, transition: 'all 0.15s', fontFamily: 'Inter, sans-serif'
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e2e8f0'; }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#e2e8f0'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
           >
-            <span style={{ fontSize: collapsed ? 16 : 13, width: collapsed ? '100%' : 'auto', textAlign: 'center' }}>💾</span>
+            <span style={{ fontSize: collapsed ? 18 : 14, width: collapsed ? '100%' : 20, textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
+              <HiOutlineDownload />
+            </span>
             {!collapsed && 'Descargar backup'}
           </button>
           <button onClick={() => {
@@ -129,10 +142,10 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
             input.onchange = async () => {
               const file = input.files[0];
               if (!file) return;
-              if (!window.confirm('⚠ Esto REEMPLAZARA toda la base de datos. ¿Continuar?')) return;
+              if (!window.confirm('Esto REEMPLAZARA toda la base de datos. ¿Continuar?')) return;
               try {
                 await client.upload('/admin/restore', file, 'archivo');
-                alert('Restauracion completada. La pagina se recargara.');
+                alert('Restauracion completada.');
                 window.location.reload();
               } catch (e) { alert('Error: ' + e.message); }
             };
@@ -141,15 +154,17 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
           title={collapsed ? 'Cargar backup' : undefined}
           style={{
             width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-            padding: collapsed ? '12px 0' : '8px 12px', marginBottom: 2,
-            borderRadius: 10, border: 'none', cursor: 'pointer', textAlign: 'left',
+            padding: collapsed ? '12px 0' : '8px 14px', marginBottom: 1,
+            borderRadius: 8, border: 'none', cursor: 'pointer', textAlign: 'left',
             background: 'transparent', color: '#94a3b8',
             fontSize: 12, fontWeight: 500, transition: 'all 0.15s', fontFamily: 'Inter, sans-serif'
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#e2e8f0'; }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#e2e8f0'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
           >
-            <span style={{ fontSize: collapsed ? 16 : 13, width: collapsed ? '100%' : 'auto', textAlign: 'center' }}>📥</span>
+            <span style={{ fontSize: collapsed ? 18 : 14, width: collapsed ? '100%' : 20, textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
+              <HiOutlineUpload />
+            </span>
             {!collapsed && 'Cargar backup'}
           </button>
         </div>
@@ -158,7 +173,7 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
       {/* Bottom section */}
       <div style={{
         padding: collapsed ? 8 : '14px 16px',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
         background: 'rgba(0,0,0,0.15)'
       }}>
         {!collapsed && (
@@ -202,19 +217,22 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.18)'; }}
         onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.10)'; }}
         >
-          <span style={{ fontSize: 13 }}>{collapsed ? '✕' : '🚪'}</span>
-          {!collapsed && 'Cerrar sesión'}
+          <span style={{ fontSize: 14, display: 'flex' }}>
+            <HiOutlineLogout />
+          </span>
+          {!collapsed && 'Cerrar sesion'}
         </button>
         {onToggle && (
           <button onClick={onToggle} style={{
             width: '100%', marginTop: 6, padding: '4px 0', borderRadius: 8,
             border: 'none', background: 'transparent', color: '#475569',
-            cursor: 'pointer', fontSize: 13, transition: 'color 0.15s', fontFamily: 'Inter, sans-serif'
+            cursor: 'pointer', fontSize: 13, transition: 'color 0.15s', fontFamily: 'Inter, sans-serif',
+            display: 'flex', justifyContent: 'center'
           }}
           onMouseEnter={e => { e.currentTarget.style.color = '#94a3b8'; }}
           onMouseLeave={e => { e.currentTarget.style.color = '#475569'; }}
           >
-            {collapsed ? '▸' : '◂'}
+            {collapsed ? <HiOutlineChevronRight /> : <HiOutlineChevronLeft />}
           </button>
         )}
       </div>
