@@ -13,31 +13,31 @@ export default memo(function Header({ user, onMonitorClick }) {
 
   useEffect(() => {
     const load = () => {
-      client.get('/notificaciones/count').then(r => setNotifCount(r.count || 0)).catch(() => {});
+      client.get(`/notificaciones/count?usuarioId=${user?.id || ''}`).then(r => setNotifCount(r.count || 0)).catch(() => {});
     };
     load();
     const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user?.id]);
 
   const openNotifs = async () => {
     setShowNotifs(!showNotifs);
     if (!showNotifs) {
       try {
-        const data = await client.get('/notificaciones');
+        const data = await client.get(`/notificaciones?usuarioId=${user?.id}`);
         setNotifs(data);
       } catch (err) { /* ignore */ }
     }
   };
 
   const markAll = async () => {
-    try { await client.put('/notificaciones/read-all', {}); setNotifCount(0); setNotifs(n => n.map(x => ({ ...x, leida: true }))); }
+    try { await client.put(`/notificaciones/leer-todas?usuarioId=${user?.id}`, {}); setNotifCount(0); setNotifs(n => n.map(x => ({ ...x, leida: true }))); }
     catch (err) { /* ignore */ }
   };
 
   const markOne = async (id) => {
     try {
-      await client.put(`/notificaciones/${id}/read`, {});
+      await client.put(`/notificaciones/${id}/leer`, {});
       setNotifCount(c => Math.max(0, c - 1));
       setNotifs(n => n.map(x => x.id === id ? { ...x, leida: true } : x));
     } catch (err) { /* ignore */ }

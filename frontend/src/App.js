@@ -41,7 +41,7 @@ const ModalContext = createContext(null);
 export function useModals() { return useContext(ModalContext); }
 
 function ModalProvider({ children }) {
-  const [modal, setModal] = useState({ open: false, type: '', title: '', message: '', resolve: null, input: false, label: '' });
+  const [modal, setModal] = useState({ open: false, type: '', title: '', message: '', resolve: null, input: false, label: '', variant: 'success' });
   const [inputValue, setInputValue] = useState('');
 
   const confirm = useCallback((title, message) => new Promise(resolve => {
@@ -53,8 +53,8 @@ function ModalProvider({ children }) {
     setInputValue('');
   }), []);
 
-  const alerta = useCallback((title, message) => {
-    setModal({ open: true, type: 'alert', title, message, resolve: null, input: false, label: '' });
+  const alerta = useCallback((title, message, variant = 'success') => {
+    setModal({ open: true, type: 'alert', title, message, resolve: null, input: false, label: '', variant });
   }, []);
 
   const close = (result) => {
@@ -97,9 +97,9 @@ function ModalProvider({ children }) {
             )}
             {modal.type === 'alert' && (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 36, marginBottom: 8 }}>✓</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#16a34a', marginBottom: 4 }}>{modal.title}</div>
-                <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5, marginBottom: 16 }}>{modal.message}</div>
+                <div style={{ fontSize: 36, marginBottom: 8 }}>{modal.variant === 'error' ? '✗' : '✓'}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: modal.variant === 'error' ? '#dc2626' : '#16a34a', marginBottom: 4 }}>{modal.title}</div>
+                <div style={{ fontSize: 13, color: modal.variant === 'error' ? '#991b1b' : '#64748b', lineHeight: 1.5, marginBottom: 16 }}>{modal.message}</div>
                 <button className="btn btn-primary btn-sm" onClick={() => close()}>Entendido</button>
               </div>
             )}
