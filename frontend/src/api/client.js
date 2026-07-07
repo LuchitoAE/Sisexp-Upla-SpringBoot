@@ -1,4 +1,4 @@
-const API_URL = (window.__SISEXP_CONFIG__ && window.__SISEXP_CONFIG__.API_URL) || process.env.REACT_APP_API_URL || '/api';
+const API_URL = process.env.REACT_APP_API_URL || (window.__SISEXP_CONFIG__ && window.__SISEXP_CONFIG__.API_URL) || '/api';
 const CACHE_TTL = 30_000;
 
 const cache = new Map();

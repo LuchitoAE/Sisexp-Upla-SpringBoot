@@ -4,7 +4,7 @@
   "framework": "create-react-app",
   "build": {
     "env": {
-      "REACT_APP_API_URL": "https://e332-179-6-45-108.ngrok-free.app/api"
+      "REACT_APP_API_URL": "https://api-gateway-production-e01a.up.railway.app/api"
     }
   }
 }
