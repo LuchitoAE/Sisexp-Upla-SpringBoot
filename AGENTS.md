@@ -1,4 +1,4 @@
-# AGENTS.md — SISEXP-UPLA (Spring Boot Microservicios)
+# AGENTS.md — SISEXP-UPLA (Spring Boot Microservicios) — vFinal
 
 ## PROYECTO ACTUAL: SISEXP-UPLA Microservicios
 
@@ -10,10 +10,10 @@ Arquitectura de microservicios con 12 contenedores Docker Compose. Proyecto fina
 |---|---|
 | Dominio | Gestion presupuestal de expedientes (Techo -> POI -> PAP -> Expedientes) |
 | Entidades | 9 (Usuario, TechoPresupuestal, ActividadPOI, NecesidadPAP, Expediente, DocumentoAdjunto, SeguimientoLog, NotaModificatoria, Notificacion) |
-| Enums | 9 (RolUsuario, EstadoExpediente, Urgencia, Naturaleza, EstadoActividad, TipoDocumento, TipoNotificacion, TipoNota, EstadoNota) |
+| Enums | 10 (RolUsuario, EstadoExpediente, Urgencia, Naturaleza, EstadoActividad, TipoDocumento, TipoNotificacion, TipoNota, EstadoNota, ActivityAction) |
 | Roles | 6 (Administrador, Coordinacion, Secretaria, Director, Laboratorio, Decanato) |
 | Estados expediente | 7 (Borrador, En_revision, Aprobado, Rechazado, Finalizado, Observado, Derivado) |
-| Frontend | React 19 SPA CRA + NGINX + react-icons (Heroicons outline) + UPLA institutional login |
+| Frontend | React 19 SPA CRA + NGINX + react-icons 5.7.0 (Heroicons outline) + UPLA login |
 | Auth | JWT stateless (jjwt 0.12.6) |
 | GitHub | https://github.com/LuchitoAE/Sisexp-Upla-SpringBoot |
 | Deploy Frontend | Vercel: https://frontend-ivory-nine-43.vercel.app |
@@ -27,10 +27,10 @@ Arquitectura de microservicios con 12 contenedores Docker Compose. Proyecto fina
 | # | Contenedor | Puerto | Tecnologia |
 |:--|:-----------|:------:|:-----------|
 | 1 | sisexp-nginx | 80 | nginx:alpine (React SPA + proxy /api) |
-| 2 | sisexp-api-gateway | 8080 | Spring Cloud Gateway + JWT filter |
+| 2 | sisexp-api-gateway | 8080 | Spring Cloud Gateway + JwtAuthFilter + ActivityLogFilter + MonitorController |
 | 3 | sisexp-eureka | 8761 | Netflix Eureka (Service Discovery) |
 | 4 | sisexp-auth-service | 8081 | Spring Boot + PostgreSQL |
-| 5 | sisexp-presupuesto-service | 8082 | Spring Boot + PostgreSQL |
+| 5 | sisexp-presupuesto-service | 8082 | Spring Boot + PostgreSQL + RestTemplate |
 | 6 | sisexp-expediente-service | 8083 | Spring Boot + PostgreSQL + RabbitMQ |
 | 7 | sisexp-notificacion-service | 8084 | Spring Boot + PostgreSQL + RabbitMQ |
 | 8-11 | 4 PostgreSQL | 5433-5436 | postgres:16-alpine |
@@ -42,10 +42,11 @@ Arquitectura de microservicios con 12 contenedores Docker Compose. Proyecto fina
 
 | Contexto | Servicio | Puerto | Responsabilidad |
 |:---------|:---------|:------:|:----------------|
-| Autenticacion | auth-service | 8081 | Login JWT, gestion usuarios/roles, validacion tokens |
-| Presupuesto | presupuesto-service | 8082 | Techos, POI, PAP, NotasModif, Dashboard, Reportes, RestTemplate |
-| Expedientes | expediente-service | 8083 | CRUD expedientes, documentos, seguimiento estados, publica eventos |
+| Autenticacion | auth-service | 8081 | Login JWT, gestion usuarios/roles, validacion tokens, StatusController |
+| Presupuesto | presupuesto-service | 8082 | Techos, POI, PAP, NotasModif, Dashboard, Reportes, RestTemplate a expediente-service |
+| Expedientes | expediente-service | 8083 | CRUD expedientes, documentos, seguimiento estados, publica eventos RabbitMQ |
 | Notificaciones | notificacion-service | 8084 | Consume eventos RabbitMQ, crea/consulta notificaciones |
+| Monitoreo | api-gateway | 8080 | ActivityLogFilter intercepta todas las llamadas, MonitorController sirve feed de actividad |
 | Ruteo | api-gateway | 8080 | Punto unico de entrada, JWT global, CORS, ruteo load-balanced |
 
 ---
@@ -54,12 +55,13 @@ Arquitectura de microservicios con 12 contenedores Docker Compose. Proyecto fina
 
 | URL | Que es |
 |:----|:-------|
-| `http://localhost` | SISEXP-UPLA React SPA (login, dashboard, CRUD) |
-| `http://localhost/monitor` | Dashboard de monitoreo (12 nodos en tiempo real) |
+| `http://localhost` | SISEXP-UPLA React SPA (login, dashboard, CRUD, monitor) |
+| `http://localhost/api/monitor/activity?since=5` | API: actividad en tiempo real ultimos N minutos |
 | `http://localhost/api/status` | API: estado de los 7 nodos |
 | `http://localhost:8761` | Eureka Dashboard |
 | `http://localhost:15672` | RabbitMQ Management (sisexp/sisexp) |
 | `https://frontend-ivory-nine-43.vercel.app` | Frontend en Vercel |
+| `https://api-gateway-production-e01a.up.railway.app` | API Gateway publico en Railway |
 
 ### Credenciales
 
@@ -77,7 +79,7 @@ Arquitectura de microservicios con 12 contenedores Docker Compose. Proyecto fina
 ## Comandos Rapidos
 
 ```bash
-# Construir y levantar
+# Construir y levantar todo
 docker compose build
 docker compose up -d
 
@@ -92,12 +94,24 @@ docker compose up -d auth-service presupuesto-service expediente-service api-gat
 # Detener
 docker compose down
 
-# Reconstruir frontend
+# Reconstruir solo frontend (el cambio mas frecuente)
 cd frontend && pnpm install && pnpm run build && cd ..
 docker compose build nginx && docker compose up -d --force-recreate nginx
 
-# Smoke test
+# Reconstruir api-gateway (cambios de backend)
+docker compose build api-gateway && docker compose up -d --force-recreate api-gateway
+
+# Smoke test automatizado
 docker compose -f docker-compose.yml -f docker-compose.test.yml up --exit-code-from tester
+
+# Deploy Vercel (forzar)
+cd frontend && npx vercel deploy --prod --yes && cd ..
+
+# Railway (1 solo servicio a la vez, CLI interactiva)
+railway service redeploy --service api-gateway -y
+railway variables set KEY="VALUE" --service api-gateway
+railway add --image postgres:16-alpine --service {name} --variables "K=V"
+railway domain --service api-gateway --port 8080
 ```
 
 ---
@@ -106,9 +120,15 @@ docker compose -f docker-compose.yml -f docker-compose.test.yml up --exit-code-f
 
 ```
 microservicios/
-├── sisexp-common/         # 9 enums compartidos (TipoNota, EstadoNota, Naturaleza, etc.)
-├── eureka-server/         # Netflix Eureka
-├── api-gateway/           # Spring Cloud Gateway + JwtAuthFilter + CorsConfig
+├── sisexp-common/         # 10 enums compartidos (TipoNota, EstadoNota, Naturaleza, etc.)
+├── eureka-server/         # Netflix Eureka (+ railway.toml)
+├── api-gateway/           # Spring Cloud Gateway + JwtAuthFilter + CorsConfig + ActivityLogFilter + MonitorController
+│   ├── JwtAuthFilter.java     # JWT validation, exime /api/auth/login, /api/health, /api/rastreo, /api/status, /api/monitor
+│   ├── CorsConfig.java        # allowCredentials=false, allowedOriginPatterns=*
+│   ├── ActivityLogFilter.java # GlobalFilter orden 10: intercepta todo, guarda eventos en ActivityBuffer
+│   ├── ActivityBuffer.java    # Buffer circular 200 eventos thread-safe, queries por tiempo/servicio
+│   ├── ActivityEvent.java     # POJO: timestamp, service, action, description, path, status, userEmail
+│   └── MonitorController.java # GET /api/monitor/activity?since=N, GET /api/monitor/activity/service?name=X&since=N
 ├── auth-service/
 │   └── model/Usuario, config/DataInitializer, controller/ApiAuth, ApiUsuario, Status
 ├── presupuesto-service/
@@ -121,29 +141,44 @@ microservicios/
 │   ├── config/            # DataInitializer (seed 8 expedientes), RabbitMQConfig
 │   └── controller/        # ApiExpediente (CRUD, estado, rastreo, documentos)
 └── notificacion-service/
-    └── model/Notificacion, controller/ApiNotificacion
+    └── model/Notificacion, controller/ApiNotificacion, consumer/ExpedienteEventConsumer
+
 frontend/
 ├── src/
-│   ├── api/client.js      # HTTP client con JWT + cache
-│   ├── components/Auth/Login.js   # Login con identidad UPLA + seeds
-│   ├── components/Layout/         # Sidebar (Heroicons), Header (notif bell)
-│   ├── pages/                     # Dashboard, Expediente, POI, PAP, Techos, Reportes, Notas, Usuarios
-│   ├── contexts/AuthContext.js    # Auth state + JWT token
-│   └── utils/config.js            # Roles, permisos, modulos
-├── public/config.js       # API_URL para local (/api) o Vercel
-├── monitor/               # Dashboard monitoreo 12 nodos
-└── nginx.conf             # Proxy / -> SPA, /api -> gateway, /monitor -> monitor
+│   ├── api/client.js          # HTTP client con JWT + cache + interceptor de grabacion (recording)
+│   ├── components/Auth/Login.js       # Login identidad UPLA + seeds rapidos
+│   ├── components/Layout/
+│   │   ├── Sidebar.js         # Heroicons outline, item Monitor (todos los roles), colapsable
+│   │   └── Header.js          # Botones Monitor + Grabar, campana notificaciones, avatar
+│   ├── pages/
+│   │   ├── Dashboard.js       # KPI Cards por año (selector, por defecto ultimo año activo)
+│   │   ├── ExpedientePage.js  # CRUD expedientes + documentos + cambio de estado
+│   │   ├── ActividadPOIPage.js
+│   │   ├── NecesidadPAPPage.js
+│   │   ├── TechoPresupuestalPage.js
+│   │   ├── ReportesPage.js
+│   │   ├── NotaModificatoriaPage.js
+│   │   ├── UsuariosPage.js
+│   │   └── MonitorPage.js     # Pantalla completa: canvas 12 nodos + edges + feed actividad + grabaciones/replay
+│   ├── contexts/
+│   │   ├── AuthContext.js      # Auth state + JWT token
+│   │   └── RecorderContext.js  # Estado grabacion (start/stop/buffer/localStorage)
+│   └── utils/config.js         # Roles, NAV_MODULES, NAV_PERMISSIONS (incluye monitor)
+├── public/config.js            # API_URL: detecta localhost vs Vercel, setea URL correcta
+└── nginx.conf                  # Proxy / -> SPA, /api -> gateway (sin bloque /monitor)
 ```
 
 ---
 
-## Endpoints API (41 total)
+## Endpoints API (43 total)
 
 | Metodo | Ruta | Servicio | Auth |
 |:-------|:-----|:---------|:----:|
 | POST | /api/auth/login | auth-service | No |
 | GET | /api/auth/me | auth-service | JWT |
 | GET | /api/usuarios | auth-service | JWT |
+| GET | /api/status | auth-service | No |
+| GET | /api/health | auth-service | No |
 | GET | /api/techos-presupuestales | presupuesto-service | JWT |
 | GET | /api/actividades-poi/techo/{id} | presupuesto-service | JWT |
 | GET | /api/necesidades-pap/actividad/{id} | presupuesto-service | JWT |
@@ -161,8 +196,10 @@ frontend/
 | GET/POST | /api/expedientes | expediente-service | JWT |
 | PUT | /api/expedientes/{id}/estado | expediente-service | JWT |
 | GET | /api/expedientes/rastreo/{codigo} | expediente-service | No |
-| GET | /api/notificaciones | notificacion-service | JWT |
-| GET | /api/status | auth-service | No |
+| GET | /api/notificaciones?usuarioId= | notificacion-service | JWT |
+| GET | /api/notificaciones/count?usuarioId= | notificacion-service | JWT |
+| GET | /api/monitor/activity?since=5 | api-gateway (local) | No |
+| GET | /api/monitor/activity/service?name=X&since=5 | api-gateway (local) | No |
 
 ---
 
@@ -192,63 +229,130 @@ Todos los montos: BigDecimal precision=12 scale=2. Enums: @Enumerated(EnumType.S
 
 ---
 
-## Railway Deployment
+## Railway Deployment — 12/12 SUCCESS
 
-| Item | Estado |
-|:-----|:------|
-| TODOS (12/12) | SUCCESS |
-| auth-db, presupuesto-db, expediente-db, notificacion-db | SUCCESS |
-| rabbitmq, eureka-server, api-gateway | SUCCESS |
-| auth-service, presupuesto-service | SUCCESS |
-| expediente-service, notificacion-service | SUCCESS |
-| nginx | No necesario (frontend en Vercel) |
+| Item | Estado | Nota |
+|:-----|:------|:-----|
+| auth-db | SUCCESS | postgres:16-alpine |
+| presupuesto-db | SUCCESS | postgres:16-alpine |
+| expediente-db | SUCCESS | postgres:16-alpine, recreado via `railway add` |
+| notificacion-db | SUCCESS | postgres:16-alpine, recreado via `railway add` |
+| rabbitmq | SUCCESS | rabbitmq:3-management-alpine |
+| eureka-server | SUCCESS | Puerto 8761, private domain configurado |
+| api-gateway | SUCCESS | Dominio publico: api-gateway-production-e01a.up.railway.app |
+| auth-service | SUCCESS | + JWT_EXPIRATION, conecta a auth-db |
+| presupuesto-service | SUCCESS | + RestTemplate, conecta a presupuesto-db |
+| expediente-service | SUCCESS | + RabbitMQ, conecta a expediente-db |
+| notificacion-service | SUCCESS | + RabbitMQ, conecta a notificacion-db |
+| nginx | No necesario | Frontend en Vercel, no se necesita nginx en Railway |
 
-**URL publica API Gateway:** `https://api-gateway-production-e01a.up.railway.app`
+**Proyecto ID:** `38350e4a-d078-4836-bf40-290719260fde`
 
-**Railway CLI v4.30.5**: interactiva, usar flags `--service`, `--variables`, `--image`, `-y`.
+### Variables criticas por servicio
 
-**Fixes aplicados:**
-- `EUREKA_INSTANCE_HOSTNAME` = `RAILWAY_PRIVATE_DOMAIN` en cada servicio (sin esto, Eureka registra el container ID que no es resoluble)
-- `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE` usa el private domain real del eureka-server (`sisexp-upla-springboot.railway.internal`, no `eureka-server.railway.internal`)
-- `railway add --image postgres:16-alpine --service {name} --variables "..."` para crear DBs
-- `railway domain --service api-gateway --port 8080` para exponer el gateway publicamente
-- `railway service redeploy --service {name} -y` para redesplegar
+| Servicio | Variable | Valor |
+|:---------|:---------|:------|
+| TODOS los servicios | EUREKA_CLIENT_SERVICEURL_DEFAULTZONE | `http://sisexp-upla-springboot.railway.internal:8761/eureka` |
+| auth-service | EUREKA_INSTANCE_HOSTNAME | `auth-service.railway.internal` |
+| presupuesto-service | EUREKA_INSTANCE_HOSTNAME | `presupuesto-service.railway.internal` |
+| expediente-service | EUREKA_INSTANCE_HOSTNAME | `heartfelt-wonder.railway.internal` |
+| notificacion-service | EUREKA_INSTANCE_HOSTNAME | `notificacion-service.railway.internal` |
+| TODOS | JWT_SECRET | `SisexpJwtSecret2026MicroservicesKey!` |
+| auth-service | JWT_EXPIRATION | `86400000` |
+| auth-service | SPRING_DATASOURCE_URL | `jdbc:postgresql://auth-db.railway.internal:5432/auth_db` |
+| presupuesto-service | SPRING_DATASOURCE_URL | `jdbc:postgresql://presupuesto-db.railway.internal:5432/presupuesto_db` |
+| expediente-service | SPRING_DATASOURCE_URL | `jdbc:postgresql://expediente-db.railway.internal:5432/expediente_db` |
+| notificacion-service | SPRING_DATASOURCE_URL | `jdbc:postgresql://notificacion-db.railway.internal:5432/notific_db` |
+| expediente-service | SPRING_RABBITMQ_HOST | `rabbitmq.railway.internal` |
+| notificacion-service | SPRING_RABBITMQ_HOST | `rabbitmq.railway.internal` |
 
-Proyecto ID: `38350e4a-d078-4836-bf40-290719260fde`
+### Railway CLI — Patrones seguros
+
+```bash
+# v4.30.5 es interactiva. Usar flags, NO argumentos posicionales.
+# NO abrir multiples ventanas de Railway (rate limit 1015 Cloudflare)
+
+# Crear DBs
+railway add --image "postgres:16-alpine" --service "expediente-db" --variables "POSTGRES_DB=expediente_db" --variables "POSTGRES_PASSWORD=sisexp"
+
+# Redesplegar
+railway service redeploy --service api-gateway -y
+
+# Variables
+railway variables set KEY="value" --service api-gateway
+railway variables --service api-gateway  # listar
+
+# Status
+railway service status --all
+
+# Dominio publico
+railway domain --service api-gateway --port 8080
+```
+
+### Railway — Lecciones aprendidas
+
+1. **EUREKA_INSTANCE_HOSTNAME es obligatorio**: sin esto, los servicios registran su container ID en Eureka (ej: `1cd254d6997e`), que NO es resoluble por otros servicios. Causa `UnknownHostException`.
+2. **EUREKA_CLIENT_SERVICEURL_DEFAULTZONE usa el private domain real**: `sisexp-upla-springboot.railway.internal` NO `eureka-server.railway.internal`. El RAILWAY_PRIVATE_DOMAIN del eureka-server puede ser diferente al nombre del servicio.
+3. **CORS en Gateway usa `allowCredentials=false`**: incompatible con `*` origins. Se configuro `addAllowedOriginPattern("*")` con `setAllowCredentials(false)`.
+4. **Railway CLI v4.30.5**: no soporta flags en modo no-TTY en algunos comandos. `railway add` y `railway service redeploy` si aceptan `--service` flag.
+5. **No ngrok**: el free tier muestra pagina interstitial que bloquea CORS preflight. Se migro a Railway con dominio publico.
 
 ---
 
 ## Frontend Design
 
-- **Libreria de iconos**: react-icons 5.7.0 (Heroicons outline style)
-- **Sidebar**: HiOutlineChartBar, HiOutlineFolderOpen, HiOutlineCurrencyDollar, etc.
-- **Header**: HiOutlineBell (notificaciones), HiOutlineLogout
-- **Login**: UPLA logo animado + fondos institucionales + seeds rapidos
-- **Estilo**: Intranet ejecutiva UPLA (Propuesta A)
+### Paleta y estilo
+- **Sidebar**: `#0f172a` fondo, items con Heroicons outline, indicador activo `#3b82f6`
+- **Header**: fondo blanco, botones Monitor (gris) y Grabar (toggle rojo pulsante), campana notificaciones
+- **Dashboard**: KPI cards blancas con bordes grises, selector de año dropdown
+- **Monitor**: dark theme `#0a0f14`, canvas con edges animados, nodos arrastrables
+- **Login**: logo UPLA animado + fondos institucionales
 
----
+### Iconos (react-icons 5.7.0)
+- Sidebar: `HiOutlineChartBar`, `HiOutlineFolderOpen`, `HiOutlineCurrencyDollar`, `HiOutlineClipboardList`, `HiOutlineArchive`, `HiOutlineChartPie`, `HiOutlineUsers`, `HiOutlinePencilAlt`, `HiOutlineDesktopComputer`
+- Header: `HiOutlineBell`, `HiOutlineDesktopComputer`, `HiOutlineVideoCamera`, `HiOutlineStop`, `HiOutlineLogout`
 
-## Skills Disponibles
+### Navegacion
+- SPA con `useState('active')` (no React Router)
+- Lazy loading con `React.lazy()` + `Suspense`
+- 9 modulos: dashboard, expedientes, techos, poi, pap, reportes, notas, usuarios, monitor
+- Monitor: vista pantalla completa (sin sidebar ni header), boton "← Volver"
 
-### Backend & Arquitectura
-- `arquitectura-microservicios` — Clean Architecture, SOLID, patrones GoF
-- `backend-sisexp` — Spring Boot, JPA, servicios, repos, enums, data types
-- `deploy-sisexp` — Docker, Railway (monolito legacy, no microservicios)
+### Sistema de Grabacion/Replay
+- **RecorderContext.js**: estado global `{ isRecording, elapsed, recordings }`
+- Boton **Grabar** en Header: toggle `HiOutlineVideoCamera` ↔ `HiOutlineStop` con dot rojo pulsante
+- Al grabar: `client.js` intercepta todas las llamadas API y guarda `{ ts, method, path, status, bodySnapshot }`
+- Al detener: se guarda en `localStorage.sisexp_recordings` con nombre y timestamp
+- Panel **Grabaciones** en Monitor: lista de sesiones guardadas con boton ▶ Reproducir
+- Modo **Reproduccion**: ejecuta acciones secuencialmente con delay 500ms, ilumina nodos afectados, velocidad 1x/2x/4x
 
-### Documentacion
-- `docs-sisexp` — MD -> DOCX profesional con reference.docx + pandoc
+### Activity Feed (Monitor)
+- **ActivityLogFilter.java** en api-gateway: GlobalFilter (orden 10) que intercepta TODAS las peticiones
+- Traduce path + metodo → descripcion humana (ej: "jefe@upla.edu.pe creo un nuevo expediente")
+- Almacena en **ActivityBuffer** (buffer circular 200 eventos thread-safe)
+- **MonitorController**: `GET /api/monitor/activity?since=5` (publico, sin JWT)
+- **MonitorPage**: polling cada 5s, timeline scrollable con dots verdes/rojos, filtrado por servicio al clickear nodo
 
-### Frontend & UX/UI
-- `frontend-sisexp` — React SPA, login, componentes, auth flow
-- `ux-ui-design` — Thymeleaf + Bootstrap (legacy del monolito)
-- `frontend-accessibility-inclusive-design` — Accesibilidad WCAG
-- `frontend-ui-visual-composition` — Jerarquia visual, tipografia, color
-- `frontend-ux-usability-foundations` — Affordances, feedback, prevencion errores
-- `frontend-interaction-patterns-components` — Patrones de interaccion
-- `frontend-forms-inputs-checkout` — Formularios, validacion
-- `frontend-information-architecture-navigation` — Navegacion, breadcrumbs
-- `frontend-ux-writing-content-design` — Microcopy, CTAs, empty states
-- `frontend-design-systems-frontend-architecture` — Design tokens, componentes
+### Monitor — Canvas de 12 nodos
+- 12 nodos arrastrables (drag & drop, posiciones guardadas en localStorage)
+- 16 edges animados (solid=gateway routing, dashed=DB, dotted=Eureka/RabbitMQ)
+- Click en nodo → panel lateral con status, host, acciones recientes, componentes
+- Click en espacio vacio → cierra panel
+- Top bar: contador UP/DOWN, latencia, boton Pausar/Sondear
+- Nodos de servicio tienen boton "Ir al modulo →" que navega a la pagina correspondiente
+
+### Config.js — Deteccion de entorno
+```js
+window.__SISEXP_CONFIG__ = {
+  API_URL: (function() {
+    var host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1" || host.endsWith(".local")) {
+      return "/api";  // Docker local: nginx proxy a api-gateway:8080
+    }
+    return "https://api-gateway-production-e01a.up.railway.app/api";  // Vercel: directo a Railway
+  })()
+};
+```
 
 ---
 
@@ -256,7 +360,11 @@ Proyecto ID: `38350e4a-d078-4836-bf40-290719260fde`
 
 | Archivo | Descripcion |
 |:--------|:------------|
+| `AGENTS.md` | Este archivo — contexto completo del proyecto |
+| `README.md` | Readme del repo con setup, endpoints, seed data |
+| `docker-compose.yml` | Stack local 12 contenedores |
+| `docker-compose.test.yml` | Smoke test automatizado 21 endpoints |
 | `docs/INFORME_MICROSERVICIOS_SISEXP.md` | Documentacion completa de arquitectura |
 | `docs/INFORME_MICROSERVICIOS_SISEXP.docx` | Version Word |
-| `README.md` | Readme del repo con setup, endpoints, seed data |
-| `docker-compose.test.yml` | Smoke test 21 endpoints |
+| `frontend/vercel.json` | Config de deploy Vercel (CRA, build command) |
+| `microservicios/*/railway.toml` | Config-as-code Railway por servicio (6 archivos) |
