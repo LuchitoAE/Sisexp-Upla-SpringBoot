@@ -55,8 +55,8 @@ public class ExpedienteService {
         e.setActividadPOIId(actividadPoiId);
         e.setNecesidadPAPId(necesidadPapId);
         e.setSolicitanteId(solicitanteId);
-        e.setUrgencia(com.upla.sisexp.common.enums.Urgencia.valueOf(urgencia));
-        e.setNaturaleza(naturaleza != null ? com.upla.sisexp.common.enums.Naturaleza.valueOf(naturaleza) : null);
+        e.setUrgencia(com.upla.sisexp.common.enums.Urgencia.valueOf(urgencia.replace(' ', '_')));
+        e.setNaturaleza(naturaleza != null ? com.upla.sisexp.common.enums.Naturaleza.valueOf(naturaleza.replace(' ', '_')) : null);
         e.setDescripcion(descripcion);
         e.setCantidadSolicitada(cantidad);
         e.setCostoEstimado(costo);
