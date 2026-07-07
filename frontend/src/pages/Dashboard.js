@@ -161,10 +161,20 @@ export default function Dashboard() {
       {/* ─── KPI Cards por año ─── */}
       {puedeVerSaldos && saldos && (
         <div style={{ marginBottom: 24 }}>
-          {años.map(anio => {
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>
+              📈 Resumen Presupuestal
+            </div>
+            <select value={filtroAnioSaldos} onChange={e => setFiltroAnioSaldos(e.target.value)}
+              style={{ fontSize: 12, padding: '5px 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: '#475569', fontWeight: 500 }}>
+              {años.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+          {(() => {
+            const anio = filtroAnioSaldos || años[años.length - 1];
             const t = totalesPorAnio[String(anio)] || { asignado: 0, comprometido: 0, ejecutado: 0, disponible: 0 };
             return (
-              <div key={anio} style={{ marginBottom: 16 }}>
+              <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ background: '#eff6ff', color: '#2563eb', padding: '3px 12px', borderRadius: 10, fontSize: 12 }}>{anio}</span>
                   <span style={{ fontSize: 11, fontWeight: 400, color: '#64748b' }}>Presupuesto total: {formatMoney(t.asignado)}</span>
@@ -195,7 +205,7 @@ export default function Dashboard() {
                 </div>
               </div>
             );
-          })}
+          })()}
         </div>
       )}
 

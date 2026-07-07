@@ -3,8 +3,20 @@ import { useRecorder, getRecordings } from '../contexts/RecorderContext';
 import { API_URL } from '../api/client';
 import './MonitorPage.css';
 
-const POLL_MS = 5000;
+const POSITIONS_KEY = 'sisexp_monitor_positions';
 
+function loadPositions() {
+  try {
+    const raw = localStorage.getItem(POSITIONS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function savePositions(pos) {
+  localStorage.setItem(POSITIONS_KEY, JSON.stringify(pos));
+}
+
+const POLL_MS = 5000;
 const serviceDefs = [
   { id: 'nginx', title: 'NGINX Frontend', port: ':80', x: 40, y: 170, icon: '🌐', cls: 'gateway', type: 'proxy' },
   { id: 'api-gateway', title: 'API Gateway', port: ':8080', x: 280, y: 90, icon: '⚙', cls: 'gateway', type: 'gateway' },
@@ -134,14 +146,14 @@ function EdgeCanvas({ selected, nodesElRef }) {
   return <canvas ref={canvasRef} className="monitor-canvas" />;
 }
 
-function NodeCard({ def, status, selected, onClick, replayHighlight }) {
+function NodeCard({ def, status, selected, onClick, replayHighlight, pos, onDragStart }) {
   const st = status || 'UNKNOWN';
   return (
     <div
       id={'mn-' + def.id}
       className={'monitor-node' + (def.cls ? ' ' + def.cls : '') + (selected ? ' selected' : '') + (replayHighlight ? ' replay-hit' : '')}
-      style={{ left: def.x, top: def.y }}
-      onClick={(e) => { e.stopPropagation(); onClick(def); }}
+      style={{ left: pos.x, top: pos.y, cursor: 'grab' }}
+      onMouseDown={(e) => { e.stopPropagation(); onDragStart(def, e); }}
     >
       <span className={'node-dot status-' + st} />
       <div className="node-icon">{def.icon}</div>
@@ -306,6 +318,15 @@ export default function MonitorPage({ onBack }) {
   const [replaying, setReplaying] = useState(null);
   const [replayIndex, setReplayIndex] = useState(-1);
   const [replaySpeed, setReplaySpeed] = useState(1);
+  const [nodePositions, setNodePositions] = useState(() => {
+    const saved = loadPositions();
+    const initial = {};
+    serviceDefs.forEach(def => {
+      initial[def.id] = saved[def.id] || { x: def.x, y: def.y };
+    });
+    return initial;
+  });
+  const dragRef = useRef(null);
   const replayTimerRef = useRef(null);
   const activityTimerRef = useRef(null);
 
@@ -429,6 +450,55 @@ export default function MonitorPage({ onBack }) {
     return 'api-gateway';
   };
 
+  const handleNodeDragStart = useCallback((nodeDef, e) => {
+    e.preventDefault();
+    const nodeEl = document.getElementById('mn-' + nodeDef.id);
+    if (!nodeEl) return;
+    const rect = nodeEl.getBoundingClientRect();
+    const parentRect = nodeEl.parentElement.getBoundingClientRect();
+    dragRef.current = {
+      nodeDef,
+      nodeId: nodeDef.id,
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startLeft: rect.left - parentRect.left,
+      startTop: rect.top - parentRect.top,
+      didMove: false
+    };
+  }, []);
+
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!dragRef.current) return;
+      const { nodeId, startMouseX, startMouseY, startLeft, startTop } = dragRef.current;
+      const dx = e.clientX - startMouseX;
+      const dy = e.clientY - startMouseY;
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+        dragRef.current.didMove = true;
+      }
+      if (dragRef.current.didMove) {
+        setNodePositions(prev => {
+          const next = { ...prev, [nodeId]: { x: startLeft + dx, y: startTop + dy } };
+          savePositions(next);
+          return next;
+        });
+      }
+    };
+    const onUp = () => {
+      if (!dragRef.current) return;
+      if (!dragRef.current.didMove && dragRef.current.nodeDef) {
+        setSelected(dragRef.current.nodeDef);
+      }
+      dragRef.current = null;
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, []);
+
   const replayHighlight = getReplayHighlight();
 
   return (
@@ -477,6 +547,8 @@ export default function MonitorPage({ onBack }) {
               status={statuses[def.id]?.status}
               selected={selected?.id === def.id}
               replayHighlight={replayHighlight === def.id}
+              pos={nodePositions[def.id] || { x: def.x, y: def.y }}
+              onDragStart={handleNodeDragStart}
               onClick={setSelected}
             />
           ))}
