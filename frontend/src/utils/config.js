@@ -55,15 +55,14 @@ export const NAV_MODULES = [
   { id: 'pap', label: 'PAP' },
   { id: 'reportes', label: 'Reportes' },
   { id: 'notas', label: 'Notas Modif.' },
-  { id: 'usuarios', label: 'Usuarios' },
-  { id: 'monitor', label: 'Monitor' }
+  { id: 'usuarios', label: 'Usuarios' }
 ];
 
 export const NAV_PERMISSIONS = {
-  'Administrador': ['dashboard', 'expedientes', 'techos', 'poi', 'pap', 'reportes', 'notas', 'usuarios', 'monitor'],
-  'Coordinacion': ['dashboard', 'expedientes', 'techos', 'poi', 'pap', 'reportes', 'notas', 'monitor'],
-  'Secretaria': ['dashboard', 'expedientes', 'techos', 'poi', 'pap', 'notas', 'monitor'],
-  'Director': ['dashboard', 'expedientes', 'techos', 'poi', 'pap', 'reportes', 'notas', 'monitor'],
-  'Laboratorio': ['dashboard', 'expedientes', 'poi', 'pap', 'notas', 'monitor'],
-  'Decanato': ['dashboard', 'pap', 'reportes', 'notas', 'monitor']
+  'Administrador': ['dashboard', 'expedientes', 'techos', 'poi', 'pap', 'reportes', 'notas', 'usuarios'],
+  'Coordinacion': ['dashboard', 'expedientes', 'techos', 'poi', 'pap', 'reportes', 'notas'],
+  'Secretaria': ['dashboard', 'expedientes', 'techos', 'poi', 'pap', 'notas'],
+  'Director': ['dashboard', 'expedientes', 'techos', 'poi', 'pap', 'reportes', 'notas'],
+  'Laboratorio': ['dashboard', 'expedientes', 'poi', 'pap', 'notas'],
+  'Decanato': ['dashboard', 'pap', 'reportes', 'notas']
 };

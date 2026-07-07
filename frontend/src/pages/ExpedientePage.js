@@ -52,7 +52,7 @@ export default function ExpedientePage() {
 
   const load = useCallback(async () => {
     try { const data = await client.get('/expedientes'); setList(data); }
-    catch (err) { modals.alerta('Error', err.message); }
+    catch (err) { modals.alerta('Error', err.message, 'error'); }
     finally { setLoading(false); }
   }, [modals]);
 
@@ -68,13 +68,13 @@ export default function ExpedientePage() {
   const loadActividades = async (techoId) => {
     if (!techoId) { setActividades([]); return; }
     try { const data = await client.get(`/actividades-poi/techo/${techoId}`); setActividades(data); }
-    catch (err) { modals.alerta('Error', err.message); }
+    catch (err) { modals.alerta('Error', err.message, 'error'); }
   };
 
   const loadNecesidades = async (actividadId) => {
     if (!actividadId) { setNecesidades([]); return; }
     try { const data = await client.get(`/necesidades-pap/actividad/${actividadId}`); setNecesidades(data); }
-    catch (err) { modals.alerta('Error', err.message); }
+    catch (err) { modals.alerta('Error', err.message, 'error'); }
   };
 
   const handleActividadChange = (actividadId) => {
@@ -106,7 +106,7 @@ export default function ExpedientePage() {
       setForm({ actividadPoiId: '', necesidadPapId: '', urgencia: '', naturaleza: '', descripcion: '', cantidadSolicitada: 1 });
       setActividades([]); setNecesidades([]); setSelectedTecho('');
       await load();
-    } catch (err) { modals.alerta('Error', err.message); }
+    } catch (err) { modals.alerta('Error', err.message, 'error'); }
   };
 
   const handleUpload = async (file, tipo) => {
@@ -116,13 +116,13 @@ export default function ExpedientePage() {
       await client.upload(`/expedientes/${detalle.id}/documentos`, file, null, 'archivo', { tipo });
       client.invalidarCache('/expedientes');
       await loadDetalle(detalle.id);
-    } catch (err) { modals.alerta('Error', err.message); }
+    } catch (err) { modals.alerta('Error', err.message, 'error'); }
     finally { setUploading(false); }
   };
 
   const loadDetalle = async (id) => {
     try { const data = await client.get(`/expedientes/${id}`); setDetalle(data); }
-    catch (err) { modals.alerta('Error', err.message); }
+    catch (err) { modals.alerta('Error', err.message, 'error'); }
   };
 
   const cambiarEstado = async (estado) => {
@@ -134,7 +134,8 @@ export default function ExpedientePage() {
       await client.put(`/expedientes/${detalle.id}/estado`, { estado, observacion: obs, usuarioId: user?.id });
       client.invalidarCache('/expedientes');
       await loadDetalle(detalle.id); await load();
-    } catch (err) { modals.alerta('Error', err.message); }
+      modals.alerta('Listo', `Expediente paso a ${estado.replace('_', ' ')}`);
+    } catch (err) { modals.alerta('Error', err.message, 'error'); }
     finally { setChangingEstado(false); }
   };
 
@@ -353,8 +354,7 @@ export default function ExpedientePage() {
           </div>
           {puedeAprobar && d.estado === 'Borrador' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-warning btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('En_revision')}>🔍 Enviar a revisión</button>
-              <button className="btn btn-danger btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('Rechazado')}>✗ Rechazar</button>
+              <button className="btn btn-warning btn-sm" disabled={changingEstado} onClick={() => cambiarEstado('En_revision')}>Enviar a revision</button>
             </div>
           )}
           {puedeAprobar && d.estado === 'En_revision' && (

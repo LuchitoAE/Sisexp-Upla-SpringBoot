@@ -97,6 +97,7 @@ function normalizeAnual(raw, anio) {
   const acts = raw.actividades || [];
   const montoTotal = techo.montoTotal || 0;
   const ejercido = techo.montoUtilizado || 0;
+  const hoy = new Date();
   return {
     techo: {
       total: montoTotal,
@@ -107,15 +108,23 @@ function normalizeAnual(raw, anio) {
     actividades: {
       total: acts.length,
       pendientes: acts.filter(a => a.estado === 'Pendiente' || a.estado === 'En_proceso').length,
-      cerradas: acts.filter(a => a.estado === 'Finalizada').length,
+      cerradas: acts.filter(a => a.estado === 'Cerrado' || a.estado === 'Finalizada').length,
+      vencidas: acts.filter(a => {
+        if (!a.fechaLimite) return false;
+        return a.estado !== 'Cerrado' && a.estado !== 'Finalizada' && new Date(a.fechaLimite) < hoy;
+      }).length,
     },
     expedientes: {
       total: raw.totalExpedientes || 0,
       costoTotal: raw.costoTotalEstimado || 0,
+      conDocumentos: raw.conDocumentos || 0,
+      porEstado: raw.porEstado || {},
+      porMes: raw.porMes || {},
+      porUrgencia: raw.porUrgencia || {},
     },
     pap: {
-      totalItems: 0,
-      pctEjecucionMonto: '0',
+      totalItems: raw.totalItemsPAP || 0,
+      pctEjecucionMonto: raw.pctEjecucionMontoPAP || '0',
     },
     _techo: techo,
     _acts: acts,
@@ -124,35 +133,41 @@ function normalizeAnual(raw, anio) {
 }
 
 function normalizeExpedientes(raw) {
-  const listado = Array.isArray(raw) ? raw : (raw.listado || []);
-  return { listado };
+  return {
+    total: raw.total || 0,
+    totalCosto: raw.totalCosto || 0,
+    conDocumentos: raw.conDocumentos || 0,
+    sinDocumentos: raw.sinDocumentos || 0,
+    porEstado: raw.porEstado || {},
+    porUrgencia: raw.porUrgencia || {},
+    listado: raw.listado || [],
+  };
 }
 
 function normalizePOI(raw) {
-  const actividades = Array.isArray(raw) ? raw : (raw.actividades || []);
-  const totalPresupuesto = actividades.reduce((s, a) => s + (a.presupuestoAsignado || 0), 0);
-  const totalDisponible = actividades.reduce((s, a) => s + (a.disponible || 0), 0);
   return {
-    presupuesto: {
-      totalPOI: actividades.length,
-      presupuestoTotal: totalPresupuesto,
-      ejecucionPct: totalPresupuesto > 0 ? Math.round(((totalPresupuesto - totalDisponible) / totalPresupuesto) * 100) : 0,
-      disponible: totalDisponible,
-    },
-    actividades,
+    totalActividades: raw.totalActividades || 0,
+    presupuesto: raw.presupuesto || { total: 0, pctEjecucion: 0, disponible: 0 },
+    actividades: raw.actividades || [],
   };
 }
 
 function normalizePAP(raw) {
-  const listado = Array.isArray(raw) ? raw : (raw.listado || []);
-  return { listado };
+  return {
+    totalItems: raw.totalItems || 0,
+    pctEjecucionCantidad: raw.pctEjecucionCantidad || 0,
+    pctEjecucionMonto: raw.pctEjecucionMonto || 0,
+    porTipo: raw.porTipo || { Bien: 0, Servicio: 0 },
+    cantidades: raw.cantidades || { planificado: 0, disponible: 0, ejecutado: 0 },
+    listado: raw.listado || [],
+  };
 }
 
 export default function ReportesPage() {
   useAuth();
   const modals = useModals();
   const [seccion, setSeccion] = useState('anual');
-  const [anio, setAnio] = useState('2026');
+  const [anio, setAnio] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [techos, setTechos] = useState([]);
@@ -160,11 +175,15 @@ export default function ReportesPage() {
   useEffect(() => {
     client.get('/techos-presupuestales').then(d => {
       setTechos(d);
-      if (d.length > 0) setAnio(String(d[d.length - 1].año));
+      if (d.length > 0) {
+        const ultimo = String(d[d.length - 1].año);
+        setAnio(prev => prev || ultimo);
+      }
     }).catch(() => {});
   }, []);
 
   const load = useCallback(async (secc, a) => {
+    if (!a) return;
     setLoading(true);
     setData(null);
     try {
