@@ -1,8 +1,0 @@
-[build]
-builder = "DOCKERFILE"
-dockerfilePath = "microservicios/notificacion-service/Dockerfile"
-
-[deploy]
-numReplicas = 1
-startCommand = "java -jar app.jar"
-healthcheckPath = "/actuator/health"
