@@ -34,4 +34,20 @@ public class NecesidadPAPService {
 
     @Transactional
     public void eliminar(Long id) { necesidadRepo.delete(obtener(id)); }
+
+    @Transactional
+    public NecesidadPAP editar(Long id, String nombre, Integer cantidad, BigDecimal precioEstimado,
+            String unidad, String oficina, String clasificador) {
+        NecesidadPAP n = obtener(id);
+        if (nombre != null) n.setNombre(nombre);
+        if (cantidad != null) { n.setCantidad(cantidad); n.setCantidadDisponible(cantidad); }
+        if (precioEstimado != null) {
+            n.setPrecioEstimado(precioEstimado);
+            n.setMontoDisponible(precioEstimado.multiply(BigDecimal.valueOf(n.getCantidad())));
+        }
+        if (unidad != null) n.setUnidad(unidad);
+        if (oficina != null) n.setOficinaLaboratorio(oficina);
+        if (clasificador != null) n.setClasificadorGasto(clasificador);
+        return necesidadRepo.save(n);
+    }
 }

@@ -41,4 +41,32 @@ public class ActividadPOIService {
 
     @Transactional
     public void eliminar(Long id) { actividadRepo.delete(obtener(id)); }
+
+    @Transactional
+    public void planificarPOI(Long techoId) {
+        List<ActividadPOI> actividades = actividadRepo.findByTechoPresupuestalId(techoId);
+        for (ActividadPOI a : actividades) { a.setPlanificado(true); }
+        actividadRepo.saveAll(actividades);
+    }
+
+    @Transactional
+    public void desplanificarPOI(Long techoId) {
+        List<ActividadPOI> actividades = actividadRepo.findByTechoPresupuestalId(techoId);
+        for (ActividadPOI a : actividades) { a.setPlanificado(false); }
+        actividadRepo.saveAll(actividades);
+    }
+
+    @Transactional
+    public void finalizarPAP(Long id) {
+        ActividadPOI a = obtener(id);
+        a.setEstado(EstadoActividad.Finalizada);
+        actividadRepo.save(a);
+    }
+
+    @Transactional
+    public void desbloquearPAP(Long id) {
+        ActividadPOI a = obtener(id);
+        a.setEstado(EstadoActividad.Pendiente);
+        actividadRepo.save(a);
+    }
 }
