@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModals } from '../App';
-import { client } from '../api/client';
+import { client, API_URL } from '../api/client';
 
 function formatMoney(n) {
   return 'S/ ' + Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2 });
@@ -184,24 +184,37 @@ export default function ReportesPage() {
 
   // ─── Export handlers ───
 
-  const handleExportCSV = () => {
-    if (!data) return;
+  const downloadFile = async (url, filename) => {
+    try {
+      const token = localStorage.getItem('jwt_token');
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) {
+        const err = await res.text(); throw new Error(err || 'Error al descargar');
+      }
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objUrl; a.download = filename; a.click();
+      URL.revokeObjectURL(objUrl);
+    } catch (err) { modals.alerta('Error', err.message); }
+  };
+
+  const handleExportExcel = () => {
     switch (seccion) {
-      case 'anual': if (data.techo) exportarCSVAnual(data, anio); break;
-      case 'expedientes': if (data.listado) exportarCSVExpedientes(data, anio); break;
-      case 'poi': if (data.actividades) exportarCSVPOI(data, anio); break;
-      case 'pap': if (data.listado) exportarCSVPAP(data, anio); break;
+      case 'anual': downloadFile(`${API_URL}/reportes/anual/${anio}/excel`, `informe_anual_${anio}.xlsx`); break;
+      case 'expedientes': downloadFile(`${API_URL}/reportes/expedientes/excel?anio=${anio}`, `reporte_expedientes_${anio}.xlsx`); break;
+      case 'poi': downloadFile(`${API_URL}/reportes/poi/excel?anio=${anio}`, `reporte_poi_${anio}.xlsx`); break;
+      case 'pap': downloadFile(`${API_URL}/reportes/pap/excel?anio=${anio}`, `reporte_pap_${anio}.xlsx`); break;
       default: break;
     }
   };
 
   const handleExportPDF = () => {
-    if (!data) return;
     switch (seccion) {
-      case 'anual': if (data.techo) exportarPDFAnual(data, anio); break;
-      case 'expedientes': if (data.listado) exportarPDFExpedientes(data, anio); break;
-      case 'poi': if (data.actividades) exportarPDFPOI(data, anio); break;
-      case 'pap': if (data.listado) exportarPDFPAP(data, anio); break;
+      case 'anual': downloadFile(`${API_URL}/reportes/anual/${anio}/pdf`, `informe_anual_${anio}.pdf`); break;
+      case 'expedientes': downloadFile(`${API_URL}/reportes/expedientes/pdf?anio=${anio}`, `reporte_expedientes_${anio}.pdf`); break;
+      case 'poi': downloadFile(`${API_URL}/reportes/poi/pdf?anio=${anio}`, `reporte_poi_${anio}.pdf`); break;
+      case 'pap': downloadFile(`${API_URL}/reportes/pap/pdf?anio=${anio}`, `reporte_pap_${anio}.pdf`); break;
       default: break;
     }
   };
@@ -243,7 +256,7 @@ export default function ReportesPage() {
         <>
           {/* Export bar */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 20 }}>
-            <button onClick={() => handleExportCSV()} style={{
+            <button onClick={() => handleExportExcel()} style={{
               padding: '7px 16px', borderRadius: 8, border: '1px solid #16a34a', background: '#fff',
               color: '#16a34a', cursor: 'pointer', fontSize: 12, fontWeight: 600
             }}>📥 Exportar Excel</button>

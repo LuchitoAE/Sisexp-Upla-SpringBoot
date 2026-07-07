@@ -164,7 +164,11 @@ public class ApiExpedienteController {
     @PutMapping("/{id}/estado")
     public ResponseEntity<?> cambiarEstado(@PathVariable Long id, @RequestBody Map<String, String> body) {
         try {
-            var exp = expedienteService.actualizarEstado(id, body.get("estado"), body.get("observacion"),
+            String estadoStr = body.get("estado");
+            if (estadoStr == null || estadoStr.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "El campo 'estado' es obligatorio"));
+            }
+            var exp = expedienteService.actualizarEstado(id, estadoStr, body.get("observacion"),
                 body.get("usuarioId") != null ? Long.valueOf(body.get("usuarioId")) : null);
             return ResponseEntity.ok(exp);
         } catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }

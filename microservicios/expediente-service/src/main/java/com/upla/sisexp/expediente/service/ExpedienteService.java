@@ -3,6 +3,7 @@ package com.upla.sisexp.expediente.service;
 import com.upla.sisexp.common.enums.EstadoExpediente;
 import com.upla.sisexp.common.enums.TipoDocumento;
 import com.upla.sisexp.common.exception.BusinessException;
+import com.upla.sisexp.common.util.EnumUtils;
 import com.upla.sisexp.expediente.config.RabbitMQConfig;
 import com.upla.sisexp.expediente.model.*;
 import com.upla.sisexp.expediente.repository.*;
@@ -55,8 +56,8 @@ public class ExpedienteService {
         e.setActividadPOIId(actividadPoiId);
         e.setNecesidadPAPId(necesidadPapId);
         e.setSolicitanteId(solicitanteId);
-        e.setUrgencia(com.upla.sisexp.common.enums.Urgencia.valueOf(urgencia.replace(' ', '_')));
-        e.setNaturaleza(naturaleza != null ? com.upla.sisexp.common.enums.Naturaleza.valueOf(naturaleza.replace(' ', '_')) : null);
+        e.setUrgencia(EnumUtils.parseSafe(com.upla.sisexp.common.enums.Urgencia.class, urgencia));
+        e.setNaturaleza(naturaleza != null ? EnumUtils.parseSafe(com.upla.sisexp.common.enums.Naturaleza.class, naturaleza) : null);
         e.setDescripcion(descripcion);
         e.setCantidadSolicitada(cantidad);
         e.setCostoEstimado(costo);
@@ -69,9 +70,12 @@ public class ExpedienteService {
 
     @Transactional
     public Expediente actualizarEstado(Long id, String nuevoEstadoStr, String observacion, Long usuarioId) {
+        if (nuevoEstadoStr == null || nuevoEstadoStr.isBlank()) {
+            throw new BusinessException("El campo 'estado' es obligatorio");
+        }
         Expediente exp = obtenerConLogs(id);
         EstadoExpediente estadoActual = exp.getEstado();
-        EstadoExpediente nuevoEstado = EstadoExpediente.valueOf(nuevoEstadoStr.replace(' ', '_'));
+        EstadoExpediente nuevoEstado = EnumUtils.parseSafe(EstadoExpediente.class, nuevoEstadoStr);
         Set<EstadoExpediente> permitidos = TRANSICIONES.getOrDefault(estadoActual, Set.of());
         if (!permitidos.contains(nuevoEstado)) {
             throw new BusinessException("Transicion invalida: de " + estadoActual + " a " + nuevoEstado);
@@ -89,7 +93,8 @@ public class ExpedienteService {
 
     @Transactional
     public DocumentoAdjunto subirDocumento(Long expedienteId, TipoDocumento tipo, MultipartFile archivo) {
-        Expediente exp = expedienteRepo.findById(expedienteId).orElseThrow();
+        Expediente exp = expedienteRepo.findById(expedienteId)
+            .orElseThrow(() -> new BusinessException("Expediente no encontrado con ID: " + expedienteId));
         DocumentoAdjunto doc = new DocumentoAdjunto();
         doc.setExpediente(exp); doc.setTipo(tipo);
         doc.setNombreOriginal(archivo.getOriginalFilename());
@@ -99,7 +104,7 @@ public class ExpedienteService {
         return documentoRepo.save(doc);
     }
 
-    private String generarNumero() {
+    private synchronized String generarNumero() {
         int año = Year.now().getValue();
         String prefix = "EXP-" + año + "-";
         long count = expedienteRepo.countByCodigoStartingWith(prefix);

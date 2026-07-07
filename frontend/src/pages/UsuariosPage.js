@@ -52,7 +52,7 @@ export default function UsuariosPage() {
       `${u.activo ? '¿Desactivar' : '¿Activar'} a ${u.nombre}? ${u.activo ? 'No podrá iniciar sesión.' : 'Podrá volver a acceder al sistema.'}`
     );
     if (!ok) return;
-    try { await client.patch(`/usuarios/${u.id}/toggle-activo`, {}); load(); }
+    try { await client.put(`/usuarios/${u.id}/toggle-activo`, {}); load(); }
     catch (err) { modals.alerta('Error', err.message); }
   };
 

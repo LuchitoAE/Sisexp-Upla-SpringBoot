@@ -2,6 +2,7 @@ package com.upla.sisexp.presupuesto.service;
 
 import com.upla.sisexp.common.enums.EstadoNota;
 import com.upla.sisexp.common.enums.Naturaleza;
+import com.upla.sisexp.common.exception.BusinessException;
 import com.upla.sisexp.presupuesto.model.ActividadPOI;
 import com.upla.sisexp.presupuesto.model.NecesidadPAP;
 import com.upla.sisexp.presupuesto.model.NotaModificatoria;
@@ -52,16 +53,16 @@ public class NotaModificatoriaService {
     public NotaModificatoria configurar(Long id, Long actividadOrigenId, BigDecimal monto,
                                          String clasificador, Naturaleza tipo) {
         NotaModificatoria nota = notaRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Nota no encontrada"));
+            .orElseThrow(() -> new BusinessException("Nota no encontrada"));
 
         if (nota.getTipo().name().contains("actividad") && actividadOrigenId != null) {
             ActividadPOI origen = actividadRepo.findById(actividadOrigenId)
-                .orElseThrow(() -> new RuntimeException("Actividad origen no encontrada"));
+                .orElseThrow(() -> new BusinessException("Actividad origen no encontrada"));
             BigDecimal disponible = origen.getPresupuestoAsignado()
                 .subtract(origen.getSaldoEjecutado())
                 .subtract(origen.getSaldoComprometido());
             if (monto.compareTo(disponible) > 0)
-                throw new RuntimeException("Monto excede el disponible en actividad origen: " + disponible);
+                throw new BusinessException("Monto excede el disponible en actividad origen: " + disponible);
             origen.setSaldoComprometido(origen.getSaldoComprometido().add(monto));
             actividadRepo.save(origen);
             nota.setActividadOrigenId(actividadOrigenId);
@@ -71,12 +72,12 @@ public class NotaModificatoriaService {
             Long actId = nota.getActividadExistenteId();
             if (actId != null) {
                 ActividadPOI dest = actividadRepo.findById(actId)
-                    .orElseThrow(() -> new RuntimeException("Actividad destino no encontrada"));
+                    .orElseThrow(() -> new BusinessException("Actividad destino no encontrada"));
                 BigDecimal disponible = dest.getPresupuestoAsignado()
                     .subtract(dest.getSaldoEjecutado())
                     .subtract(dest.getSaldoComprometido());
                 if (monto.compareTo(disponible) > 0)
-                    throw new RuntimeException("Monto excede el disponible en actividad destino: " + disponible);
+                    throw new BusinessException("Monto excede el disponible en actividad destino: " + disponible);
                 dest.setSaldoComprometido(dest.getSaldoComprometido().add(monto));
                 actividadRepo.save(dest);
 
@@ -106,7 +107,7 @@ public class NotaModificatoriaService {
     @Transactional
     public NotaModificatoria rechazar(Long id, String observacion) {
         NotaModificatoria nota = notaRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Nota no encontrada"));
+            .orElseThrow(() -> new BusinessException("Nota no encontrada"));
         nota.setEstado(EstadoNota.rechazada);
         nota.setObservacionAdmin(observacion);
         nota.setUpdatedAt(LocalDateTime.now());

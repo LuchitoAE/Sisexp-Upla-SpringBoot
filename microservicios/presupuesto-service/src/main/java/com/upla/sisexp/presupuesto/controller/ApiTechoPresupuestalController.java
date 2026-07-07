@@ -1,6 +1,7 @@
 package com.upla.sisexp.presupuesto.controller;
 
 import com.upla.sisexp.common.exception.BusinessException;
+import com.upla.sisexp.presupuesto.service.ActividadPOIService;
 import com.upla.sisexp.presupuesto.service.TechoPresupuestalService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +13,11 @@ import java.util.Map;
 @RequestMapping("/api/techos-presupuestales")
 public class ApiTechoPresupuestalController {
     private final TechoPresupuestalService techoService;
-    public ApiTechoPresupuestalController(TechoPresupuestalService techoService) { this.techoService = techoService; }
+    private final ActividadPOIService actividadService;
+    public ApiTechoPresupuestalController(TechoPresupuestalService techoService, ActividadPOIService actividadService) {
+        this.techoService = techoService;
+        this.actividadService = actividadService;
+    }
 
     @GetMapping
     public ResponseEntity<?> listar() { return ResponseEntity.ok(techoService.listar()); }
@@ -53,6 +58,18 @@ public class ApiTechoPresupuestalController {
     @PatchMapping("/{id}/toggle-activo")
     public ResponseEntity<?> toggleActivo(@PathVariable Long id) {
         try { techoService.toggleActivo(id); return ResponseEntity.ok(Map.of("ok", true)); }
+        catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
+    }
+
+    @PostMapping("/{id}/finalizar-poi")
+    public ResponseEntity<?> finalizarPOI(@PathVariable Long id) {
+        try { actividadService.planificarPOI(id); return ResponseEntity.ok(Map.of("ok", true)); }
+        catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
+    }
+
+    @PostMapping("/{id}/desbloquear-poi")
+    public ResponseEntity<?> desbloquearPOI(@PathVariable Long id) {
+        try { actividadService.desplanificarPOI(id); return ResponseEntity.ok(Map.of("ok", true)); }
         catch (BusinessException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
     }
 }

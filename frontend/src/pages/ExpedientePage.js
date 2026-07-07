@@ -131,7 +131,7 @@ export default function ExpedientePage() {
     if (estado === 'Observado') { obs = await modals.promptText('Observar expediente', 'Describa el detalle de la observación para que el laboratorio pueda corregir.', 'Detalle:'); if (!obs) return; }
     setChangingEstado(true);
     try {
-      await client.put(`/expedientes/${detalle.id}/estado`, { estado, observacion: obs });
+      await client.put(`/expedientes/${detalle.id}/estado`, { estado, observacion: obs, usuarioId: user?.id });
       client.invalidarCache('/expedientes');
       await loadDetalle(detalle.id); await load();
     } catch (err) { modals.alerta('Error', err.message); }

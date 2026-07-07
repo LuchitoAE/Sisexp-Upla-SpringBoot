@@ -5,8 +5,12 @@ import com.upla.sisexp.presupuesto.model.ActividadPOI;
 import com.upla.sisexp.presupuesto.model.NecesidadPAP;
 import com.upla.sisexp.presupuesto.model.TechoPresupuestal;
 import com.upla.sisexp.presupuesto.repository.*;
+import com.upla.sisexp.presupuesto.service.ExportService;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,15 +26,18 @@ public class ReportesController {
     private final ActividadPOIRepository actividadRepo;
     private final NecesidadPAPRepository necesidadRepo;
     private final RestTemplate restTemplate;
+    private final ExportService exportService;
 
     public ReportesController(TechoPresupuestalRepository techoRepo,
                                ActividadPOIRepository actividadRepo,
                                NecesidadPAPRepository necesidadRepo,
-                               RestTemplate restTemplate) {
+                               RestTemplate restTemplate,
+                               ExportService exportService) {
         this.techoRepo = techoRepo;
         this.actividadRepo = actividadRepo;
         this.necesidadRepo = necesidadRepo;
         this.restTemplate = restTemplate;
+        this.exportService = exportService;
     }
 
     @GetMapping("/anual/{anio}")
@@ -372,5 +379,77 @@ public class ReportesController {
         result.put("necesidades", necList);
 
         return result;
+    }
+
+    @GetMapping("/anual/{anio}/excel")
+    public ResponseEntity<byte[]> excelAnual(@PathVariable int anio) {
+        byte[] data = exportService.exportarExcelAnual(anio);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=informe_anual_" + anio + ".xlsx")
+            .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            .body(data);
+    }
+
+    @GetMapping("/anual/{anio}/pdf")
+    public ResponseEntity<byte[]> pdfAnual(@PathVariable int anio) {
+        byte[] data = exportService.exportarPDFAnual(anio);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=informe_anual_" + anio + ".pdf")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(data);
+    }
+
+    @GetMapping("/expedientes/excel")
+    public ResponseEntity<byte[]> excelExpedientes(@RequestParam(defaultValue = "2026") int anio) {
+        byte[] data = exportService.exportarExcelExpedientes(anio);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_expedientes_" + anio + ".xlsx")
+            .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            .body(data);
+    }
+
+    @GetMapping("/expedientes/pdf")
+    public ResponseEntity<byte[]> pdfExpedientes(@RequestParam(defaultValue = "2026") int anio) {
+        byte[] data = exportService.exportarPDFExpedientes(anio);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_expedientes_" + anio + ".pdf")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(data);
+    }
+
+    @GetMapping("/poi/excel")
+    public ResponseEntity<byte[]> excelPOI(@RequestParam(defaultValue = "2026") int anio) {
+        byte[] data = exportService.exportarExcelPOI(anio);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_poi_" + anio + ".xlsx")
+            .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            .body(data);
+    }
+
+    @GetMapping("/poi/pdf")
+    public ResponseEntity<byte[]> pdfPOI(@RequestParam(defaultValue = "2026") int anio) {
+        byte[] data = exportService.exportarPDFPOI(anio);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_poi_" + anio + ".pdf")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(data);
+    }
+
+    @GetMapping("/pap/excel")
+    public ResponseEntity<byte[]> excelPAP(@RequestParam(defaultValue = "2026") int anio) {
+        byte[] data = exportService.exportarExcelPAP(anio);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_pap_" + anio + ".xlsx")
+            .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            .body(data);
+    }
+
+    @GetMapping("/pap/pdf")
+    public ResponseEntity<byte[]> pdfPAP(@RequestParam(defaultValue = "2026") int anio) {
+        byte[] data = exportService.exportarPDFPAP(anio);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_pap_" + anio + ".pdf")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(data);
     }
 }
