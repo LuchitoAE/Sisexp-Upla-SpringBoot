@@ -153,8 +153,12 @@ function AppContent() {
       />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <Header user={user} onMonitorClick={() => setActive('monitor')} />
-        <main style={{ flex: 1, overflowY: 'auto', background: '#f8fafc' }}>
-          <div className="animate-in" key={active}>
+        <main style={
+          active === 'monitor'
+            ? { flex: 1, overflow: 'hidden', background: '#0a0f14' }
+            : { flex: 1, overflowY: 'auto', background: '#f8fafc' }
+        }>
+          <div className="animate-in" key={active} style={active === 'monitor' ? { height: '100%' } : {}}>
             <Suspense fallback={<PageSkeleton />}>
               {renderContent()}
             </Suspense>
