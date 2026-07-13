@@ -11,7 +11,7 @@ Arquitectura de microservicios con 12 contenedores Docker Compose. Proyecto fina
 | Capa | Tecnologia |
 |:-----|:-----------|
 | Backend | Spring Boot 3.4.1, Java 17, Spring Cloud Gateway, JWT (jjwt 0.12.6) |
-| Frontend | React 19 SPA CRA + NGINX + react-icons 5.7.0 (Heroicons outline) |
+| Frontend | React 19 SPA CRA + NGINX + Mermaid.js 11 + react-icons 5.7.0 (Heroicons) |
 | BD | PostgreSQL 16-alpine (4 instancias: auth, presupuesto, expediente, notificacion) |
 | Mensajeria | RabbitMQ 3-management-alpine |
 | Service Discovery | Netflix Eureka |
@@ -46,8 +46,9 @@ docker compose build expediente-service && docker compose up -d --force-recreate
 # Ver estado
 docker compose ps
 
-# Smoke test automatizado (21 endpoints)
-docker compose -f docker-compose.yml -f docker-compose.test.yml up --exit-code-from tester
+# Smoke test automatizado (20 endpoints)
+docker compose up -d
+docker compose -f docker-compose.yml -f docker-compose.test.yml run --rm tester
 ```
 
 ---
@@ -140,7 +141,8 @@ frontend/
 │   │   ├── ExpedientePage.js  # CRUD + docs + estado + disponibilidad
 │   │   ├── ActividadPOIPage.js, NecesidadPAPPage.js, TechoPresupuestalPage.js
 │   │   ├── ReportesPage.js, NotaModificatoriaPage.js, UsuariosPage.js
-│   │   └── MonitorPage.js     # Pantalla completa: canvas 12 nodos + edges + feed actividad + grabaciones
+│   │   └── MonitorPage.js     # Visor 4 tabs: Infraestructura, Datos en Vivo, 23 Diagramas ICONIX, Estructura
+│   │   └── monitor/           # InfraTab, DatosVivoTab, DiagramasTab, EstructuraTab + schema/diagrams.js
 │   ├── contexts/
 │   │   ├── AuthContext.js      # Auth state + JWT token
 │   │   └── RecorderContext.js  # Estado grabacion (start/stop/buffer/localStorage)
@@ -215,11 +217,12 @@ frontend/
 
 ## Frontend Design
 
-### Sistema de Monitor
-- **Actividad en tiempo real**: ActivityLogFilter en gateway intercepta todas las llamadas, ActivityBuffer almacena 200 eventos, MonitorController expone `/api/monitor/activity`
-- **Canvas de 12 nodos**: arrastrables (drag & drop con persistencia en localStorage), 16 edges animados
-- **Panel de detalle**: click en nodo muestra status, host, acciones recientes, componentes, boton "Ir al modulo →"
-- **Activity Feed**: timeline scrollable con dots verdes/rojos, polling cada 5s
+### Visor del Proyecto (Monitor → 4 Tabs)
+- **Tab 1 — Infraestructura**: Canvas de 12 nodos arrastrables con 16 edges animados. Panel de detalle mejorado al clickear nodo (entidades del servicio, tablas de DB) con cross-navigation a otros tabs
+- **Tab 2 — Datos en Vivo**: 7 tablas con datos reales de la API, lazy load al expandir, auto-refresh configurable (30s/pausado)
+- **Tab 3 — Diagramas ICONIX**: 23 diagramas renderizados con Mermaid.js, organizados por servicio (3 globales + 5 por microservicio: CU, Dominio, Robustez, Secuencia, Clases), zoom/pan, codigo fuente
+- **Tab 4 — Estructura**: Entidades JPA con campos y flags (PK, NN, FK), enums, endpoints REST por servicio. Navegacion por servicio/DB
+- **Activity Feed**: ActivityLogFilter en gateway intercepta todas las llamadas, ActivityBuffer 200 eventos, `/api/monitor/activity`
 
 ### Sistema de Grabacion/Replay
 - Boton **Grabar** en Header (toggle rojo pulsante con timer)
@@ -231,9 +234,9 @@ frontend/
 ### Navegacion
 - SPA con `useState('active')` (no React Router)
 - Lazy loading con `React.lazy()` + `Suspense`
-- 9 modulos: dashboard, expedientes, techos, poi, pap, reportes, notas, usuarios, monitor
-- Monitor: pantalla completa sin sidebar ni header, boton "← Volver"
-- Sidebar con Heroicons outline, colapsable, item Monitor visible para todos los roles
+- 8 modulos: dashboard, expedientes, techos, poi, pap, reportes, notas, usuarios
+- Monitor/Visor: pantalla completa sin sidebar ni header, boton "← Volver", 4 tabs con navegacion cruzada
+- Sidebar con Heroicons outline, colapsable
 
 ### Config.js — Deteccion de entorno
 ```js
@@ -272,11 +275,16 @@ window.__SISEXP_CONFIG__ = {
 
 | Archivo | Descripcion |
 |:--------|:------------|
-| `AGENTS.md` | Guia completa para AI agents (contexto, skills, comandos, lecciones) |
-| `docs/INFORME_MICROSERVICIOS_SISEXP.md` | Documentacion completa de arquitectura |
-| `docs/INFORME_MICROSERVICIOS_SISEXP.docx` | Version Word |
+| `AGENTS.md` | Guia completa para AI agents (contexto, skills, comandos) |
+| `docs/ICONIX_ARQUITECTURA_GLOBAL.md/.docx` | 3 diagramas de arquitectura global |
+| `docs/SISEXP_AUTH_SERVICE.md/.docx` | Documento completo auth-service (ICONIX + API + DB) |
+| `docs/SISEXP_PRESUPUESTO_SERVICE.md/.docx` | Documento completo presupuesto-service |
+| `docs/SISEXP_EXPEDIENTE_SERVICE.md/.docx` | Documento completo expediente-service |
+| `docs/SISEXP_NOTIFICACION_SERVICE.md/.docx` | Documento completo notificacion-service |
+| `docs/INFORME_COMPLETO_SISEXP.md/.docx` | Informe tecnico general |
+| `docs/INFORME_MICROSERVICIOS_SISEXP.md/.docx` | Documentacion de arquitectura |
 | `docker-compose.yml` | Stack local 12 contenedores |
-| `docker-compose.test.yml` | Smoke test automatizado 21 endpoints |
+| `docker-compose.test.yml` | Smoke test automatizado 20 endpoints |
 | `microservicios/*/railway.toml` | Config-as-code Railway (6 archivos) |
 | `frontend/vercel.json` | Config deploy Vercel |
 
