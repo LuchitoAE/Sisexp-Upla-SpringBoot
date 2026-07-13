@@ -1,0 +1,334 @@
+.dg-root {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.dg-sidebar {
+  width: 275px;
+  background: #0d1520;
+  border-right: 1px solid #1e3350;
+  overflow-y: auto;
+  flex-shrink: 0;
+  padding: 8px 0;
+}
+
+.dg-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #38bdf8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dg-total-badge {
+  margin-left: auto;
+  background: #1e3350;
+  color: #60a5fa;
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.dg-service-group {
+  margin-bottom: 2px;
+}
+
+.dg-service-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.dg-service-header:hover {
+  background: rgba(56, 189, 248, 0.04);
+}
+.dg-service-header.active {
+  background: rgba(56, 189, 248, 0.05);
+}
+
+.dg-service-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.dg-service-port {
+  font-size: 9px;
+  color: #64748b;
+  font-family: monospace;
+}
+
+.dg-service-count {
+  margin-left: auto;
+  background: #0a0f14;
+  color: #64748b;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.dg-diagram-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px 6px 34px;
+  font-size: 10px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+.dg-diagram-item:hover {
+  background: rgba(56, 189, 248, 0.04);
+  color: #e2e8f0;
+}
+.dg-diagram-item.active {
+  background: rgba(56, 189, 248, 0.08);
+  border-left-color: #38bdf8;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.dg-diagram-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dg-diagram-type {
+  font-size: 8px;
+  color: #64748b;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  background: #0a0f14;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.dg-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dg-viewer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.dg-viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 16px 10px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.dg-viewer-service {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+}
+
+.dg-viewer-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 2px;
+}
+
+.dg-viewer-desc {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.dg-viewer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dg-zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #0a0f14;
+  border: 1px solid #334b64;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.dg-zoom-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.dg-zoom-btn:hover:not(:disabled) { background: #1e3350; color: #e2e8f0; }
+.dg-zoom-btn:disabled { opacity: 0.3; cursor: default; }
+
+.dg-zoom-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #60a5fa;
+  min-width: 36px;
+  text-align: center;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+.dg-zoom-label:hover { color: #38bdf8; }
+
+.dg-code-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(22, 37, 53, 0.9);
+  border: 1px solid #334b64;
+  color: #94a3b8;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 10px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.dg-code-toggle:hover { color: #e2e8f0; border-color: #38bdf8; }
+
+.dg-code {
+  margin: 0 16px 8px;
+  background: #0a0f14;
+  border: 1px solid #1e3350;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: monospace;
+  font-size: 10px;
+  color: #cbd5e1;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  max-height: 180px;
+  overflow-y: auto;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+.dg-diagram-wrap {
+  flex: 1;
+  overflow: auto;
+  margin: 0 16px 16px;
+  background: #0d1520;
+  border: 1px solid #1e3350;
+  border-radius: 10px;
+  position: relative;
+}
+
+.dg-zoom-container {
+  min-width: 100%;
+  min-height: 100%;
+  padding: 20px;
+}
+
+.dg-zoom-content {
+  display: inline-block;
+  min-width: max-content;
+}
+
+.dg-zoom-content svg {
+  max-width: none;
+  height: auto;
+}
+
+.dg-diagram-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.dg-diagram-error {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.dg-error-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.dg-error-msg {
+  color: #fca5a5;
+  font-size: 11px;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 6px;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.dg-retry-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.dg-retry-btn:hover { background: rgba(239, 68, 68, 0.2); }
+
+.dg-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: #64748b;
+}
+
+.dg-empty-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.dg-empty-desc {
+  font-size: 12px;
+}

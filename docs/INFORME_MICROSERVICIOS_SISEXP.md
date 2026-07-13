@@ -50,6 +50,8 @@ SISEXP-UPLA es un sistema de seguimiento y control de expedientes para la Univer
 
 ## **3. Arquitectura de Microservicios**
 
+![](diagramas/arquitectura-microservicios.png)
+
 ### **3.1 Diagrama de Despliegue**
 
 ```
@@ -108,6 +110,8 @@ SISEXP-UPLA es un sistema de seguimiento y control de expedientes para la Univer
 ---
 
 ## **4. Clean Architecture por Servicio**
+
+![](diagramas/componentes.png)
 
 Cada servicio implementa **4 capas concentricas** con dependencias hacia adentro:
 

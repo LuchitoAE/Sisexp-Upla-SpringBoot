@@ -106,6 +106,8 @@ El proyecto se desarrollo siguiendo una **arquitectura de microservicios** con p
 
 ## **4. Arquitectura del Sistema**
 
+![](diagramas/arquitectura-microservicios.png)
+
 ### **4.1 Diagrama de Contenedores (12)**
 
 El sistema se compone de 12 contenedores Docker orquestados con Docker Compose:
@@ -367,6 +369,8 @@ Los reportes muestran datos en tiempo real con normalizacion correcta de campos 
 ---
 
 ## **9. Despliegue**
+
+![](diagramas/despliegue.png)
 
 ### **9.1 Entornos**
 
