@@ -41,13 +41,11 @@ export default memo(function Sidebar({ active, onNavigate, user, onLogout, colla
         borderBottom: '1px solid rgba(255,255,255,0.08)',
         display: 'flex', alignItems: 'center', gap: 12
       }}>
-        <div style={{
-          width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-          background: 'linear-gradient(135deg, #1a56db, #1e40af)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 15, fontWeight: 900, color: '#fff',
-          boxShadow: '0 4px 14px rgba(26,86,219,0.35)'
-        }}>S</div>
+        <img
+          src={require('../../assets/images/logo/upla_logo_transparente.png')}
+          alt="UPLA"
+          style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, objectFit: 'contain' }}
+        />
         {!collapsed && (
           <div>
             <div style={{ fontSize: 14, fontWeight: 800, color: '#f8fafc', letterSpacing: -0.3, lineHeight: 1.1 }}>

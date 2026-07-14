@@ -671,12 +671,12 @@ textarea.input { resize: vertical; font-family: 'Inter', sans-serif; }
 }
 
 .login-right-slide--1 {
-  background-image: url('./assets/login/backgrounds/Facultad_de_Ingenieria_UPLA_01.jpg');
+  background-image: url('./assets/images/backgrounds/Facultad_de_Ingenieria_UPLA_01.jpg');
   animation: slide1 10s infinite;
 }
 
 .login-right-slide--2 {
-  background-image: url('./assets/login/backgrounds/Facultad_de_Ingenieria_UPLA_02.jpg');
+  background-image: url('./assets/images/backgrounds/Facultad_de_Ingenieria_UPLA_02.jpg');
   animation: slide2 10s infinite;
 }
 
