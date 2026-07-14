@@ -217,10 +217,14 @@ frontend/
 
 ## Frontend Design
 
+### Dashboard
+- **Selector de año unico**: dropdown que filtra KPIs (ya no multi-year). Backend acepta `?anio=N` en `/api/dashboard/alertas` y `/api/dashboard/saldos`
+- Logo UPLA transparente en Login y Sidebar
+
 ### Visor del Proyecto (Monitor → 4 Tabs)
 - **Tab 1 — Infraestructura**: Canvas de 12 nodos arrastrables con 16 edges animados. Panel de detalle mejorado al clickear nodo (entidades del servicio, tablas de DB) con cross-navigation a otros tabs
 - **Tab 2 — Datos en Vivo**: 7 tablas con datos reales de la API, lazy load al expandir, auto-refresh configurable (30s/pausado)
-- **Tab 3 — Diagramas ICONIX**: 23 diagramas renderizados con Mermaid.js, organizados por servicio (3 globales + 5 por microservicio: CU, Dominio, Robustez, Secuencia, Clases), zoom/pan, codigo fuente
+- **Tab 3 — Diagramas ICONIX**: 23 diagramas (19 Mermaid.js + 4 PNG de robustez generados por IA), organizados por servicio (3 globales + 5 por microservicio: CU, Dominio, Robustez, Secuencia, Clases), zoom/pan, codigo fuente
 - **Tab 4 — Estructura**: Entidades JPA con campos y flags (PK, NN, FK), enums, endpoints REST por servicio. Navegacion por servicio/DB
 - **Activity Feed**: ActivityLogFilter en gateway intercepta todas las llamadas, ActivityBuffer 200 eventos, `/api/monitor/activity`
 

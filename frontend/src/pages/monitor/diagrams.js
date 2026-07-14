@@ -167,24 +167,9 @@ export const AUTH_DIAGRAMS = [
   {
     id: 'robustez-auth',
     title: 'Robustez — CU-01: Gestionar Usuarios',
-    type: 'flowchart',
+    type: 'image',
     desc: 'Boundary → Controller → Entity. Admin gestiona usuarios a traves del CRUD protegido por JWT.',
-    mermaid: `flowchart LR
-    UP(["UsuariosPage.js"])
-    AC3{"ApiUsuarioController"}
-    US{"UsuarioService"}
-    UR["UsuarioRepository"]
-    ENT3["Usuario"]
-    UP --> AC3
-    AC3 --> US
-    US --> UR
-    UR --> ENT3
-    classDef boundary fill:#3b82f6,stroke:#2563eb,color:#fff
-    classDef control fill:#f97316,stroke:#ea580c,color:#fff
-    classDef entity fill:#22c55e,stroke:#16a34a,color:#fff
-    class UP boundary
-    class AC3,US control
-    class UR,ENT3 entity`
+    imageSrc: '/diagramas/auth-robustez.png'
   },
   {
     id: 'secuencia-auth',
@@ -344,26 +329,9 @@ export const PRESUPUESTO_DIAGRAMS = [
   {
     id: 'robustez-presupuesto',
     title: 'Robustez — CU-09: Exportar Reportes',
-    type: 'flowchart',
+    type: 'image',
     desc: 'Boundary → Controller → Entity. Exportacion Excel (Apache POI 5.2.5) y PDF con marca de agua UPLA.',
-    mermaid: `flowchart LR
-    RP(["ReportesPage.js"])
-    RC{"ReportesController"}
-    EXS{"ExportService"}
-    TEC["TechoPresupuestal"]
-    POI2["ActividadPOI"]
-    PAP["NecesidadPAP"]
-    RP --> RC
-    RC --> EXS
-    EXS --> TEC
-    EXS --> POI2
-    EXS --> PAP
-    classDef boundary fill:#3b82f6,stroke:#2563eb,color:#fff
-    classDef control fill:#f97316,stroke:#ea580c,color:#fff
-    classDef entity fill:#22c55e,stroke:#16a34a,color:#fff
-    class RP boundary
-    class RC,EXS control
-    class TEC,POI2,PAP entity`
+    imageSrc: '/diagramas/presupuesto-robustez.png'
   },
   {
     id: 'secuencia-presupuesto',
@@ -535,43 +503,9 @@ export const EXPEDIENTE_DIAGRAMS = [
   {
     id: 'robustez-expediente',
     title: 'Robustez — CU-05: Crear Expediente + CU-06: Cambiar Estado',
-    type: 'flowchart',
+    type: 'image',
     desc: 'Dos flujos criticos: creacion con validacion de disponibilidad y cambio de estado con publicacion RabbitMQ.',
-    mermaid: `flowchart TB
-    subgraph creacion["CU-05: Crear Expediente"]
-      EP(["ExpedientePage.js"])
-      AC{"ApiExpedienteCtrl"}
-      ES{"ExpedienteService"}
-      DISP{"Validacion Disponibilidad"}
-      EXP["Expediente"]
-      SL["SeguimientoLog"]
-      RMQ1["RabbitMQ"]
-      EP --> AC --> ES
-      ES --> DISP --> EXP
-      ES --> SL
-      ES --> RMQ1
-    end
-
-    subgraph cambio["CU-06: Cambiar Estado"]
-      EP2(["ExpedientePage.js"])
-      AC2{"ApiExpedienteCtrl"}
-      ES2{"ExpedienteService"}
-      EXP2["Expediente"]
-      LOG2["SeguimientoLog"]
-      RMQ2["RabbitMQ"]
-      NTF["Notificacion"]
-      EP2 --> AC2 --> ES2
-      ES2 --> EXP2
-      ES2 --> LOG2
-      ES2 --> RMQ2
-      RMQ2 --> NTF
-    end
-    classDef boundary fill:#3b82f6,stroke:#2563eb,color:#fff
-    classDef control fill:#f97316,stroke:#ea580c,color:#fff
-    classDef entity fill:#22c55e,stroke:#16a34a,color:#fff
-    class EP,EP2 boundary
-    class AC,ES,DISP,AC2,ES2 control
-    class EXP,SL,RMQ1,EXP2,LOG2,RMQ2,NTF entity`
+    imageSrc: '/diagramas/expediente-robustez.png'
   },
   {
     id: 'secuencia-expediente',
@@ -726,27 +660,9 @@ export const NOTIFICACION_DIAGRAMS = [
   {
     id: 'robustez-notificacion',
     title: 'Robustez — Consumir Eventos RabbitMQ y Generar Notificaciones',
-    type: 'flowchart',
+    type: 'image',
     desc: 'Boundary → Controller → Entity. Listener RabbitMQ consume eventos de expediente y crea notificaciones.',
-    mermaid: `flowchart LR
-    RMQ["RabbitMQ"]
-    LSN{"ExpedienteEventConsumer"}
-    NS2{"NotificacionService"}
-    NR["NotificacionRepository"]
-    NT["Notificacion"]
-    ANC{"ApiNotificacionController"}
-    FRT(["Frontend - campana"])
-    RMQ --> LSN
-    LSN --> NS2
-    NS2 --> NR
-    NR --> NT
-    ANC --> FRT
-    classDef boundary fill:#3b82f6,stroke:#2563eb,color:#fff
-    classDef control fill:#f97316,stroke:#ea580c,color:#fff
-    classDef entity fill:#22c55e,stroke:#16a34a,color:#fff
-    class FRT boundary
-    class LSN,NS2,ANC control
-    class RMQ,NR,NT entity`
+    imageSrc: '/diagramas/notificacion-robustez.png'
   },
   {
     id: 'secuencia-notificacion',

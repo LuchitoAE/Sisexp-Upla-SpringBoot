@@ -23,10 +23,11 @@ SISEXP-UPLA es un sistema de seguimiento y control de expedientes para la Univer
 
 | **Dato** | **Valor** |
 |:---------|:----------|
-| Dominio | Gestion presupuestal: Techo → POI → PAP → Expediente |
-| Entidades | 11 (Usuario, TechoPresupuestal, ActividadPOI, NecesidadPAP, Expediente, DocumentoAdjunto, SeguimientoLog, Notificacion, etc.) |
+| Dominio | Gestion presupuestal: Techo -> POI -> PAP -> Expediente |
+| Entidades | 9 (Usuario, TechoPresupuestal, ActividadPOI, NecesidadPAP, Expediente, DocumentoAdjunto, SeguimientoLog, NotaModificatoria, Notificacion) |
+| Enums | 10 (RolUsuario, EstadoExpediente, Urgencia, Naturaleza, EstadoActividad, TipoDocumento, TipoNotificacion, TipoNota, EstadoNota, ActivityAction) |
 | Roles | 6 (Administrador, Coordinacion, Secretaria, Director, Laboratorio, Decanato) |
-| Estados | 7 (Borrador, En_revision, Aprobado, Rechazado, Finalizado, Observado, Derivado) |
+| Estados Expediente | 7 (Borrador, En_revision, Aprobado, Rechazado, Finalizado, Observado, Derivado) |
 
 ---
 
@@ -54,39 +55,7 @@ SISEXP-UPLA es un sistema de seguimiento y control de expedientes para la Univer
 
 ### **3.1 Diagrama de Despliegue**
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                     Docker Compose (12 contenedores)               │
-│                                                                    │
-│  ┌──────────┐     ┌──────────────────┐     ┌───────────────────┐  │
-│  │  NGINX   │────→│   API Gateway    │←────│  Eureka Server    │  │
-│  │  :80     │     │   :8080          │     │  :8761            │  │
-│  │ (React)  │     │ (Spring Cloud)   │     │ (Service Discov.) │  │
-│  └──────────┘     └───────┬──────────┘     └───────────────────┘  │
-│                           │                                        │
-│        ┌──────────────────┼───────────────────┐                    │
-│        ↓                  ↓                   ↓                    │
-│  ┌───────────┐   ┌───────────────┐   ┌───────────────┐            │
-│  │ AUTH-SVC  │   │PRESUPUESTO-SVC│   │ EXPEDIENTE-SVC│            │
-│  │ :8081     │   │ :8082         │   │ :8083         │            │
-│  └─────┬─────┘   └──────┬────────┘   └───┬───────┬───┘            │
-│        ↓                ↓                ↓       │                │
-│  ┌───────────┐   ┌───────────┐   ┌──────────┐   │                │
-│  │  PG Auth  │   │ PG Presup │   │ PG Exped │   │                │
-│  │  :5433    │   │ :5434     │   │ :5435    │   │                │
-│  └───────────┘   └───────────┘   └──────────┘   │                │
-│                                                  ↓                │
-│  ┌───────────┐                       ┌────────────────┐          │
-│  │ NOTIF-SVC │←──────────────────────│   RabbitMQ     │          │
-│  │ :8084     │   consume eventos      │   :5672:15672  │          │
-│  └─────┬─────┘                       └────────────────┘          │
-│        ↓                                                          │
-│  ┌───────────┐                                                     │
-│  │ PG Notif  │                                                     │
-│  │ :5436     │                                                     │
-│  └───────────┘                                                     │
-└──────────────────────────────────────────────────────────────────┘
-```
+![Diagrama de Despliegue](diagramas/despliegue.png)
 
 ### **3.2 Bounded Contexts**
 
@@ -255,8 +224,9 @@ El dashboard de monitoreo esta en `http://localhost` (servido por NGINX):
 
 - **12 nodos** visualizados con iconos, puertos y tecnologias
 - **Estado en vivo**: poll-ea `/api/status` cada 5 segundos
+- **Grafica de actividad**: ActivityLogFilter intercepta todas las llamadas, ActivityBuffer 200 eventos, `/api/monitor/activity`
 - **Indicadores**: verde = UP, amarillo = STARTING, rojo = DOWN
-- **Click en nodo**: muestra componentes (db, rabbit, disk, ping, ssl)
+- **Click en nodo**: muestra componentes (db, rabbit, disk, ping, ssl) con panel detallado
 - **Boton Pausar/Reanudar**: detiene el polling
 - **Boton Sondear Ahora**: consulta inmediata
 - **Header**: UP/DOWN count + latencia en ms
@@ -308,51 +278,150 @@ Respuesta de ejemplo con los 4 servicios UP:
 
 ---
 
-## **11. Acceso Publico — ngrok**
+## **11. Despliegue en Produccion — Railway + Vercel**
 
-Para exponer el sistema a internet durante la presentacion:
+El sistema se despliega en dos plataformas cloud:
+
+| **Componente** | **Plataforma** | **URL** |
+|:---------------|:---------------|:--------|
+| Frontend React SPA | Vercel | `https://frontend-ivory-nine-43.vercel.app` |
+| Backend (API Gateway) | Railway | `https://api-gateway-production-e01a.up.railway.app` |
+| Backend (servicios) | Railway | 6 servicios internos (private domain) |
+
+### **11.1 Frontend en Vercel**
 
 ```bash
-# Instalar ngrok (una vez)
-winget install --id ngrok.ngrok
-
-# Configurar authtoken (una vez)
-ngrok config add-authtoken TU_TOKEN
-
-# Exponer localhost:80
-ngrok http 80
+cd frontend && npx vercel deploy --prod --yes && cd ..
 ```
 
-| **Propiedad** | **Valor** |
-|:--------------|:----------|
-| URL actual | `https://7fbf-179-6-45-108.ngrok-free.app` |
-| Cambio por reinicio | La URL cambia cada vez que se reinicia ngrok |
-| URL fija | Requiere plan pago |
+El `public/config.js` detecta automaticamente el entorno:
+```js
+API_URL = (function() {
+  var host = window.location.hostname;
+  if (host === "localhost" || host.endsWith(".local"))
+    return "/api"; // Docker local: nginx proxy
+  return "https://api-gateway-production-e01a.up.railway.app/api"; // Vercel -> Railway
+})();
+```
 
-> **NOTA**: Los visitantes que ingresan por ngrok Free veran una pagina de advertencia — deben hacer click en "Visit Site" para continuar.
+### **11.2 Backend en Railway (12/12 servicios)**
+
+| **Servicio** | **Tipo** | **Estado** |
+|:-------------|:---------|:----------:|
+| auth-db, presupuesto-db, expediente-db, notificacion-db | PostgreSQL 16-alpine | OK |
+| rabbitmq | RabbitMQ 3-management-alpine | OK |
+| eureka-server | Netflix Eureka (:8761) | OK |
+| api-gateway | Spring Cloud Gateway (:8080) | OK |
+| auth-service, presupuesto-service, expediente-service, notificacion-service | Spring Boot 3.4 | OK |
+
+### **11.3 Lecciones Aprendidas (Railway)**
+
+1. **EUREKA_INSTANCE_HOSTNAME es obligatorio**: sin esto los servicios registran su container ID (ej: `1cd254d6997e`), que no es resoluble por otros servicios → `UnknownHostException`
+2. **EUREKA_CLIENT_SERVICEURL_DEFAULTZONE** usa el private domain real de Railway (`sisexp-upla-springboot.railway.internal`), no el nombre del servicio
+3. **CORS**: `allowCredentials=false` + `allowedOriginPatterns=*` (incompatible con `*` origins con credentials)
+4. **Railway CLI v4.30.5**: interactiva, usar flags `--service`, `--variables`, `-y`. Espaciar consultas para evitar rate limit Cloudflare 1015
+5. **No ngrok**: free tier muestra pagina interstitial que bloquea CORS preflight. Se migro a Railway con dominio publico
 
 ---
 
-## **12. API Reference**
+## **12. Seed Data**
 
+| **Servicio** | **Cantidad** | **Detalle** |
+|:-------------|:-------------|:------------|
+| auth-service | 6 usuarios | 1 por cada rol: Admin, Coordinacion, Secretaria, Director, Laboratorio, Decanato |
+| presupuesto-service | 5 techos, 20 POI, 80 PAP, 4 notas | Techos 2022-2026. S/1.5M en 2026 (50% usado). Notas modificatorias en estados pendiente/configurada/rechazada |
+| expediente-service | 8 expedientes + 6 logs | 7 estados distintos (Borrador a Finalizado), urgencias variadas |
+
+### Credenciales de prueba
+
+| **Rol** | **Email** | **Password** |
+|:--------|:----------|:-------------|
+| Administrador | jefe@upla.edu.pe | jefe123 |
+| Coordinacion | coord@upla.edu.pe | coord123 |
+| Secretaria | secretaria@upla.edu.pe | secretaria123 |
+| Director | director@upla.edu.pe | director123 |
+| Laboratorio | lab@upla.edu.pe | lab123 |
+| Decanato | decanato@upla.edu.pe | decanato123 |
+
+---
+
+## **13. Data Types — Post-Auditoria**
+
+| **Entidad** | **Campo** | **Tipo** | **Justificacion** |
+|:------------|:----------|:---------|:------------------|
+| NotaModificatoria | tipo | TipoNota enum | inclusion_item / inclusion_actividad |
+| NotaModificatoria | estado | EstadoNota enum | pendiente / configurada / rechazada |
+| NotaModificatoria | nuevoTipo | Naturaleza enum | Bien / Servicio |
+| NotaModificatoria | justificacion | TEXT | Sin limite arbitrario (era VARCHAR(2000)) |
+| DocumentoAdjunto | tamano | Long | Archivos >2GB (era Integer, max 2.1GB) |
+| Usuario | email | length=254 | RFC 5321 |
+| Usuario | nombre | length=150 | Acotado |
+
+Todos los montos: BigDecimal precision=12, scale=2. Enums: @Enumerated(EnumType.STRING). FK entre servicios: Long (sin @ManyToOne).
+
+---
+
+## **14. API Reference (44 endpoints)**
+
+### Auth & Usuarios
 | **Metodo** | **Ruta** | **Servicio** | **Auth** |
 |:-----------|:---------|:-------------|:--------:|
 | POST | /api/auth/login | auth-service | No |
 | GET | /api/auth/me | auth-service | JWT |
-| GET | /api/usuarios | auth-service | Admin |
-| GET | /api/techos-presupuestales | presupuesto-service | JWT |
-| POST | /api/techos-presupuestales | presupuesto-service | JWT |
-| GET | /api/actividades-poi | presupuesto-service | JWT |
-| POST | /api/necesidades-pap | presupuesto-service | JWT |
-| GET | /api/expedientes | expediente-service | JWT |
-| POST | /api/expedientes | expediente-service | JWT |
-| PUT | /api/expedientes/{id}/estado | expediente-service | JWT |
-| GET | /api/notificaciones | notificacion-service | JWT |
+| GET | /api/usuarios | auth-service | JWT |
 | GET | /api/status | auth-service | No |
+| GET | /api/health | auth-service | No |
+
+### Presupuesto
+| **Metodo** | **Ruta** | **Servicio** | **Auth** |
+|:-----------|:---------|:-------------|:--------:|
+| GET | /api/techos-presupuestales | presupuesto-service | JWT |
+| GET | /api/actividades-poi/techo/{id} | presupuesto-service | JWT |
+| GET | /api/necesidades-pap/actividad/{id} | presupuesto-service | JWT |
+| GET/POST | /api/notas-modificatorias | presupuesto-service | JWT |
+| PUT | /api/notas-modificatorias/{id}/configurar | presupuesto-service | JWT |
+| PUT | /api/notas-modificatorias/{id}/rechazar | presupuesto-service | JWT |
+| GET | /api/dashboard/alertas?anio= | presupuesto-service | JWT |
+| GET | /api/dashboard/saldos?anio= | presupuesto-service | JWT |
+| GET | /api/reportes/anual/{anio} | presupuesto-service | JWT |
+| GET | /api/reportes/expedientes?anio= | presupuesto-service | JWT |
+| GET | /api/reportes/poi?anio= | presupuesto-service | JWT |
+| GET | /api/reportes/pap?anio= | presupuesto-service | JWT |
+| GET | /api/reportes/poi/{id} | presupuesto-service | JWT |
+| GET | /api/reportes/pap/{id} | presupuesto-service | JWT |
+
+### Expedientes
+| **Metodo** | **Ruta** | **Servicio** | **Auth** |
+|:-----------|:---------|:-------------|:--------:|
+| GET/POST | /api/expedientes | expediente-service | JWT |
+| GET | /api/expedientes/disponibilidad/{poiId}/{papId}?cantidad= | expediente-service | JWT |
+| PUT | /api/expedientes/{id}/estado | expediente-service | JWT |
+| GET | /api/expedientes/rastreo/{codigo} | expediente-service | No |
+
+### Notificaciones
+| **Metodo** | **Ruta** | **Servicio** | **Auth** |
+|:-----------|:---------|:-------------|:--------:|
+| GET | /api/notificaciones?usuarioId= | notificacion-service | JWT |
+| GET | /api/notificaciones/count?usuarioId= | notificacion-service | JWT |
+
+### Monitor (publico, sin JWT)
+| **Metodo** | **Ruta** | **Servicio** | **Auth** |
+|:-----------|:---------|:-------------|:--------:|
+| GET | /api/monitor/activity?since=5 | api-gateway | No |
+| GET | /api/monitor/activity/service?name=X&since=5 | api-gateway | No |
 
 ---
 
-## **13. Verificacion**
+## **15. Verificacion**
+
+### Smoke test automatizado (21 endpoints)
+
+```bash
+docker compose up -d
+docker compose -f docker-compose.yml -f docker-compose.test.yml run --rm tester
+```
+
+### Health Checks manuales
 
 ```bash
 # Salud de todos los servicios (via Gateway)
@@ -371,10 +440,20 @@ open http://localhost:8761
 open http://localhost:15672
 # Credenciales: sisexp / sisexp
 
-# Dashboard Monitoreo
+# Monitoreo completo
 open http://localhost
 ```
 
+### Accesos rapidos
+
+| **URL** | **Descripcion** |
+|:--------|:----------------|
+| `http://localhost` | SISEXP-UPLA React SPA (login, dashboard, CRUD, monitor) |
+| `http://localhost/api/monitor/activity?since=5` | API: actividad en tiempo real ultimos N minutos |
+| `http://localhost/api/status` | API: estado de los 7 nodos |
+| `http://localhost:8761` | Eureka Dashboard |
+| `http://localhost:15672` | RabbitMQ Management (sisexp/sisexp) |
+
 ---
 
-> **Documento generado: 30 de junio de 2026 — SISEXP-UPLA vFinal**
+> **Documento generado: 14 de julio de 2026 — SISEXP-UPLA vFinal**

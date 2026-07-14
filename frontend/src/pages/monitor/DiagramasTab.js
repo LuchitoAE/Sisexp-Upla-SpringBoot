@@ -41,6 +41,7 @@ const TYPE_ICON = {
   'state': HiOutlineLightningBolt,
   'sequence': HiOutlineSwitchHorizontal,
   'class': HiOutlineCube,
+  'image': HiOutlineEye,
 };
 
 const TYPE_LABEL = {
@@ -48,6 +49,7 @@ const TYPE_LABEL = {
   'state': 'Estados',
   'sequence': 'Secuencia',
   'class': 'Clases',
+  'image': 'Imagen',
 };
 
 const SERVICE_GROUPS = [
@@ -112,6 +114,35 @@ function MermaidDiagram({ chart, id, zoom, onZoomChange }) {
         ref={containerRef}
         dangerouslySetInnerHTML={{ __html: svg }}
       />
+    </div>
+  );
+}
+
+function ImageDiagram({ src, alt, zoom, onZoomChange }) {
+  const [error, setError] = useState(false);
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+    onZoomChange(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom + delta)));
+  };
+  if (error) {
+    return (
+      <div className="dg-diagram-error">
+        <div className="dg-error-title">Error al cargar imagen</div>
+        <div className="dg-error-msg">No se pudo cargar: {src}</div>
+      </div>
+    );
+  }
+  return (
+    <div className="dg-zoom-container" onWheel={handleWheel}>
+      <div className="dg-zoom-content" style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
+        <img
+          src={src}
+          alt={alt}
+          style={{ maxWidth: 'none', display: 'block' }}
+          onError={() => setError(true)}
+        />
+      </div>
     </div>
   );
 }
@@ -247,13 +278,23 @@ export default function DiagramasTab() {
             )}
 
             <div className="dg-diagram-wrap">
-              <MermaidDiagram
-                key={currentDiagram.id + '-' + (showCode[currentDiagram.id] ? '1' : '0')}
-                chart={currentDiagram.mermaid}
-                id={currentDiagram.id}
-                zoom={zoom}
-                onZoomChange={setZoom}
-              />
+              {currentDiagram.type === 'image' ? (
+                <ImageDiagram
+                  key={currentDiagram.id}
+                  src={currentDiagram.imageSrc}
+                  alt={currentDiagram.title}
+                  zoom={zoom}
+                  onZoomChange={setZoom}
+                />
+              ) : (
+                <MermaidDiagram
+                  key={currentDiagram.id + '-' + (showCode[currentDiagram.id] ? '1' : '0')}
+                  chart={currentDiagram.mermaid}
+                  id={currentDiagram.id}
+                  zoom={zoom}
+                  onZoomChange={setZoom}
+                />
+              )}
             </div>
           </div>
         ) : (
