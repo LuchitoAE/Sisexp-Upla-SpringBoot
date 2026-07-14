@@ -50,7 +50,7 @@ export const SERVICE_ENTITIES = {
         table: 'techos_presupuestales',
         fields: [
           { name: 'id', type: 'Long', pk: true },
-          { name: 'ano', type: 'Integer', nullable: false },
+          { name: 'año', type: 'Integer', nullable: false },
           { name: 'montoTotal', type: 'BigDecimal(12,2)', nullable: false },
           { name: 'montoUtilizado', type: 'BigDecimal(12,2)', nullable: false },
           { name: 'creadoPorId', type: 'Long' },
@@ -269,7 +269,7 @@ export const DB_TABLES = {
     label: 'PostgreSQL Presupuesto :5434',
     service: 'presupuesto-service',
     tables: [
-      { name: 'techos_presupuestales', entity: 'TechoPresupuestal', count: 5, endpoint: '/techos-presupuestales', cols: ['id', 'ano', 'montoTotal', 'montoUtilizado', 'activo', 'planificado'] },
+      { name: 'techos_presupuestales', entity: 'TechoPresupuestal', count: 5, endpoint: '/techos-presupuestales', cols: ['id', 'año', 'montoTotal', 'montoUtilizado', 'activo', 'planificado'] },
       { name: 'actividades_poi', entity: 'ActividadPOI', count: 20, endpoint: '/actividades-poi', cols: ['id', 'codigo', 'nombre', 'presupuestoAsignado', 'estado', 'fechaLimite'] },
       { name: 'necesidades_pap', entity: 'NecesidadPAP', count: 80, endpoint: '/necesidades-pap', cols: ['id', 'nombre', 'cantidad', 'precioEstimado', 'tipo', 'actividadPOIId'] },
       { name: 'notas_modificatorias', entity: 'NotaModificatoria', count: 4, endpoint: '/notas-modificatorias', cols: ['id', 'codigo', 'tipo', 'estado', 'justificacion'] },
