@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ROL_LABEL, ROL_PROFILE, ROL_COLOR, puede } from '../utils/config';
 import { client } from '../api/client';
-import { HiOutlineTrendingUp, HiOutlineEye, HiOutlineCalendar, HiOutlineClock, HiOutlineCheck, HiOutlineChartBar, HiOutlineClipboardList } from 'react-icons/hi';
+
 
 function formatMoney(n) {
   return 'S/ ' + Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2 });
@@ -162,20 +162,10 @@ export default function Dashboard() {
       {/* ─── KPI Cards por año ─── */}
       {puedeVerSaldos && saldos && (
         <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', display:'flex',alignItems:'center',gap:6 }}>
-              <HiOutlineTrendingUp style={{fontSize:16}}/>Resumen Presupuestal
-            </div>
-            <select value={filtroAnioSaldos} onChange={e => setFiltroAnioSaldos(e.target.value)}
-              style={{ fontSize: 12, padding: '5px 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: '#475569', fontWeight: 500 }}>
-              {años.map(a => <option key={a} value={a}>{a}</option>)}
-            </select>
-          </div>
-          {(() => {
-            const anio = filtroAnioSaldos || años[años.length - 1];
+          {años.map(anio => {
             const t = totalesPorAnio[String(anio)] || { asignado: 0, comprometido: 0, ejecutado: 0, disponible: 0 };
             return (
-              <div>
+              <div key={anio} style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ background: '#eff6ff', color: '#2563eb', padding: '3px 12px', borderRadius: 10, fontSize: 12 }}>{anio}</span>
                   <span style={{ fontSize: 11, fontWeight: 400, color: '#64748b' }}>Presupuesto total: {formatMoney(t.asignado)}</span>
@@ -206,7 +196,7 @@ export default function Dashboard() {
                 </div>
               </div>
             );
-          })()}
+          })}
         </div>
       )}
 
@@ -214,7 +204,7 @@ export default function Dashboard() {
       {puedeVerAlertas && alertas && (
         <div style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{display:'flex',alignItems:'center',gap:6}}><HiOutlineEye style={{fontSize:16}}/>Estado de Alertas</span>
+            <span>🚦 Estado de Alertas</span>
             {totalAlertas === 0 && <span style={{ fontSize: 11, fontWeight: 400, color: '#16a34a', background: '#dcfce7', padding: '2px 10px', borderRadius: 12 }}>Todo en orden</span>}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
@@ -237,7 +227,7 @@ export default function Dashboard() {
           {alertas.actividades?.length > 0 && (
             <div style={{ background: '#fff', borderRadius: 14, padding: 18, border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 14 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 10, display:'flex',alignItems:'center',gap:6 }}>
-                <HiOutlineCalendar style={{fontSize:14}}/>Actividades POI — Próximas a vencer
+                📅 Actividades POI — Próximas a vencer
               </div>
               {alertas.actividades.slice(0, 8).map(a => (
                 <div key={a.id} style={{
@@ -266,7 +256,7 @@ export default function Dashboard() {
           {alertas.expedientes?.length > 0 && (
             <div style={{ background: '#fff', borderRadius: 14, padding: 18, border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 10, display:'flex',alignItems:'center',gap:6 }}>
-                <HiOutlineClock style={{fontSize:14}}/>Expedientes sin movimiento (+7 días)
+                ⏳ Expedientes sin movimiento (+7 días)
               </div>
               {alertas.expedientes.map(e => (
                 <div key={e.id} style={{
@@ -296,7 +286,7 @@ export default function Dashboard() {
 
           {alertas.actividades?.length === 0 && alertas.expedientes?.length === 0 && (
             <div style={{ textAlign: 'center', padding: 20, color: '#16a34a', fontSize: 13, background: '#f0fdf4', borderRadius: 12, display:'flex',alignItems:'center',justifyContent:'center',gap:4 }}>
-              <HiOutlineCheck/>Todos los indicadores están en verde. Sin alertas activas.
+              ✓ Todos los indicadores están en verde. Sin alertas activas.
             </div>
           )}
         </div>
@@ -307,7 +297,7 @@ export default function Dashboard() {
         <div style={{ background: '#fff', borderRadius: 14, padding: 20, border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', display:'flex',alignItems:'center',gap:6 }}>
-              <HiOutlineChartBar style={{fontSize:16}}/>Saldos Presupuestales en Tiempo Real
+              📊 Saldos Presupuestales en Tiempo Real
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <select value={filtroAnioSaldos} onChange={e => setFiltroAnioSaldos(e.target.value)}
@@ -397,7 +387,7 @@ export default function Dashboard() {
       {/* Fallback for Decanato / read-only roles */}
       {!puedeVerAlertas && !puedeVerSaldos && (
         <div style={{ textAlign: 'center', padding: 48, background: '#fff', borderRadius: 14, border: '1px solid #f1f5f9' }}>
-          <div style={{ marginBottom: 12 }}><HiOutlineClipboardList style={{fontSize:32}}/></div>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>📋</div>
           <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>
             Sistema de Gestión de Expedientes — SISEXP-UPLA
           </div>
