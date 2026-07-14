@@ -84,27 +84,6 @@ export default function Dashboard() {
     return [...set].sort();
   }, [saldos]);
 
-  const totalesPorAnio = useMemo(() => {
-    const map = {};
-    // Inicializar techos como años base (incluso sin actividades)
-    if (saldos?.techos) {
-      saldos.techos.forEach(t => {
-        map[String(t.año)] = { asignado: 0, comprometido: 0, ejecutado: 0, disponible: 0 };
-      });
-    }
-    if (saldos?.actividades) {
-      saldos.actividades.forEach(a => {
-        const key = String(a.año || '—');
-        if (!map[key]) map[key] = { asignado: 0, comprometido: 0, ejecutado: 0, disponible: 0 };
-        map[key].asignado += a.asignado;
-        map[key].comprometido += a.comprometido;
-        map[key].ejecutado += a.ejecutado;
-        map[key].disponible += a.disponible;
-      });
-    }
-    return map;
-  }, [saldos]);
-
   const actividadesFiltradas = useMemo(() => {
     if (!saldos?.actividades) return [];
     if (!filtroAnioSaldos && años.length > 0) return [];
