@@ -32,8 +32,18 @@ public class DashboardController {
     }
 
     @GetMapping("/alertas")
-    public Map<String, Object> alertas() {
-        List<ActividadPOI> actividades = actividadRepo.findAll();
+    public Map<String, Object> alertas(@RequestParam(required = false) Integer anio) {
+        List<ActividadPOI> actividades;
+        if (anio != null) {
+            var techoOpt = techoRepo.findByAño(anio);
+            if (techoOpt.isPresent()) {
+                actividades = actividadRepo.findByTechoPresupuestalId(techoOpt.get().getId());
+            } else {
+                actividades = Collections.emptyList();
+            }
+        } else {
+            actividades = actividadRepo.findAll();
+        }
         List<Map<String, Object>> actsAlert = new ArrayList<>();
         int rojas = 0, amarillas = 0, verdes = 0;
         LocalDate hoy = LocalDate.now();
@@ -52,10 +62,16 @@ public class DashboardController {
             else if (diasRestantes < 30 || pctEj < 60) { semaforo = "amarillo"; amarillas++; }
             else { semaforo = "verde"; verdes++; }
 
+            Integer añoAct = null;
+            if (a.getTechoPresupuestalId() != null) {
+                añoAct = techoRepo.findById(a.getTechoPresupuestalId())
+                    .map(TechoPresupuestal::getAño).orElse(null);
+            }
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("id", a.getId());
             item.put("codigo", a.getCodigo());
             item.put("nombre", a.getNombre());
+            item.put("año", añoAct);
             item.put("semaforo", semaforo);
             item.put("diasRestantes", (int) diasRestantes);
             item.put("pctEjecucion", pctEj);
@@ -106,8 +122,22 @@ public class DashboardController {
     }
 
     @GetMapping("/saldos")
-    public Map<String, Object> saldos() {
-        List<TechoPresupuestal> techos = techoRepo.findAll();
+    public Map<String, Object> saldos(@RequestParam(required = false) Integer anio) {
+        List<TechoPresupuestal> techos;
+        List<ActividadPOI> actividades;
+        if (anio != null) {
+            var techoOpt = techoRepo.findByAño(anio);
+            if (techoOpt.isPresent()) {
+                techos = List.of(techoOpt.get());
+                actividades = actividadRepo.findByTechoPresupuestalId(techoOpt.get().getId());
+            } else {
+                techos = Collections.emptyList();
+                actividades = Collections.emptyList();
+            }
+        } else {
+            techos = techoRepo.findAll();
+            actividades = actividadRepo.findAll();
+        }
         List<Map<String, Object>> techosList = new ArrayList<>();
         for (TechoPresupuestal t : techos) {
             Map<String, Object> tm = new LinkedHashMap<>();
@@ -119,7 +149,6 @@ public class DashboardController {
             techosList.add(tm);
         }
 
-        List<ActividadPOI> actividades = actividadRepo.findAll();
         List<Map<String, Object>> actsList = new ArrayList<>();
         for (ActividadPOI a : actividades) {
             BigDecimal asignado = a.getPresupuestoAsignado();

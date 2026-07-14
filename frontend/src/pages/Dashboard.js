@@ -58,25 +58,24 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
+      setLoading(true);
       try {
+        const anioParam = filtroAnioSaldos ? `?anio=${filtroAnioSaldos}` : '';
         const [alertasData, saldosData] = await Promise.all([
-          puedeVerAlertas ? client.get('/dashboard/alertas') : null,
-          puedeVerSaldos ? client.get('/dashboard/saldos') : null,
+          puedeVerAlertas ? client.get(`/dashboard/alertas${anioParam}`) : null,
+          puedeVerSaldos ? client.get(`/dashboard/saldos${anioParam}`) : null,
         ]);
         setAlertas(alertasData);
         setSaldos(saldosData);
-        if (saldosData?.techos?.length) {
+        if (!filtroAnioSaldos && saldosData?.techos?.length) {
           const years = saldosData.techos.map(t => t.año).sort();
           setFiltroAnioSaldos(String(years[years.length - 1]));
-        } else if (saldosData?.actividades?.length) {
-          const years = [...new Set(saldosData.actividades.map(a => a.año).filter(Boolean))].sort();
-          if (years.length > 0) setFiltroAnioSaldos(String(years[years.length - 1]));
         }
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     }
     load();
-  }, []); // eslint-disable-line
+  }, [filtroAnioSaldos]);
 
   const años = useMemo(() => {
     const set = new Set();
@@ -150,53 +149,58 @@ export default function Dashboard() {
             </span>
           </div>
         </div>
-        <div style={{
-          padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-          background: profile.color ? `${profile.color}18` : '#f1f5f9',
-          color: profile.color || '#475569', border: `1px solid ${profile.color}30`
-        }}>
-          {profile.label || user?.rol}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {puedeVerSaldos && años.length > 0 && (
+            <select value={filtroAnioSaldos} onChange={e => setFiltroAnioSaldos(e.target.value)}
+              style={{ fontSize: 12, padding: '5px 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: '#475569', fontWeight: 500 }}>
+              {años.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          )}
+          <div style={{
+            padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+            background: profile.color ? `${profile.color}18` : '#f1f5f9',
+            color: profile.color || '#475569', border: `1px solid ${profile.color}30`
+          }}>
+            {profile.label || user?.rol}
+          </div>
         </div>
       </div>
 
-      {/* ─── KPI Cards por año ─── */}
-      {puedeVerSaldos && saldos && (
+      {/* ─── KPI Cards del año seleccionado ─── */}
+      {puedeVerSaldos && saldos && años.length > 0 && (
         <div style={{ marginBottom: 24 }}>
-          {años.map(anio => {
-            const t = totalesPorAnio[String(anio)] || { asignado: 0, comprometido: 0, ejecutado: 0, disponible: 0 };
-            return (
-              <div key={anio} style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ background: '#eff6ff', color: '#2563eb', padding: '3px 12px', borderRadius: 10, fontSize: 12 }}>{anio}</span>
-                  <span style={{ fontSize: 11, fontWeight: 400, color: '#64748b' }}>Presupuesto total: {formatMoney(t.asignado)}</span>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ background: '#eff6ff', color: '#2563eb', padding: '3px 12px', borderRadius: 10, fontSize: 12 }}>
+              {filtroAnioSaldos || años[años.length - 1]}
+            </span>
+            <span style={{ fontSize: 11, fontWeight: 400, color: '#64748b' }}>
+              Presupuesto total: {formatMoney(totalesFiltrados.asignado)}
+            </span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+            {[
+              { label: 'Presupuesto asignado', value: totalesFiltrados.asignado, color: '#0f172a', bg: '#f8fafc' },
+              { label: 'Ejecutado', value: totalesFiltrados.ejecutado, color: '#16a34a', bg: '#f0fdf4',
+                pct: totalesFiltrados.asignado > 0 ? Math.round((totalesFiltrados.ejecutado / totalesFiltrados.asignado) * 100) : 0 },
+              { label: 'Comprometido', value: totalesFiltrados.comprometido, color: '#d97706', bg: '#fffbeb',
+                pct: totalesFiltrados.asignado > 0 ? Math.round((totalesFiltrados.comprometido / totalesFiltrados.asignado) * 100) : 0 },
+              { label: 'Disponible', value: totalesFiltrados.disponible, color: '#3b82f6', bg: '#eff6ff',
+                pct: totalesFiltrados.asignado > 0 ? Math.round((totalesFiltrados.disponible / totalesFiltrados.asignado) * 100) : 0 },
+            ].map(k => (
+              <div key={k.label} style={{
+                background: '#fff', borderRadius: 10, padding: '12px 14px',
+                border: '1px solid #f1f5f9', boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 500, color: '#64748b', marginBottom: 3 }}>{k.label}</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: k.color, letterSpacing: -0.2 }}>
+                  {formatMoney(k.value)}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-                  {[
-                    { label: 'Presupuesto asignado', value: t.asignado, color: '#0f172a', bg: '#f8fafc' },
-                    { label: 'Ejecutado', value: t.ejecutado, color: '#16a34a', bg: '#f0fdf4',
-                      pct: t.asignado > 0 ? Math.round((t.ejecutado / t.asignado) * 100) : 0 },
-                    { label: 'Comprometido', value: t.comprometido, color: '#d97706', bg: '#fffbeb',
-                      pct: t.asignado > 0 ? Math.round((t.comprometido / t.asignado) * 100) : 0 },
-                    { label: 'Disponible', value: t.disponible, color: '#3b82f6', bg: '#eff6ff',
-                      pct: t.asignado > 0 ? Math.round((t.disponible / t.asignado) * 100) : 0 },
-                  ].map(k => (
-                    <div key={k.label} style={{
-                      background: '#fff', borderRadius: 10, padding: '12px 14px',
-                      border: '1px solid #f1f5f9', boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-                    }}>
-                      <div style={{ fontSize: 11, fontWeight: 500, color: '#64748b', marginBottom: 3 }}>{k.label}</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: k.color, letterSpacing: -0.2 }}>
-                        {formatMoney(k.value)}
-                      </div>
-                      {k.pct !== undefined && (
-                        <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1 }}>{k.pct}% del año</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                {k.pct !== undefined && (
+                  <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1 }}>{k.pct}% del año</div>
+                )}
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
       )}
 
@@ -299,16 +303,10 @@ export default function Dashboard() {
             <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', display:'flex',alignItems:'center',gap:6 }}>
               📊 Saldos Presupuestales en Tiempo Real
             </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <select value={filtroAnioSaldos} onChange={e => setFiltroAnioSaldos(e.target.value)}
-                style={{ fontSize: 12, padding: '4px 10px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: '#475569' }}>
-                {años.map(a => <option key={a} value={a}>{a}</option>)}
-              </select>
-              <button onClick={() => setSaldosExpandido(!saldosExpandido)}
+            <button onClick={() => setSaldosExpandido(!saldosExpandido)}
                 style={{ fontSize: 11, padding: '4px 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: '#2563eb', cursor: 'pointer', fontWeight: 600 }}>
                 {saldosExpandido ? 'Colapsar' : `Ver ${actividadesFiltradas.length} actividades`}
               </button>
-            </div>
           </div>
 
           {/* Barra de saldos general */}

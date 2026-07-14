@@ -170,15 +170,21 @@ export const AUTH_DIAGRAMS = [
     type: 'flowchart',
     desc: 'Boundary → Controller → Entity. Admin gestiona usuarios a traves del CRUD protegido por JWT.',
     mermaid: `flowchart LR
-    UP("UsuariosPage.js - React Form")
-    AC3("ApiUsuarioController - GET/POST/PUT /usuarios")
-    US("UsuarioService - listar / crear / editar / toggle")
-    UR("UsuarioRepository - findByEmail / existsByEmail")
-    ENT3("Usuario - nombre, email, rol, activo")
+    UP(["UsuariosPage.js"])
+    AC3{"ApiUsuarioController"}
+    US{"UsuarioService"}
+    UR["UsuarioRepository"]
+    ENT3["Usuario"]
     UP --> AC3
     AC3 --> US
     US --> UR
-    UR --> ENT3`
+    UR --> ENT3
+    classDef boundary fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef control fill:#f97316,stroke:#ea580c,color:#fff
+    classDef entity fill:#22c55e,stroke:#16a34a,color:#fff
+    class UP boundary
+    class AC3,US control
+    class UR,ENT3 entity`
   },
   {
     id: 'secuencia-auth',
@@ -341,17 +347,23 @@ export const PRESUPUESTO_DIAGRAMS = [
     type: 'flowchart',
     desc: 'Boundary → Controller → Entity. Exportacion Excel (Apache POI 5.2.5) y PDF con marca de agua UPLA.',
     mermaid: `flowchart LR
-    RP("ReportesPage.js - Boton Exportar")
-    RC("ReportesController - GET /excel /pdf")
-    EXS("ExportService - exportarExcel / exportarPDF")
-    TEC("TechoPresupuestal")
-    POI2("ActividadPOI")
-    PAP("NecesidadPAP")
+    RP(["ReportesPage.js"])
+    RC{"ReportesController"}
+    EXS{"ExportService"}
+    TEC["TechoPresupuestal"]
+    POI2["ActividadPOI"]
+    PAP["NecesidadPAP"]
     RP --> RC
     RC --> EXS
     EXS --> TEC
     EXS --> POI2
-    EXS --> PAP`
+    EXS --> PAP
+    classDef boundary fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef control fill:#f97316,stroke:#ea580c,color:#fff
+    classDef entity fill:#22c55e,stroke:#16a34a,color:#fff
+    class RP boundary
+    class RC,EXS control
+    class TEC,POI2,PAP entity`
   },
   {
     id: 'secuencia-presupuesto',
@@ -527,13 +539,13 @@ export const EXPEDIENTE_DIAGRAMS = [
     desc: 'Dos flujos criticos: creacion con validacion de disponibilidad y cambio de estado con publicacion RabbitMQ.',
     mermaid: `flowchart TB
     subgraph creacion["CU-05: Crear Expediente"]
-      EP("ExpedientePage.js - Form")
-      AC("ApiExpedienteCtrl - POST /expedientes")
-      ES("ExpedienteService - crear / generarNumero")
-      DISP("Validacion Disponibilidad - saldo + fecha")
-      EXP("Expediente - codigo, estado=Borrador")
-      SL("SeguimientoLog - registro inicial")
-      RMQ1("RabbitMQ - evento creado")
+      EP(["ExpedientePage.js"])
+      AC{"ApiExpedienteCtrl"}
+      ES{"ExpedienteService"}
+      DISP{"Validacion Disponibilidad"}
+      EXP["Expediente"]
+      SL["SeguimientoLog"]
+      RMQ1["RabbitMQ"]
       EP --> AC --> ES
       ES --> DISP --> EXP
       ES --> SL
@@ -541,19 +553,25 @@ export const EXPEDIENTE_DIAGRAMS = [
     end
 
     subgraph cambio["CU-06: Cambiar Estado"]
-      EP2("ExpedientePage.js - Botones estado")
-      AC2("ApiExpedienteCtrl - PUT /id/estado")
-      ES2("ExpedienteService - TRANSICIONES validas")
-      EXP2("Expediente - setEstado")
-      LOG2("SeguimientoLog - registro transicion")
-      RMQ2("RabbitMQ - evento cambio")
-      NTF("Notificacion - async")
+      EP2(["ExpedientePage.js"])
+      AC2{"ApiExpedienteCtrl"}
+      ES2{"ExpedienteService"}
+      EXP2["Expediente"]
+      LOG2["SeguimientoLog"]
+      RMQ2["RabbitMQ"]
+      NTF["Notificacion"]
       EP2 --> AC2 --> ES2
       ES2 --> EXP2
       ES2 --> LOG2
       ES2 --> RMQ2
       RMQ2 --> NTF
-    end`
+    end
+    classDef boundary fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef control fill:#f97316,stroke:#ea580c,color:#fff
+    classDef entity fill:#22c55e,stroke:#16a34a,color:#fff
+    class EP,EP2 boundary
+    class AC,ES,DISP,AC2,ES2 control
+    class EXP,SL,RMQ1,EXP2,LOG2,RMQ2,NTF entity`
   },
   {
     id: 'secuencia-expediente',
@@ -711,18 +729,24 @@ export const NOTIFICACION_DIAGRAMS = [
     type: 'flowchart',
     desc: 'Boundary → Controller → Entity. Listener RabbitMQ consume eventos de expediente y crea notificaciones.',
     mermaid: `flowchart LR
-    RMQ("RabbitMQ - evento expediente")
-    LSN("ExpedienteEventConsumer - @RabbitListener")
-    NS2("NotificacionService")
-    NR("NotificacionRepository - save")
-    NT("Notificacion - usuarioId, mensaje, tipo")
-    ANC("ApiNotificacionController - GET /notificaciones")
-    FRT("Frontend - campana notificaciones")
+    RMQ["RabbitMQ"]
+    LSN{"ExpedienteEventConsumer"}
+    NS2{"NotificacionService"}
+    NR["NotificacionRepository"]
+    NT["Notificacion"]
+    ANC{"ApiNotificacionController"}
+    FRT(["Frontend - campana"])
     RMQ --> LSN
     LSN --> NS2
     NS2 --> NR
     NR --> NT
-    ANC --> FRT`
+    ANC --> FRT
+    classDef boundary fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef control fill:#f97316,stroke:#ea580c,color:#fff
+    classDef entity fill:#22c55e,stroke:#16a34a,color:#fff
+    class FRT boundary
+    class LSN,NS2,ANC control
+    class RMQ,NR,NT entity`
   },
   {
     id: 'secuencia-notificacion',
